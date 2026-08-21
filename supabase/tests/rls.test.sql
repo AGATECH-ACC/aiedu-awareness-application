@@ -1,6 +1,6 @@
 begin;
 
-select plan(6);
+select plan(8);
 
 insert into auth.users (id, email)
 values
@@ -22,6 +22,7 @@ set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
 
 select is((select count(*)::int from public.readings), 1, 'owner sees only their reading');
 select is((select count(*)::int from public.deep_reports), 1, 'owner sees only their report');
+select is((select count(*)::int from public.profiles), 1, 'owner sees only their profile');
 select throws_ok(
   $$insert into public.readings (user_id, mode, spread_key, cards)
     values ('22222222-2222-2222-2222-222222222222', 1, 'single', '[{"n": 3}]')$$,
@@ -36,6 +37,7 @@ set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
 
 select is((select count(*)::int from public.readings), 1, 'other user sees only their reading');
 select is((select count(*)::int from public.deep_reports), 1, 'other user sees only their report');
+select is((select count(*)::int from public.profiles), 1, 'other user sees only their profile');
 select throws_ok(
   $$insert into public.deep_reports (user_id, reading_id, model, content)
     values (

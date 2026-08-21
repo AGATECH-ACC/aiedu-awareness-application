@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { byNum, CHAPTERS, INNER_CHILD, SPREAD3 } from '@/lib/cards';
 import {
   countReportsSince,
+  getProfile,
   getReading,
   getReportByReading,
   insertReading,
@@ -182,6 +183,21 @@ export async function POST(request) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+
+  if (process.env.NEXT_PUBLIC_REQUIRE_PLAN === 'true') {
+    try {
+      const profile = await getProfile(supabase, user.id);
+      if (!profile || profile.plan === 'free') {
+        return NextResponse.json({
+          error: 'plan_required',
+          message: '深度报告需要升级方案。 · A paid plan is required for Deep Reports.',
+        }, { status: 403 });
+      }
+    } catch (error) {
+      console.error('Unable to check report plan', error);
+      return NextResponse.json({ error: 'plan_check_failed' }, { status: 500 });
+    }
+  }
 
   let body;
   try {

@@ -33,7 +33,7 @@ function CardsSummary({ reading }) {
   );
 }
 
-export default function PortalClient({ userId, email, initialReports }) {
+export default function PortalClient({ userId, email, initialReports, requirePlan = false, plan = 'free' }) {
   const supabase = useMemo(() => createClient(), []);
   const [latest, setLatest] = useState(null);
   const [question, setQuestion] = useState('');
@@ -46,6 +46,8 @@ export default function PortalClient({ userId, email, initialReports }) {
   const [deletingId, setDeletingId] = useState(null);
   const [sharingId, setSharingId] = useState(null);
   const [shareState, setShareState] = useState(null);
+  const [upgradeMessage, setUpgradeMessage] = useState('');
+  const planRequired = requirePlan && plan === 'free';
 
   useEffect(() => {
     if (!busy) {
@@ -162,6 +164,11 @@ export default function PortalClient({ userId, email, initialReports }) {
     window.location.assign('/');
   }
 
+  // TODO(payments): connect this stub to the approved Curlec/Stripe checkout flow.
+  function startCheckout() {
+    setUpgradeMessage('付款功能尚未连接，请联系团队升级。 · Checkout is not connected yet; please contact the team to upgrade.');
+  }
+
   return (
     <div style={{ maxWidth: 460, margin: '0 auto', padding: '0 0 40px' }}>
       <style>{`
@@ -185,15 +192,24 @@ export default function PortalClient({ userId, email, initialReports }) {
           <textarea id="reflection-question" value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={2000}
             placeholder="（可选）此刻你想觉察的问题或情境… Optional: a question or situation you're reflecting on"
             style={{ width: '100%', boxSizing: 'border-box', minHeight: 64, padding: 10, borderRadius: 10, border: '1.5px solid #cdbf9e', fontSize: 13, resize: 'vertical' }} />
-          <button type="button" onClick={() => generate()} disabled={!latest || busy}
-            style={{ width: '100%', marginTop: 10, padding: 12, borderRadius: 10, border: 'none', background: '#2a2622', color: '#f3e6bf', fontWeight: 700, fontSize: 15, cursor: !latest || busy ? 'default' : 'pointer', opacity: !latest || busy ? 0.55 : 1 }}>
-            {busy ? (
-              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <span className="portal-spinner" aria-hidden="true" style={{ width: 14, height: 14, border: '2px solid #7e715a', borderTopColor: '#f3e6bf', borderRadius: '50%', animation: 'portal-spin .8s linear infinite' }} />
-                生成中… · Generating
-              </span>
-            ) : '生成深度报告 · Generate'}
-          </button>
+          {planRequired ? (
+            <div style={{ marginTop: 10, padding: 12, borderRadius: 12, background: '#f5ecd6', border: '1px solid #dfc78f', textAlign: 'center' }}>
+              <div style={{ color: '#654f26', fontWeight: 800, fontSize: 13 }}>升级后生成深度报告 · Upgrade for Deep Reports</div>
+              <div style={{ color: '#7c6c4f', fontSize: 11.5, lineHeight: 1.55, marginTop: 3 }}>你的抽牌仍可免费使用，升级方案后可生成并保存 AI 报告。<br />Card draws remain free; upgrade to generate and save AI reports.</div>
+              <button type="button" onClick={startCheckout} style={{ marginTop: 9, border: 0, borderRadius: 999, padding: '8px 14px', background: '#8b6929', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>了解升级 · Upgrade</button>
+              {upgradeMessage && <div role="status" style={{ marginTop: 7, color: '#775f31', fontSize: 10.5 }}>{upgradeMessage}</div>}
+            </div>
+          ) : (
+            <button type="button" onClick={() => generate()} disabled={!latest || busy}
+              style={{ width: '100%', marginTop: 10, padding: 12, borderRadius: 10, border: 'none', background: '#2a2622', color: '#f3e6bf', fontWeight: 700, fontSize: 15, cursor: !latest || busy ? 'default' : 'pointer', opacity: !latest || busy ? 0.55 : 1 }}>
+              {busy ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <span className="portal-spinner" aria-hidden="true" style={{ width: 14, height: 14, border: '2px solid #7e715a', borderTopColor: '#f3e6bf', borderRadius: '50%', animation: 'portal-spin .8s linear infinite' }} />
+                  生成中… · Generating
+                </span>
+              ) : '生成深度报告 · Generate'}
+            </button>
+          )}
           {busy && <div role="status" aria-live="polite" style={{ textAlign: 'center', color: '#8a7f6c', fontSize: 11.5, marginTop: 7 }}>已等待 {elapsed} 秒 · {elapsed}s elapsed</div>}
 
           {errorState && (
