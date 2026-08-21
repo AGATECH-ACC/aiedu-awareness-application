@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { byNum, CHAPTERS, SPREAD3 } from '@/lib/cards';
+import { insertReading } from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -69,11 +70,18 @@ export async function POST(request) {
   const cardsPayload = cardNumbers.map((n, i) => ({
     n, position_cn: positions?.[i]?.[0] || null, position_en: positions?.[i]?.[1] || null,
   }));
-  const { data: reading, error: rErr } = await supabase
-    .from('readings')
-    .insert({ user_id: user.id, mode, spread_key: String(spreadKey ?? ''), question: question || null, cards: cardsPayload })
-    .select('id').single();
-  if (rErr) return NextResponse.json({ error: rErr.message }, { status: 500 });
+  let reading;
+  try {
+    reading = await insertReading(supabase, {
+      userId: user.id,
+      mode,
+      spreadKey: String(spreadKey ?? ''),
+      question: question || null,
+      cards: cardsPayload,
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'reading_save_failed', detail: error.message }, { status: 500 });
+  }
 
   // Generate the deep report with Claude.
   const model = process.env.REPORT_MODEL || 'claude-sonnet-5';
