@@ -208,8 +208,11 @@ export default function App({ onReading } = {}) {
       setFlipped(false);
       setTimeout(() => setFlipped(true), 60);
     }
-    setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 120);
-  }, [method, inputs, mode, pool, metaFor]);
+    setTimeout(() => {
+      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      resultRef.current?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest" });
+    }, 120);
+  }, [method, inputs, mode, pool, metaFor, onReading]);
 
   const changeMode = useCallback((nextMode) => {
     setReading(null);
@@ -243,7 +246,7 @@ export default function App({ onReading } = {}) {
           {MODES.map(({ m, cn, en }) => {
             const active = mode === m;
             return (
-              <button key={m} onClick={() => changeMode(m)} style={{
+              <button type="button" key={m} aria-pressed={active} onClick={() => changeMode(m)} style={{
                 flex: 1, border: "none", borderRadius: 10, padding: "9px 4px", cursor: "pointer",
                 background: active ? "#2a2622" : "transparent", color: active ? "#f3e6bf" : "#6a5f4a",
                 fontWeight: 700, fontSize: 13, transition: "all .2s",
@@ -260,7 +263,7 @@ export default function App({ onReading } = {}) {
           {[["draw", "随机抽牌", "Draw"], ["input", "输入编号", "Enter №"]].map(([k, cn, en]) => {
             const active = method === k;
             return (
-              <button key={k} onClick={() => setMethod(k)} style={{
+              <button type="button" key={k} aria-pressed={active} onClick={() => setMethod(k)} style={{
                 border: `1.5px solid ${active ? "#b5842b" : "#cdbf9e"}`, background: active ? "#b5842b" : "transparent",
                 color: active ? "#fff" : "#8a7a54", borderRadius: 999, padding: "6px 15px", fontSize: 12.5, fontWeight: 600, cursor: "pointer",
               }}>{cn} · {en}</button>
@@ -271,9 +274,9 @@ export default function App({ onReading } = {}) {
         {/* 3-card position set picker */}
         {mode === 3 && (
           <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 11.5, color: "#8a7f6c", fontWeight: 600, display: "block", marginBottom: 5 }}>选择牌阵含义 · Position meanings</label>
+            <label htmlFor="three-card-spread" style={{ fontSize: 11.5, color: "#8a7f6c", fontWeight: 600, display: "block", marginBottom: 5 }}>选择牌阵含义 · Position meanings</label>
             <div style={{ position: "relative" }}>
-              <select className="aw" value={set3} onChange={(e) => setSet3(Number(e.target.value))} style={{
+              <select id="three-card-spread" className="aw" value={set3} onChange={(e) => setSet3(Number(e.target.value))} style={{
                 width: "100%", padding: "11px 34px 11px 14px", borderRadius: 12, border: "1.5px solid #cdbf9e",
                 background: "#fffdf8", fontSize: 13.5, fontWeight: 600, color: "#2a2622", cursor: "pointer",
               }}>
@@ -298,7 +301,7 @@ export default function App({ onReading } = {}) {
               const active = filter === k;
               const c = k === 0 ? "#7a6a4a" : CHAPTERS[k].color;
               return (
-                <button key={k} onClick={() => setFilter(k)} style={{
+                <button type="button" key={k} aria-pressed={active} onClick={() => setFilter(k)} style={{
                   border: `1.5px solid ${c}`, background: active ? c : "transparent", color: active ? "#fff" : c,
                   borderRadius: 999, padding: "5px 12px", fontSize: 12, cursor: "pointer", fontWeight: 600,
                 }}>{k === 0 ? "全部 All" : CHAPTERS[k].cn}</button>
@@ -315,10 +318,10 @@ export default function App({ onReading } = {}) {
                 const meta = metaFor(mode)[i];
                 return (
                   <div key={i}>
-                    <label style={{ fontSize: 10.5, color: "#8a7f6c", fontWeight: 700, display: "block", marginBottom: 3, textAlign: "center" }}>
+                    <label htmlFor={`card-number-${i}`} style={{ fontSize: 10.5, color: "#8a7f6c", fontWeight: 700, display: "block", marginBottom: 3, textAlign: "center" }}>
                       {mode === 1 ? "编号 №" : `${i + 1}. ${meta[0]}`}
                     </label>
-                    <input type="number" min={1} max={40} inputMode="numeric" value={inputs[i]}
+                    <input id={`card-number-${i}`} type="number" min={1} max={40} inputMode="numeric" value={inputs[i]}
                       onChange={(e) => { const v = [...inputs]; v[i] = e.target.value; setInputs(v); }}
                       placeholder="1–40"
                       style={{ width: "100%", boxSizing: "border-box", padding: "10px 6px", borderRadius: 10, border: "1.5px solid #cdbf9e", background: "#fffdf8", fontSize: 15, textAlign: "center", fontWeight: 700, color: "#2a2622" }} />
@@ -332,20 +335,20 @@ export default function App({ onReading } = {}) {
 
         {/* Primary action */}
         <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 6 }}>
-          <button onClick={() => generate()} style={{
+          <button type="button" onClick={() => generate()} style={{
             background: "#2a2622", color: "#f3e6bf", border: "none", borderRadius: 999, padding: "12px 26px",
             fontSize: 15, fontWeight: 700, cursor: "pointer",
           }}>
             {method === "input" ? "查看解读 · Read" : reading ? "重新抽牌 · Draw again" : `抽 ${mode} 张牌 · Draw ${mode}`}
           </button>
-          <button onClick={() => setShowDeck((s) => !s)} style={{
+          <button type="button" aria-expanded={showDeck} onClick={() => setShowDeck((s) => !s)} style={{
             background: "transparent", color: "#7a6a4a", border: "1.5px solid #c8b48a", borderRadius: 999, padding: "12px 16px",
             fontSize: 14, fontWeight: 600, cursor: "pointer",
           }}>{showDeck ? "收起" : "全部 40"}</button>
         </div>
 
         {/* ── RESULT ── */}
-        <div ref={resultRef}>
+        <div ref={resultRef} aria-live="polite">
           {/* Single card: flip */}
           {reading && mode === 1 && (
             <>
@@ -412,7 +415,7 @@ export default function App({ onReading } = {}) {
             {CARDS.map((c) => {
               const cc = CHAPTERS[c.ch];
               return (
-                <button key={c.n} onClick={() => { setShowDeck(false); setMode(1); setMethod("draw"); generate([c], 1); }} style={{
+                <button type="button" key={c.n} aria-label={`第 ${String(c.n).padStart(2, "0")} 张 · ${c.cn} · ${c.en}`} onClick={() => { setShowDeck(false); setMode(1); setMethod("draw"); generate([c], 1); }} style={{
                   border: `1.5px solid ${cc.color}`, borderRadius: 10, background: "#fffdf8", padding: "8px 4px", cursor: "pointer",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
                 }}>

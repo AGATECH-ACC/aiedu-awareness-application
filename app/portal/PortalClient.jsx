@@ -77,7 +77,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
       if (!response.ok) {
         setErrorState({
           status: response.status,
-          message: ERROR_COPY[response.status] || data.message || '操作失败，请稍后再试。 · Something went wrong. Please try again.',
+          message: data.message || ERROR_COPY[response.status] || '操作失败，请稍后再试。 · Something went wrong. Please try again.',
           readingId: data.readingId || retryReadingId || null,
         });
         return;

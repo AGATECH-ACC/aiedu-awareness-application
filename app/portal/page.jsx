@@ -4,7 +4,6 @@ import PortalClient from './PortalClient';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { listReports } from '@/lib/db';
 import { getProfile } from '@/lib/db';
-import '../globals.css';
 
 export default async function PortalPage() {
   const supabase = createServerSupabase();

@@ -1,3 +1,26 @@
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: clip; }
+body { min-width: 0; }
 a { color: inherit; }
+button, input, textarea, select { font: inherit; }
+
+:where(a, button, input, textarea, select):focus-visible {
+  outline: 3px solid #2d6fa3;
+  outline-offset: 3px;
+}
+
+@media (max-width: 420px) {
+  .top-nav-draw { display: none; }
+  .top-nav { padding-inline: 12px !important; }
+  .top-nav-actions { gap: 7px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -10,6 +10,7 @@ import {
   insertReading,
   insertReport,
 } from '@/lib/db';
+import { checkReportBurstLimit, reportClientIp } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -179,6 +180,17 @@ function invalidPayload(message) {
 }
 
 export async function POST(request) {
+  const burst = checkReportBurstLimit(reportClientIp(request));
+  if (!burst.allowed) {
+    return NextResponse.json({
+      error: 'burst_limit_reached',
+      message: '请求过于频繁，请稍后再试。 · Too many requests. Please wait and try again.',
+    }, {
+      status: 429,
+      headers: { 'Retry-After': String(burst.retryAfter) },
+    });
+  }
+
   // Auth gate — Layer 2 only.
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();

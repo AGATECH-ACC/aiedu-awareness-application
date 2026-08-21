@@ -1,7 +1,6 @@
 import TopNav from '@/components/TopNav';
 import CardDeck from '@/components/CardDeck';
 import { createServerSupabase } from '@/lib/supabase-server';
-import './globals.css';
 
 export default async function HomePage() {
   const supabase = createServerSupabase();
