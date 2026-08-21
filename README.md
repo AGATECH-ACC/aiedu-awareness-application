@@ -1,117 +1,143 @@
 # 幸福人生觉察卡 · Awareness Portal
 
-A two-layer web app for the Happy Life Awareness Cards deck, on
-**awareness.aiedu.academy**.
+A bilingual, two-layer web app for the Happy Life Awareness Cards deck at
+`awareness.aiedu.academy`.
 
-- **Layer 1 — Open draw (public):** single / three-card / Inner Child spreads,
-  each card with its meaning and "how it affects you." No login.
-- **Layer 2 — Portal (sign in):** save readings + generate an AI **Deep Report**
-  (overview, card-by-card, inner patterns, integrated guidance, a 7-day practice,
-  and a closing affirmation), with per-user history.
+- **Public layer:** draw one card, a three-card spread, or the four-card Inner
+  Child spread without an account.
+- **Signed-in portal:** save readings, generate reflective AI Deep Reports,
+  review/delete history, and create read-only public report links.
+- **Optional plan gate:** disabled by default; payment processing remains a
+  deliberate TODO.
 
-Stack: **Next.js 14 (App Router) · Supabase (Auth + Postgres, RLS) · Claude API · Vercel.**
+Stack: **Next.js 14 App Router · Supabase Auth/Postgres/RLS · Anthropic SDK · Vercel**.
+The project targets **Node.js 24** for parity with Vercel.
 
----
+## Project map
 
-## File map
-
+```text
+lib/cards.js                         40 cards + spreads; the only card-data source
+lib/db.js                            RLS-scoped Supabase data helpers
+lib/supabase-browser.js              browser client
+lib/supabase-server.js               cookie-bound server client
+middleware.js                        refreshes auth and gates /portal
+components/CardDeck.jsx              shared public/portal drawing UI
+components/Markdownish.jsx           minimal safe report renderer
+app/page.jsx                         public deck
+app/login/*                          magic-link and optional Google sign-in
+app/auth/callback/route.js            PKCE callback and expired-link handling
+app/portal/*                         authenticated draw → report → history flow
+app/api/report/route.js              validation, plan/cap gates, Claude, persistence
+app/r/[token]/page.jsx               public read-only report via narrow RPC
+supabase/schema.sql                  base readings/reports schema and RLS
+supabase/migrations/2_share.sql      sharing columns + public RPC
+supabase/migrations/3_profiles.sql   profiles, signup trigger, optional plan data
+supabase/tests/rls.test.sql          two-identity ownership policy checks
 ```
-lib/cards.js              40-card dataset + spreads (single source of truth)
-lib/supabase-browser.js   client Supabase
-lib/supabase-server.js    server Supabase (cookies)
-middleware.js             session refresh + gates /portal
-components/CardDeck.jsx    the draw UI (emits each reading via onReading)
-components/Markdownish.jsx report renderer
-components/TopNav.jsx
-app/page.jsx              Layer 1 (public draw)
-app/login/page.jsx        magic-link + Google sign in
-app/auth/callback/route.js
-app/portal/page.jsx       Layer 2 (server: auth + history)
-app/portal/PortalClient.jsx  draw → deep report → history
-app/api/report/route.js   auth-gated: saves reading, calls Claude, stores report
-supabase/schema.sql       tables + RLS
-```
 
-The card content lives **only** in `lib/cards.js`. Edit it there and both the
-deck and the report update.
+Do not copy card meanings into another file. Both drawing and report generation
+must continue importing from `lib/cards.js`.
 
----
+## Local setup
 
-## 1. Create the repo & install
+1. Use Node.js 24 and install the locked dependencies:
+
+   ```bash
+   npm ci
+   ```
+
+2. Create local environment values:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Placeholder values let the UI build, but real Supabase and Anthropic values
+   are required for authentication, persistence, sharing, and report generation.
+
+3. In a fresh Supabase project, run SQL in this order:
+
+   1. `supabase/schema.sql`
+   2. `supabase/migrations/2_share.sql`
+   3. `supabase/migrations/3_profiles.sql`
+
+   The SQL explicitly grants only the Data API privileges the app needs and
+   enables ownership RLS on every public table. The public sharing function is a
+   narrow `SECURITY DEFINER` RPC returning only `content` and `created_at` for an
+   unguessable token whose report is explicitly public.
+
+4. Configure Supabase Auth URL settings:
+
+   - Site URL: `http://localhost:3000` locally; the production domain when live.
+   - Redirect URL: `http://localhost:3000/auth/callback`.
+   - Also add the production callback and each approved Vercel preview callback.
+   - Enable Google in Supabase and set `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=true` only
+     after its OAuth client is configured.
+
+5. Start the app:
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000).
+
+## Environment variables
+
+| Variable | Exposure | Default / purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser + server | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser + server | Supabase anon/publishable API key; RLS remains mandatory |
+| `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH` | Browser + server | `false`; enables the Google button only after provider setup |
+| `ANTHROPIC_API_KEY` | **Server only** | Required for Deep Reports; never prefix with `NEXT_PUBLIC_` |
+| `REPORT_MODEL` | Server only | `claude-sonnet-5` fallback; never hardcoded elsewhere |
+| `REPORT_DAILY_LIMIT` | Server only | `5`; per authenticated user from 00:00 UTC |
+| `NEXT_PUBLIC_REQUIRE_PLAN` | Browser + server | `false`; when true, `profiles.plan='free'` is gated |
+| `NEXT_PUBLIC_SITE_URL` | Browser + server | Canonical origin for metadata and links |
+
+The report endpoint also applies a fixed best-effort IP burst limit of 10
+requests per minute. It is in memory, so it resets on deploy/cold start and is
+not shared across Vercel instances. The user-scoped database daily cap is the
+authoritative cost control.
+
+## Authentication and data behavior
+
+- `/portal` is checked in middleware and again in its Server Component.
+- `/api/report` independently verifies the user before any user data is read or
+  written. Middleware is defense in depth, not the sole authorization layer.
+- Every insert carries `user_id`; reads, updates, and deletes are constrained by
+  the cookie-bound session and RLS.
+- A generation failure keeps the reading and returns `readingId`. Retrying uses
+  that saved reading and does not redraw or insert a second reading.
+- Reports are reflective, not diagnostic. Keep the system prompt and visible
+  disclaimer intact.
+
+Run the two-user RLS suite against a configured local Supabase stack:
 
 ```bash
-# in this folder
-git init && git add . && git commit -m "init awareness portal"
-# create an empty GitHub repo, then:
-git remote add origin git@github.com:AGA-Ventures/awareness-aiedu.git
-git push -u origin main
-
-npm install
+supabase test db
 ```
 
-## 2. Supabase
+## Optional plan gate
 
-1. Create a new Supabase project (portal-only — keep it separate from other data).
-2. **SQL editor → run** `supabase/schema.sql`.
-3. **Authentication → URL Configuration:**
-   - Site URL: `https://awareness.aiedu.academy`
-   - Redirect URLs: add `https://awareness.aiedu.academy/auth/callback`
-     and `http://localhost:3000/auth/callback` for local dev.
-4. (Optional) **Authentication → Providers → Google** to enable the Google button.
-5. Copy the Project URL + anon key into env (below).
+Apply `3_profiles.sql` before enabling the flag. With
+`NEXT_PUBLIC_REQUIRE_PLAN=false`, behavior is unchanged and no profile lookup is
+required. With it set to `true`, free/missing profiles receive `403` from the API
+and see an upgrade prompt. `startCheckout()` in `app/portal/PortalClient.jsx` is
+intentionally a TODO; no real Curlec/Stripe flow is included.
 
-## 3. Environment
+## Build and deploy
 
-Copy `.env.example` → `.env.local` and fill in:
-
-```
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-ANTHROPIC_API_KEY=sk-ant-...
-REPORT_MODEL=claude-sonnet-5      # or claude-opus-4-8 / claude-haiku-4-5
-NEXT_PUBLIC_SITE_URL=https://awareness.aiedu.academy
+```bash
+npm run build
 ```
 
-Local dev: `npm run dev` → http://localhost:3000
+Import the repository into Vercel, add the environment variables for Production
+and Preview, and attach `awareness.aiedu.academy`. Follow
+`DEPLOY_CHECKLIST.md` for the complete database, Auth, DNS, and smoke-test order.
 
-## 4. Deploy on Vercel
+For CLI deployment work, use a current Vercel CLI (59.3.0 or newer):
 
-1. **New Project → import the GitHub repo.** Framework auto-detects Next.js.
-2. Add the same env vars in **Project → Settings → Environment Variables**
-   (Production + Preview). Keep `ANTHROPIC_API_KEY` server-only (no `NEXT_PUBLIC_`).
-3. Deploy.
-
-## 5. Domain: awareness.aiedu.academy
-
-1. Vercel **Project → Settings → Domains → Add** `awareness.aiedu.academy`.
-2. In your `aiedu.academy` DNS, add the record Vercel shows — usually:
-   `CNAME  awareness  →  cname.vercel-dns.com`
-3. Wait for the cert. Then set `NEXT_PUBLIC_SITE_URL` and the Supabase
-   Site/Redirect URLs to the final domain (step 2.3 above).
-
----
-
-## How the two layers connect
-
-`CardDeck` is used by both pages. In the portal it's passed an `onReading`
-callback, so each draw is captured (mode, spread key, card numbers, positions).
-The **Deep Report** button posts that to `/api/report`, which:
-
-1. verifies the Supabase session (401 if signed out),
-2. inserts the reading (RLS scopes it to the user),
-3. calls Claude with the full card meanings + optional question,
-4. stores and returns the bilingual report.
-
-RLS guarantees each user only ever reads their own readings and reports.
-
-## Notes / next steps
-
-- **Cost control:** add a simple per-user daily cap in `app/api/report/route.js`
-  (count today's `deep_reports` before generating).
-- **Sharing:** add a public, read-only report page (`/r/[id]`) with a share token
-  if you want users to share a reading.
-- **i18n:** copy is bilingual inline; swap to next-intl if you add more languages.
-- **Payments:** gate Deep Reports behind a plan (Curlec/Stripe) by checking a
-  `profiles.plan` column in the report route.
-- The report prompt is **not** therapy/diagnosis — the system prompt states this
-  and the UI shows a reflection disclaimer.
+```bash
+npm i -g vercel@latest
+```
