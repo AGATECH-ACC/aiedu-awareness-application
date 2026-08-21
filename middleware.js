@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { safeNextPath } from '@/lib/auth-redirect';
 
 export async function middleware(request) {
   let response = NextResponse.next({ request: { headers: request.headers } });
@@ -26,7 +27,8 @@ export async function middleware(request) {
   if (request.nextUrl.pathname.startsWith('/portal') && !user) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    url.searchParams.set('next', '/portal');
+    url.search = '';
+    url.searchParams.set('next', safeNextPath(`${request.nextUrl.pathname}${request.nextUrl.search}`));
     return NextResponse.redirect(url);
   }
   return response;
