@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import CardDeck from '@/components/CardDeck';
 import Markdownish from '@/components/Markdownish';
 import { byNum } from '@/lib/cards';
-import { deleteReport } from '@/lib/db';
+import { deleteReport, shareReport } from '@/lib/db';
 import { createClient } from '@/lib/supabase-browser';
 
 const ERROR_COPY = {
@@ -33,7 +33,7 @@ function CardsSummary({ reading }) {
   );
 }
 
-export default function PortalClient({ email, initialReports }) {
+export default function PortalClient({ userId, email, initialReports }) {
   const supabase = useMemo(() => createClient(), []);
   const [latest, setLatest] = useState(null);
   const [question, setQuestion] = useState('');
@@ -44,6 +44,8 @@ export default function PortalClient({ email, initialReports }) {
   const [reports, setReports] = useState(Array.isArray(initialReports) ? initialReports : []);
   const [open, setOpen] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [sharingId, setSharingId] = useState(null);
+  const [shareState, setShareState] = useState(null);
 
   useEffect(() => {
     if (!busy) {
@@ -85,6 +87,8 @@ export default function PortalClient({ email, initialReports }) {
         created_at: data.createdAt || new Date().toISOString(),
         reading_id: data.readingId,
         readings: data.reading || null,
+        is_public: false,
+        share_token: null,
       };
       setReport(data.content);
       setReports((current) => [fresh, ...current.filter((item) => item.id !== fresh.id)]);
@@ -107,7 +111,7 @@ export default function PortalClient({ email, initialReports }) {
     setDeletingId(id);
     setErrorState(null);
     try {
-      const deleted = await deleteReport(supabase, id);
+      const deleted = await deleteReport(supabase, id, userId);
       if (!deleted) throw new Error('not_deleted');
       setReports((current) => current.filter((item) => item.id !== id));
       if (open === id) setOpen(null);
@@ -115,6 +119,41 @@ export default function PortalClient({ email, initialReports }) {
       setErrorState({ status: 0, message: '无法删除报告，请稍后再试。 · Could not delete the report. Please try again.' });
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function makeShareable(item) {
+    setSharingId(item.id);
+    setErrorState(null);
+    try {
+      const token = item.is_public && item.share_token ? item.share_token : window.crypto.randomUUID();
+      let shared = { id: item.id, is_public: true, share_token: token };
+      if (!item.is_public || !item.share_token) {
+        shared = await shareReport(supabase, { id: item.id, userId, token });
+        if (!shared) throw new Error('not_shared');
+        setReports((current) => current.map((reportItem) => (
+          reportItem.id === item.id ? { ...reportItem, ...shared } : reportItem
+        )));
+      }
+      setShareState({
+        reportId: item.id,
+        url: `${window.location.origin}/r/${shared.share_token}`,
+        copied: false,
+      });
+    } catch {
+      setErrorState({ status: 0, message: '无法建立分享连结，请稍后再试。 · Could not create a share link. Please try again.' });
+    } finally {
+      setSharingId(null);
+    }
+  }
+
+  async function copyShareLink() {
+    if (!shareState?.url) return;
+    try {
+      await navigator.clipboard.writeText(shareState.url);
+      setShareState((current) => ({ ...current, copied: true }));
+    } catch {
+      setShareState((current) => ({ ...current, copied: false, copyFailed: true }));
     }
   }
 
@@ -202,6 +241,24 @@ export default function PortalClient({ email, initialReports }) {
                   {deletingId === item.id ? '…' : '⌫'}
                 </button>
               </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #f2ead8', padding: '6px 10px', background: '#fffcf5' }}>
+                <button type="button" onClick={() => makeShareable(item)} disabled={sharingId === item.id}
+                  style={{ border: 0, background: 'transparent', color: '#8a6727', cursor: sharingId === item.id ? 'wait' : 'pointer', fontSize: 11.5, fontWeight: 750 }}>
+                  {sharingId === item.id ? '建立中… · Creating…' : item.is_public ? '分享连结 · Share link' : '分享 · Share'}
+                </button>
+              </div>
+              {shareState?.reportId === item.id && (
+                <div style={{ borderTop: '1px solid #efe5d0', background: '#f8f1e2', padding: '9px 10px' }}>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <input aria-label="公开分享连结 · Public share link" readOnly value={shareState.url} onFocus={(event) => event.currentTarget.select()}
+                      style={{ minWidth: 0, flex: 1, border: '1px solid #d7c59f', borderRadius: 8, background: '#fffdf8', color: '#5d513d', padding: '7px 8px', fontSize: 11 }} />
+                    <button type="button" onClick={copyShareLink} style={{ flex: '0 0 auto', border: 0, borderRadius: 8, background: '#7d642f', color: '#fff', padding: '7px 10px', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                      {shareState.copied ? '已复制 · Copied' : '复制 · Copy'}
+                    </button>
+                  </div>
+                  {shareState.copyFailed && <div style={{ color: '#8b4a37', fontSize: 10.5, marginTop: 4 }}>请手动复制上方连结。 · Please copy the link manually.</div>}
+                </div>
+              )}
               {open === item.id && <div style={{ borderTop: '1px solid #efe5d0', padding: '2px 14px 12px' }}><Markdownish text={item.content} /></div>}
             </article>
           ))}

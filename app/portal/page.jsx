@@ -20,7 +20,7 @@ export default async function PortalPage() {
   return (
     <main style={{ background: 'radial-gradient(130% 80% at 50% -10%, #fdf6ea 0%, #f6eede 45%, #efe6d4 100%)', minHeight: '100vh' }}>
       <TopNav user={user} />
-      <PortalClient email={user.email} initialReports={reports} />
+      <PortalClient userId={user.id} email={user.email} initialReports={reports} />
     </main>
   );
 }
