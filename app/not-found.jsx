@@ -7,7 +7,7 @@ export default function NotFound() {
         <div aria-hidden="true" style={{ color: '#b5842b', fontFamily: 'Georgia, serif', fontSize: 48 }}>404</div>
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 22, margin: '8px 0' }}>这里没有这张牌 · This page isn’t here</h1>
         <p style={{ color: '#786d5c', fontSize: 13.5, lineHeight: 1.65 }}>连结可能无效、已关闭分享，或页面已经移动。<br />The link may be invalid, no longer public, or moved.</p>
-        <Link href="/" style={{ display: 'inline-block', marginTop: 8, background: '#b5842b', color: '#fff', borderRadius: 999, padding: '10px 18px', textDecoration: 'none', fontWeight: 700 }}>回到抽牌 · Draw a card</Link>
+        <Link href="/draw" style={{ display: 'inline-block', marginTop: 8, background: '#b5842b', color: '#fff', borderRadius: 999, padding: '10px 18px', textDecoration: 'none', fontWeight: 700 }}>回到抽牌 · Draw a card</Link>
       </div>
     </main>
   );

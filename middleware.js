@@ -1,39 +1,55 @@
-import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { safeNextPath } from '@/lib/auth-redirect';
+import { NextResponse } from 'next/server';
 
 export async function middleware(request) {
-  let response = NextResponse.next({ request: { headers: request.headers } });
+  let response = NextResponse.next({ request });
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    publishableKey,
     {
+      db: { schema: 'awareness' },
       cookies: {
-        get: (name) => request.cookies.get(name)?.value,
-        set: (name, value, options) => {
-          response.cookies.set({ name, value, ...options });
-        },
-        remove: (name, options) => {
-          response.cookies.set({ name, value: '', ...options });
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value);
+          });
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
         },
       },
     }
   );
 
   const { data: { user } } = await supabase.auth.getUser();
+  const path = request.nextUrl.pathname;
+  const isProtectedPage = path === '/portal' || path.startsWith('/portal/');
 
-  // Gate Layer 2 (portal) behind auth.
-  if (request.nextUrl.pathname.startsWith('/portal') && !user) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.search = '';
-    url.searchParams.set('next', safeNextPath(`${request.nextUrl.pathname}${request.nextUrl.search}`));
-    return NextResponse.redirect(url);
+  if (!user && isProtectedPage) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = '/login';
+    loginUrl.search = '';
+    loginUrl.searchParams.set('next', `${path}${request.nextUrl.search}`);
+    return NextResponse.redirect(loginUrl);
   }
+
+  if (user && (path === '/login' || path === '/signup')) {
+    const portalUrl = request.nextUrl.clone();
+    portalUrl.pathname = '/portal';
+    portalUrl.search = '';
+    return NextResponse.redirect(portalUrl);
+  }
+
   return response;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|opengraph-image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };

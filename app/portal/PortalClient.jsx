@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { CircleNotch, FileText, Trash } from '@phosphor-icons/react';
 import CardDeck from '@/components/CardDeck';
 import Markdownish from '@/components/Markdownish';
 import { byNum } from '@/lib/cards';
@@ -11,8 +12,20 @@ import { createClient } from '@/lib/supabase-browser';
 const ERROR_COPY = {
   401: '登入状态已过期，请重新登入。 · Your session has expired. Please sign in again.',
   429: '今日深度报告已达上限，请明天再来。 · You have reached today’s Deep Report limit. Please return tomorrow.',
-  502: '报告生成暂时中断，你可以用同一次抽牌重试。 · Generation was interrupted. Retry with the same reading.',
 };
+
+function reportDate(value) {
+  return new Date(value).toLocaleString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'Asia/Kuala_Lumpur',
+  });
+}
 
 function CardsSummary({ reading }) {
   const cards = Array.isArray(reading?.cards) ? reading.cards : [];
@@ -24,7 +37,6 @@ function CardsSummary({ reading }) {
         const card = byNum[item?.n];
         return (
           <span key={`${item?.n}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f5ecd9', color: '#6d5d3c', borderRadius: 999, padding: '3px 8px', fontSize: 10.5 }}>
-            <span aria-hidden="true">{card?.icon || '◦'}</span>
             {card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : `#${item?.n}`}
           </span>
         );
@@ -33,7 +45,7 @@ function CardsSummary({ reading }) {
   );
 }
 
-export default function PortalClient({ userId, email, initialReports, requirePlan = false, plan = 'free' }) {
+export default function PortalClient({ userId, email, initialReports, requirePlan = false, plan = 'free', showAccountHeader = true, embeddedAdmin = false }) {
   const supabase = useMemo(() => createClient(), []);
   const [latest, setLatest] = useState(null);
   const [question, setQuestion] = useState('');
@@ -42,7 +54,6 @@ export default function PortalClient({ userId, email, initialReports, requirePla
   const [errorState, setErrorState] = useState(null);
   const [report, setReport] = useState(null);
   const [reports, setReports] = useState(Array.isArray(initialReports) ? initialReports : []);
-  const [open, setOpen] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [sharingId, setSharingId] = useState(null);
   const [shareState, setShareState] = useState(null);
@@ -94,7 +105,6 @@ export default function PortalClient({ userId, email, initialReports, requirePla
       };
       setReport(data.content);
       setReports((current) => [fresh, ...current.filter((item) => item.id !== fresh.id)]);
-      setOpen(fresh.id);
     } catch {
       setErrorState({
         status: 0,
@@ -116,7 +126,6 @@ export default function PortalClient({ userId, email, initialReports, requirePla
       const deleted = await deleteReport(supabase, id, userId);
       if (!deleted) throw new Error('not_deleted');
       setReports((current) => current.filter((item) => item.id !== id));
-      if (open === id) setOpen(null);
     } catch {
       setErrorState({ status: 0, message: '无法删除报告，请稍后再试。 · Could not delete the report. Please try again.' });
     } finally {
@@ -170,15 +179,18 @@ export default function PortalClient({ userId, email, initialReports, requirePla
   }
 
   return (
-    <div style={{ maxWidth: 460, margin: '0 auto', padding: '0 0 40px' }}>
+    <div className={embeddedAdmin ? 'portal-client portal-client--admin' : 'portal-client'} style={{ maxWidth: embeddedAdmin ? 920 : 460, margin: '0 auto', padding: '0 0 40px' }}>
       <style>{`
         @keyframes portal-spin { to { transform: rotate(360deg); } }
+        .portal-spinner { animation: portal-spin .8s linear infinite; }
         @media (prefers-reduced-motion: reduce) { .portal-spinner { animation: none !important; } }
       `}</style>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '4px 16px 0', fontSize: 12.5, color: '#7a6f5a' }}>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>已登入 · {email}</span>
-        <button type="button" onClick={signOut} style={{ flex: '0 0 auto', border: 'none', background: 'transparent', color: '#b5842b', fontWeight: 600, cursor: 'pointer' }}>登出 · Sign out</button>
-      </div>
+      {showAccountHeader ? (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '4px 16px 0', fontSize: 12.5, color: '#7a6f5a' }}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>已登入 · {email}</span>
+          <button type="button" onClick={signOut} style={{ flex: '0 0 auto', border: 'none', background: 'transparent', color: '#b5842b', fontWeight: 600, cursor: 'pointer' }}>登出 · Sign out</button>
+        </div>
+      ) : null}
 
       <CardDeck onReading={setLatest} />
 
@@ -195,7 +207,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
           {planRequired ? (
             <div style={{ marginTop: 10, padding: 12, borderRadius: 12, background: '#f5ecd6', border: '1px solid #dfc78f', textAlign: 'center' }}>
               <div style={{ color: '#654f26', fontWeight: 800, fontSize: 13 }}>升级后生成深度报告 · Upgrade for Deep Reports</div>
-              <div style={{ color: '#7c6c4f', fontSize: 11.5, lineHeight: 1.55, marginTop: 3 }}>你的抽牌仍可免费使用，升级方案后可生成并保存 AI 报告。<br />Card draws remain free; upgrade to generate and save AI reports.</div>
+              <div style={{ color: '#7c6c4f', fontSize: 11.5, lineHeight: 1.55, marginTop: 3 }}>你的抽牌仍可免费使用，升级方案后可生成并保存双语深度报告。<br />Card draws remain free; upgrade to generate and save bilingual deep reports.</div>
               <button type="button" onClick={startCheckout} style={{ marginTop: 9, border: 0, borderRadius: 999, padding: '8px 14px', background: '#8b6929', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>了解升级 · Upgrade</button>
               {upgradeMessage && <div role="status" style={{ marginTop: 7, color: '#775f31', fontSize: 10.5 }}>{upgradeMessage}</div>}
             </div>
@@ -204,7 +216,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
               style={{ width: '100%', marginTop: 10, padding: 12, borderRadius: 10, border: 'none', background: '#2a2622', color: '#f3e6bf', fontWeight: 700, fontSize: 15, cursor: !latest || busy ? 'default' : 'pointer', opacity: !latest || busy ? 0.55 : 1 }}>
               {busy ? (
                 <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <span className="portal-spinner" aria-hidden="true" style={{ width: 14, height: 14, border: '2px solid #7e715a', borderTopColor: '#f3e6bf', borderRadius: '50%', animation: 'portal-spin .8s linear infinite' }} />
+                  <CircleNotch className="portal-spinner" size={15} weight="bold" aria-hidden="true" />
                   生成中… · Generating
                 </span>
               ) : '生成深度报告 · Generate'}
@@ -217,7 +229,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
               <div>{errorState.message}</div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 {errorState.status === 401 && <Link href="/login?next=/portal" style={{ color: '#913f2c', fontWeight: 800 }}>重新登入 · Sign in</Link>}
-                {errorState.status === 502 && errorState.readingId && (
+                {errorState.readingId && (
                   <button type="button" onClick={() => generate(errorState.readingId)} disabled={busy} style={{ border: 0, borderRadius: 999, padding: '7px 12px', background: '#913f2c', color: '#fff', cursor: busy ? 'wait' : 'pointer', fontWeight: 700 }}>
                     用同一次抽牌重试 · Retry this reading
                   </button>
@@ -237,24 +249,25 @@ export default function PortalClient({ userId, email, initialReports, requirePla
           <div id="history-title" style={{ fontWeight: 800, color: '#2a2622', marginBottom: 8 }}>历史报告 · History</div>
           {reports.length === 0 ? (
             <div style={{ background: 'rgba(255,253,248,.72)', border: '1px dashed #d8c8a6', borderRadius: 14, padding: '22px 18px', textAlign: 'center', color: '#7a6f5a' }}>
-              <div aria-hidden="true" style={{ fontSize: 24, marginBottom: 5 }}>✦</div>
+              <FileText size={25} weight="duotone" aria-hidden="true" style={{ marginBottom: 5 }} />
               <div style={{ fontWeight: 700, color: '#4f4638' }}>还没有历史报告 · No reports yet</div>
               <div style={{ fontSize: 12, lineHeight: 1.6, marginTop: 4 }}>完成一次抽牌并生成报告后，会保存在这里。<br />Draw cards and generate a report to begin your history.</div>
             </div>
           ) : reports.map((item) => (
             <article key={item.id} style={{ background: '#fffdf8', border: '1px solid #eadfc4', borderRadius: 12, marginBottom: 8, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                <button type="button" aria-expanded={open === item.id} onClick={() => setOpen(open === item.id ? null : item.id)}
-                  style={{ minWidth: 0, flex: 1, textAlign: 'left', border: 'none', background: 'transparent', padding: '11px 14px', cursor: 'pointer', fontSize: 13 }}>
+                <Link href={`/portal/reports/${item.id}`}
+                  aria-label={`查看报告 ${reportDate(item.created_at)} · View report`}
+                  style={{ minWidth: 0, flex: 1, color: 'inherit', textAlign: 'left', background: 'transparent', padding: '11px 14px', textDecoration: 'none', fontSize: 13 }}>
                   <span style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                    <span style={{ color: '#3a352e' }}>{new Date(item.created_at).toLocaleString()}</span>
-                    <span style={{ flex: '0 0 auto', color: '#b5842b' }}>{open === item.id ? '收起 ▲' : '查看 ▼'}</span>
+                    <span style={{ color: '#3a352e' }}>{reportDate(item.created_at)}</span>
+                    <span style={{ flex: '0 0 auto', color: '#b5842b', fontWeight: 750 }}>查看报告 →</span>
                   </span>
                   <CardsSummary reading={item.readings} />
-                </button>
+                </Link>
                 <button type="button" aria-label="删除报告 · Delete report" onClick={() => removeReport(item.id)} disabled={deletingId === item.id}
                   style={{ flex: '0 0 auto', width: 52, border: 0, borderLeft: '1px solid #efe5d0', background: '#fffaf0', color: '#a34b38', cursor: deletingId === item.id ? 'wait' : 'pointer', fontSize: 16 }}>
-                  {deletingId === item.id ? '…' : '⌫'}
+                  {deletingId === item.id ? <CircleNotch className="portal-spinner" size={16} aria-label="删除中 · Deleting" /> : <Trash size={17} aria-hidden="true" />}
                 </button>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #f2ead8', padding: '6px 10px', background: '#fffcf5' }}>
@@ -275,7 +288,6 @@ export default function PortalClient({ userId, email, initialReports, requirePla
                   {shareState.copyFailed && <div style={{ color: '#8b4a37', fontSize: 10.5, marginTop: 4 }}>请手动复制上方连结。 · Please copy the link manually.</div>}
                 </div>
               )}
-              {open === item.id && <div style={{ borderTop: '1px solid #efe5d0', padding: '2px 14px 12px' }}><Markdownish text={item.content} /></div>}
             </article>
           ))}
         </section>

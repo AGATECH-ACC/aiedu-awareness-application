@@ -6,7 +6,7 @@ const siteDescription = '觉察、选择、行动——抽一张幸福人生觉�
 export const metadata = {
   title: { default: siteTitle, template: `%s · ${siteTitle}` },
   description: siteDescription,
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://awareness.aiedu.academy'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://app.aiedu.academy'),
   openGraph: {
     title: siteTitle,
     description: siteDescription,

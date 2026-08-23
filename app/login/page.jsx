@@ -6,6 +6,7 @@ export default function LoginPage({ searchParams }) {
     <LoginClient
       nextPath={safeNextPath(searchParams?.next)}
       initialError={searchParams?.error === 'expired' ? 'expired' : ''}
+      initialMode="signin"
     />
   );
 }

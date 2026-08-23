@@ -1,10 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
+import { Cards } from '@phosphor-icons/react/Cards';
+import { SignIn } from '@phosphor-icons/react/SignIn';
 import { useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase-browser';
 
-export default function TopNav({ user }) {
+export default function TopNav({ user, variant = 'default' }) {
   const supabase = useMemo(() => createClient(), []);
   const [signingOut, setSigningOut] = useState(false);
   const initial = user?.email?.trim()?.charAt(0)?.toUpperCase() || 'P';
@@ -16,27 +19,50 @@ export default function TopNav({ user }) {
   }
 
   return (
-    <nav className="top-nav" aria-label="主要导航 · Main navigation" style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      maxWidth: 900, margin: '0 auto', padding: '14px 18px',
-    }}>
-      <Link href="/" style={{ textDecoration: 'none', fontWeight: 800, letterSpacing: 1, color: '#2a2622' }}>
-        觉察卡 <span style={{ color: '#b5842b', fontFamily: 'Georgia, serif', fontStyle: 'italic', fontWeight: 400 }}>Awareness</span>
+    <nav className={`top-nav${variant !== 'default' ? ` top-nav--${variant}` : ''}`} aria-label="主要导航 · Main navigation">
+      <Link className="top-nav-brand" href="/">
+        {variant === 'card' ? (
+          <>
+            <Image
+              className="top-nav-brand-logo"
+              src="/brand/aiedu-awareness-logo-alpha.png"
+              alt="AiEDU · Ai 育赋能教育学院"
+              width={136}
+              height={62}
+              priority
+            />
+            <span className="top-nav-brand-copy">
+              <strong>幸福人生觉察卡</strong>
+              <small>Awareness Cards</small>
+            </span>
+          </>
+        ) : (
+          <>
+            <span>幸福人生觉察卡</span>
+            <small>Awareness</small>
+          </>
+        )}
       </Link>
-      <div className="top-nav-actions" style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 13.5 }}>
-        <Link className="top-nav-draw" href="/" style={{ color: '#7a6f5a', textDecoration: 'none' }}>抽牌 Draw</Link>
+      <div className="top-nav-actions">
+        <Link className="top-nav-draw" href="/draw">
+          {variant === 'card' ? <Cards size={18} weight="regular" aria-hidden="true" /> : null}
+          <span>抽牌 <small>Draw</small></span>
+        </Link>
         {user ? (
           <>
-            <Link href="/portal" aria-label={`我的门户 · Portal · ${user.email || ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#2a2622', color: '#f3e6bf', padding: '6px 11px 6px 7px', borderRadius: 999, textDecoration: 'none', fontWeight: 700 }}>
-              <span aria-hidden="true" style={{ display: 'grid', placeItems: 'center', width: 23, height: 23, borderRadius: '50%', background: '#b5842b', color: '#fff', fontSize: 11 }}>{initial}</span>
+            <Link className="top-nav-portal" href="/portal" aria-label={`我的门户 · Portal · ${user.email || ''}`}>
+              <span aria-hidden="true">{initial}</span>
               Portal
             </Link>
-            <button type="button" onClick={signOut} disabled={signingOut} style={{ border: 0, background: 'transparent', color: '#8a6c31', padding: '6px 2px', cursor: signingOut ? 'wait' : 'pointer', fontWeight: 600, fontSize: 12 }}>
+            <button className="top-nav-signout" type="button" onClick={signOut} disabled={signingOut}>
               {signingOut ? '登出中…' : '登出 · Sign out'}
             </button>
           </>
         ) : (
-          <Link href="/login" style={{ background: '#b5842b', color: '#fff', padding: '7px 14px', borderRadius: 999, textDecoration: 'none', fontWeight: 700 }}>登入 Sign in</Link>
+          <Link className="top-nav-signin" href="/login">
+            {variant === 'card' ? <SignIn size={18} weight="bold" aria-hidden="true" /> : null}
+            <span>登入 <small>Sign in</small></span>
+          </Link>
         )}
       </div>
     </nav>

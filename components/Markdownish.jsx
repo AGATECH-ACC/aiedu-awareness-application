@@ -1,11 +1,12 @@
 'use client';
 import React from 'react';
 
-// Minimal renderer for the report markdown (## headers, **bold**, - lists).
+// Lightweight renderer for the controlled report Markdown returned by the API.
 export default function Markdownish({ text }) {
   const blocks = [];
   const lines = (text || '').split('\n');
   let list = null;
+  let listType = null;
 
   const inline = (s) =>
     s.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
@@ -14,19 +15,40 @@ export default function Markdownish({ text }) {
         : <React.Fragment key={i}>{part}</React.Fragment>
     );
 
-  const flush = () => { if (list) { blocks.push(<ul key={'u' + blocks.length} style={{ margin: '6px 0 12px', paddingLeft: 20 }}>{list}</ul>); list = null; } };
+  const flush = () => {
+    if (!list) return;
+    const key = `${listType}-${blocks.length}`;
+    const style = { margin: '6px 0 12px', paddingLeft: 22, color: '#3a352e' };
+    blocks.push(listType === 'ol' ? <ol key={key} style={style}>{list}</ol> : <ul key={key} style={style}>{list}</ul>);
+    list = null;
+    listType = null;
+  };
 
   lines.forEach((raw, idx) => {
     const l = raw.trim();
-    if (l.startsWith('## ')) {
+    const ordered = l.match(/^\d+\.\s+(.+)$/);
+    if (l.startsWith('### ')) {
+      flush();
+      blocks.push(<h4 key={idx} style={{ fontSize: 14, color: '#5e5039', margin: '14px 0 6px' }}>{l.slice(4)}</h4>);
+    } else if (l.startsWith('## ')) {
       flush();
       blocks.push(<h3 key={idx} style={{ fontFamily: 'Georgia, serif', fontSize: 16, color: '#b5842b', margin: '18px 0 8px', borderBottom: '1px solid #eadfc4', paddingBottom: 5 }}>{l.slice(3)}</h3>);
     } else if (l.startsWith('# ')) {
       flush();
       blocks.push(<h2 key={idx} style={{ fontFamily: 'Georgia, serif', fontSize: 19, margin: '16px 0 8px' }}>{l.slice(2)}</h2>);
     } else if (l.startsWith('- ') || l.startsWith('* ')) {
+      if (listType && listType !== 'ul') flush();
       if (!list) list = [];
+      listType = 'ul';
       list.push(<li key={idx} style={{ margin: '3px 0', lineHeight: 1.6 }}>{inline(l.slice(2))}</li>);
+    } else if (ordered) {
+      if (listType && listType !== 'ol') flush();
+      if (!list) list = [];
+      listType = 'ol';
+      list.push(<li key={idx} style={{ margin: '4px 0', lineHeight: 1.65 }}>{inline(ordered[1])}</li>);
+    } else if (l.startsWith('> ')) {
+      flush();
+      blocks.push(<blockquote key={idx} style={{ margin: '10px 0', padding: '10px 12px', borderLeft: '3px solid #b5842b', background: '#f7efdf', color: '#5e5039', lineHeight: 1.65 }}>{inline(l.slice(2))}</blockquote>);
     } else if (l === '') {
       flush();
     } else {
@@ -35,5 +57,5 @@ export default function Markdownish({ text }) {
     }
   });
   flush();
-  return <div>{blocks}</div>;
+  return <div className="markdownish-report">{blocks}</div>;
 }
