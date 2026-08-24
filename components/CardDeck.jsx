@@ -161,6 +161,50 @@ function MiniCard({ card, badge, label, sub, index }) {
   );
 }
 
+function SpreadProgress({ cards, positions, revealedCount, activeIndex, drawing }) {
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: cards.length === 4 ? "1fr 1fr" : `repeat(${cards.length}, 1fr)`,
+      gap: 8,
+      maxWidth: cards.length === 4 ? 300 : 360,
+      margin: "0 auto 18px",
+    }}>
+      {cards.map((card, index) => {
+        const revealed = index < revealedCount;
+        const active = index === activeIndex && drawing;
+        const position = positions[index];
+
+        return (
+          <div key={index} style={{ textAlign: "center", opacity: revealed || active ? 1 : 0.58, transition: "opacity .25s ease" }}>
+            <div style={{
+              position: "relative",
+              width: "100%",
+              maxWidth: 82,
+              margin: "0 auto",
+              aspectRatio: CARD_ASPECT_RATIO,
+              overflow: "hidden",
+              borderRadius: 10,
+              background: "#fff",
+              boxShadow: active ? "0 0 0 2px #b5842b, 0 5px 16px rgba(80,60,30,.18)" : "0 3px 10px rgba(60,45,25,.1)",
+            }}>
+              <CardArtwork card={card} side={revealed ? "front" : "back"} sizes="82px" eager decorative />
+              <span style={{
+                position: "absolute", top: 4, left: 5, minWidth: 18, borderRadius: 999, padding: "1px 4px",
+                background: revealed ? "rgba(255,255,255,.92)" : "rgba(42,38,34,.82)",
+                color: revealed ? CHAPTERS[card.ch].color : "#f3e6bf", fontSize: 11, fontWeight: 800,
+              }}>{index + 1}</span>
+            </div>
+            <div style={{ color: revealed || active ? "#6f5a30" : "#9a8f78", fontSize: 11, fontWeight: 750, lineHeight: 1.3, marginTop: 5 }}>
+              {position?.[0]}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function InsightSection({ label, value, valueEn, color, tint, question = false }) {
   if (!value) return null;
   return (
@@ -279,6 +323,8 @@ export default function App({ onReading, singleOnly = false, landing = false, in
   const [reading, setReading] = useState(null);
   const [posMeta, setPosMeta] = useState([]);
   const [drawPhase, setDrawPhase] = useState("idle");
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [activeDrawIndex, setActiveDrawIndex] = useState(0);
   const [dealKey, setDealKey] = useState(0);
   const resultRef = useRef(null);
   const drawTimerRefs = useRef([]);
@@ -291,6 +337,46 @@ export default function App({ onReading, singleOnly = false, landing = false, in
   }, []);
 
   useEffect(() => clearRevealTimers, [clearRevealTimers]);
+
+  const publishReading = useCallback((cards, completedMode, positions) => {
+    if (!onReading) return;
+    onReading({
+      mode: completedMode,
+      spreadKey: completedMode === 1 ? "single" : CURRENT_SPREADS[completedMode].key,
+      cardNumbers: cards.map((card) => card.n),
+      positions: positions.map(([cn, en]) => [cn, en]),
+    });
+  }, [onReading]);
+
+  const runCardAnimation = useCallback((cards, drawMode, positions, cardIndex) => {
+    clearRevealTimers();
+    setActiveDrawIndex(cardIndex);
+    setDrawPhase("running");
+    setDealKey((key) => key + 1);
+
+    const finishReveal = () => {
+      const nextRevealedCount = cardIndex + 1;
+      setDrawPhase("revealed");
+      setRevealedCount(nextRevealedCount);
+      drawTimerRefs.current = [];
+      if (nextRevealedCount === drawMode) publishReading(cards, drawMode, positions);
+    };
+
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reducedMotion) {
+      finishReveal();
+    } else {
+      drawTimerRefs.current = [
+        window.setTimeout(() => setDrawPhase("locked"), DECK_RUN_DURATION_MS),
+        window.setTimeout(() => setDrawPhase("revealing"), DECK_RUN_DURATION_MS + DECK_LOCK_HOLD_MS),
+        window.setTimeout(finishReveal, DECK_RUN_DURATION_MS + DECK_LOCK_HOLD_MS + CARD_REVEAL_DURATION_MS),
+      ];
+    }
+
+    window.setTimeout(() => {
+      resultRef.current?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest" });
+    }, 120);
+  }, [clearRevealTimers, publishReading]);
 
   const generate = useCallback((forcedCards, forcedMode = activeMode) => {
     clearRevealTimers();
@@ -323,42 +409,69 @@ export default function App({ onReading, singleOnly = false, landing = false, in
     }
     setPosMeta(nextPositions);
     setReading(cards);
-    if (onReading) onReading({
-      mode: forcedMode,
-      spreadKey: forcedMode === 1 ? "single" : CURRENT_SPREADS[forcedMode].key,
-      cardNumbers: cards.map((c) => c.n),
-      positions: nextPositions.map(([cn, en]) => [cn, en]),
-    });
-    setDealKey((k) => k + 1);
-    if (forcedMode === 1) {
-      setDrawPhase("running");
-      drawTimerRefs.current = [
-        window.setTimeout(() => setDrawPhase("locked"), DECK_RUN_DURATION_MS),
-        window.setTimeout(() => setDrawPhase("revealing"), DECK_RUN_DURATION_MS + DECK_LOCK_HOLD_MS),
-        window.setTimeout(() => {
-          setDrawPhase("revealed");
-          drawTimerRefs.current = [];
-        }, DECK_RUN_DURATION_MS + DECK_LOCK_HOLD_MS + CARD_REVEAL_DURATION_MS),
-      ];
-    } else {
+    setRevealedCount(0);
+    setActiveDrawIndex(0);
+    if (onReading) onReading(null);
+
+    if (method === "input") {
+      setRevealedCount(forcedMode);
       setDrawPhase("revealed");
+      setDealKey((key) => key + 1);
+      publishReading(cards, forcedMode, nextPositions);
+    } else {
+      runCardAnimation(cards, forcedMode, nextPositions, 0);
     }
-    setTimeout(() => {
-      const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-      resultRef.current?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest" });
-    }, 120);
-  }, [method, inputs, activeMode, onReading, clearRevealTimers]);
+  }, [method, inputs, activeMode, onReading, clearRevealTimers, publishReading, runCardAnimation]);
+
+  const continueSpreadDraw = useCallback(() => {
+    if (!reading || activeMode === 1 || method !== "draw" || revealedCount >= activeMode) return;
+    runCardAnimation(reading, activeMode, posMeta, revealedCount);
+  }, [reading, activeMode, method, revealedCount, posMeta, runCardAnimation]);
 
   const changeMode = useCallback((nextMode) => {
     clearRevealTimers();
     setReading(null);
     setDrawPhase("idle");
+    setRevealedCount(0);
+    setActiveDrawIndex(0);
     setErr("");
     setMode(nextMode);
-  }, [clearRevealTimers]);
+    if (onReading) onReading(null);
+  }, [clearRevealTimers, onReading]);
+
+  const changeMethod = useCallback((nextMethod) => {
+    clearRevealTimers();
+    setReading(null);
+    setDrawPhase("idle");
+    setRevealedCount(0);
+    setActiveDrawIndex(0);
+    setErr("");
+    setMethod(nextMethod);
+    if (onReading) onReading(null);
+  }, [clearRevealTimers, onReading]);
 
   const chap = reading && activeMode === 1 ? CHAPTERS[reading[0].ch] : null;
-  const isDrawInProgress = Boolean(reading && activeMode === 1 && drawPhase !== "revealed");
+  const isDrawInProgress = Boolean(reading && (drawPhase === "running" || drawPhase === "locked" || drawPhase === "revealing"));
+  const spreadComplete = Boolean(reading && revealedCount === activeMode);
+  const shouldContinueSpread = Boolean(reading && method === "draw" && activeMode > 1 && revealedCount > 0 && !spreadComplete);
+  const handlePrimaryAction = useCallback(() => {
+    if (shouldContinueSpread) {
+      continueSpreadDraw();
+    } else {
+      generate();
+    }
+  }, [shouldContinueSpread, continueSpreadDraw, generate]);
+  const primaryActionLabel = isDrawInProgress
+    ? `第 ${activeDrawIndex + 1} 张牌抽取中… · Drawing ${activeDrawIndex + 1} of ${activeMode}…`
+    : method === "input"
+      ? "查看解读 · Read"
+      : shouldContinueSpread
+        ? `抽第 ${revealedCount + 1} 张牌 · Draw ${revealedCount + 1} of ${activeMode}`
+        : reading
+          ? "重新抽牌 · Draw again"
+          : activeMode > 1
+            ? `抽第一张牌 · Draw 1 of ${activeMode}`
+            : "抽 1 张牌 · Draw 1";
 
   return (
     <div id={landing ? "draw" : undefined} className={`card-deck${landing ? " card-deck--landing" : ""}`} style={landing ? {
@@ -419,10 +532,10 @@ export default function App({ onReading, singleOnly = false, landing = false, in
             {MODES.map(({ m, cn, en }) => {
               const active = mode === m;
               return (
-                <button type="button" key={m} aria-pressed={active} onClick={() => changeMode(m)} style={{
-                  flex: 1, border: "none", borderRadius: 10, padding: "9px 4px", cursor: "pointer",
+                <button type="button" key={m} aria-pressed={active} onClick={() => changeMode(m)} disabled={isDrawInProgress} style={{
+                  flex: 1, border: "none", borderRadius: 10, padding: "9px 4px", cursor: isDrawInProgress ? "wait" : "pointer",
                   background: active ? "#2a2622" : "transparent", color: active ? "#f3e6bf" : "#6a5f4a",
-                  fontWeight: 700, fontSize: 14, transition: "all .2s",
+                  fontWeight: 700, fontSize: 14, transition: "all .2s", opacity: isDrawInProgress && !active ? 0.55 : 1,
                 }}>
                   <div>{cn}</div>
                   <div style={{ fontFamily: SERIF, fontSize: 12, fontStyle: "italic", opacity: 0.8, marginTop: 1 }}>{en}</div>
@@ -438,9 +551,10 @@ export default function App({ onReading, singleOnly = false, landing = false, in
             {[["draw", "随机抽牌", "Draw"], ["input", "输入编号", "Enter №"]].map(([k, cn, en]) => {
               const active = method === k;
               return (
-                <button type="button" key={k} aria-pressed={active} onClick={() => setMethod(k)} style={{
+                <button type="button" key={k} aria-pressed={active} onClick={() => changeMethod(k)} disabled={isDrawInProgress} style={{
                   border: `1.5px solid ${active ? "#b5842b" : "#cdbf9e"}`, background: active ? "#b5842b" : "transparent",
-                  color: active ? "#fff" : "#8a7a54", borderRadius: 999, padding: "6px 15px", fontSize: 14, fontWeight: 600, cursor: "pointer",
+                  color: active ? "#fff" : "#8a7a54", borderRadius: 999, padding: "6px 15px", fontSize: 14, fontWeight: 600,
+                  cursor: isDrawInProgress ? "wait" : "pointer", opacity: isDrawInProgress && !active ? 0.55 : 1,
                 }}>{cn} · {en}</button>
               );
             })}
@@ -488,18 +602,12 @@ export default function App({ onReading, singleOnly = false, landing = false, in
 
         {/* Primary action */}
         <div className="deck-actions" style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 6 }}>
-          <button className="deck-primary-action" type="button" onClick={() => generate()} disabled={isDrawInProgress} aria-busy={isDrawInProgress} style={{
+          <button className="deck-primary-action" type="button" onClick={handlePrimaryAction} disabled={isDrawInProgress} aria-busy={isDrawInProgress} style={{
             background: "#2a2622", color: "#f3e6bf", border: "none", borderRadius: 999, padding: "12px 26px",
-            minWidth: 168, minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center",
+            minWidth: activeMode > 1 ? 230 : 168, minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center",
             fontSize: 16, fontWeight: 700, cursor: isDrawInProgress ? "wait" : "pointer", opacity: isDrawInProgress ? 0.72 : 1,
           }}>
-            {isDrawInProgress
-              ? method === "input" ? "查看解读 · Read" : `抽 ${activeMode} 张牌 · Draw ${activeMode}`
-              : method === "input"
-                ? "查看解读 · Read"
-                : reading
-                  ? "重新抽牌 · Draw again"
-                  : `抽 ${activeMode} 张牌 · Draw ${activeMode}`}
+            {primaryActionLabel}
           </button>
         </div>
           </section>
@@ -546,9 +654,72 @@ export default function App({ onReading, singleOnly = false, landing = false, in
             </>
           )}
 
+          {/* Multi-card ritual: reveal one position per deliberate click */}
+          {reading && activeMode > 1 && method === "draw" ? (
+            <div key={`ritual-${dealKey}`} style={{ marginTop: 20 }}>
+              <div style={{ textAlign: "center", marginBottom: 14 }}>
+                <div style={{ color: "#8b6929", fontSize: 12, fontWeight: 800, letterSpacing: 1.2 }}>
+                  {spreadComplete ? "牌阵完成 · SPREAD COMPLETE" : `第 ${activeDrawIndex + 1} 个位置 · POSITION ${activeDrawIndex + 1} OF ${activeMode}`}
+                </div>
+                <div style={{ color: "#2a2622", fontFamily: SERIF, fontSize: 20, fontWeight: 700, marginTop: 4 }}>
+                  {spreadComplete ? "让完整的牌阵慢慢浮现" : posMeta[activeDrawIndex]?.[0]}
+                </div>
+                <div lang="en" style={{ color: "#8a7f6c", fontFamily: SERIF, fontSize: 14, fontStyle: "italic", marginTop: 2 }}>
+                  {spreadComplete ? "Pause and take in the whole spread." : posMeta[activeDrawIndex]?.[1]}
+                </div>
+              </div>
+
+              <SpreadProgress
+                cards={reading}
+                positions={posMeta}
+                revealedCount={revealedCount}
+                activeIndex={activeDrawIndex}
+                drawing={isDrawInProgress}
+              />
+
+              {drawPhase === "running" || drawPhase === "locked" ? (
+                <div style={{ width: "100%", margin: "0 auto" }}>
+                  <DeckRun selectedCard={reading[activeDrawIndex]} locked={drawPhase === "locked"} />
+                </div>
+              ) : (
+                <SingleCardReveal card={reading[activeDrawIndex]} phase={drawPhase} />
+              )}
+
+              {drawPhase === "revealed" && revealedCount > 0 ? (
+                <div style={{ textAlign: "center", marginTop: 16, animation: "fadeUp .45s ease both" }}>
+                  <div style={{ color: CHAPTERS[reading[activeDrawIndex].ch].color, fontSize: 15, fontWeight: 800 }}>
+                    {String(reading[activeDrawIndex].n).padStart(2, "0")}. {reading[activeDrawIndex].cn}
+                  </div>
+                  <div lang="en" style={{ color: "#8a7f6c", fontFamily: SERIF, fontSize: 14, fontStyle: "italic", marginTop: 2 }}>
+                    {reading[activeDrawIndex].en}
+                  </div>
+                  {!spreadComplete ? (
+                    <>
+                      <p style={{ color: "#7a6f5a", fontSize: 14, lineHeight: 1.6, margin: "14px 0 10px" }}>
+                        停一停，感受这张牌。准备好后，再抽下一张。<br />
+                        <span lang="en" style={{ fontFamily: SERIF, fontStyle: "italic" }}>Pause with this card. Continue when you feel ready.</span>
+                      </p>
+                      <button type="button" onClick={continueSpreadDraw} style={{
+                        border: 0, borderRadius: 999, padding: "11px 22px", background: "#8b6929", color: "#fffdf8",
+                        cursor: "pointer", fontSize: 15, fontWeight: 750,
+                      }}>
+                        抽第 {revealedCount + 1} 张牌 · Draw {revealedCount + 1} of {activeMode}
+                      </button>
+                    </>
+                  ) : (
+                    <p style={{ color: "#6f5a30", fontSize: 14, fontWeight: 700, lineHeight: 1.6, margin: "14px 0 4px" }}>
+                      所有位置已经揭晓。完整解读在下方。<br />
+                      <span lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 600 }}>Every position is revealed. Your full reading follows below.</span>
+                    </p>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
           {/* Three-card row */}
-          {reading && activeMode === 3 && (
-            <div key={dealKey} style={{ marginTop: 20 }}>
+          {reading && activeMode === 3 && spreadComplete && (
+            <div key={`spread-three-${dealKey}`} style={{ marginTop: 20 }}>
               <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{CURRENT_SPREADS[3].name} · {CURRENT_SPREADS[3].en}</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, maxWidth: 360, margin: "0 auto" }}>
                 {reading.map((c, i) => <MiniCard key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} index={i} />)}
@@ -560,8 +731,8 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           )}
 
           {/* Four-card deep awareness flow */}
-          {reading && activeMode === 4 && (
-            <div key={dealKey} style={{ marginTop: 20 }}>
+          {reading && activeMode === 4 && spreadComplete && (
+            <div key={`spread-four-${dealKey}`} style={{ marginTop: 20 }}>
               <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>
                 模式 → 内在触发 → 需要 → 新选择<br />
                 <span lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13 }}>Pattern → Trigger → Need → New Choice</span>
