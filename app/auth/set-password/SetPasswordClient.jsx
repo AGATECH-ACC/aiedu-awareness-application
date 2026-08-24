@@ -5,6 +5,7 @@ import { ArrowLeft } from '@phosphor-icons/react/ArrowLeft';
 import { LockKey } from '@phosphor-icons/react/LockKey';
 import { useEffect, useRef, useState } from 'react';
 import AuthShell from '@/components/AuthShell';
+import PasswordInput from '@/components/PasswordInput';
 import {
   EXPIRED_PASSWORD_LINK_MESSAGE,
   updatePasswordErrorMessage,
@@ -113,9 +114,8 @@ export default function SetPasswordClient() {
 
           <div className="auth-field">
             <label htmlFor="new-password">新密码 · New password</label>
-            <input
+            <PasswordInput
               id="new-password"
-              type="password"
               autoComplete="new-password"
               required
               minLength={8}
@@ -127,9 +127,8 @@ export default function SetPasswordClient() {
 
           <div className="auth-field">
             <label htmlFor="confirm-password">确认密码 · Confirm password</label>
-            <input
+            <PasswordInput
               id="confirm-password"
-              type="password"
               autoComplete="new-password"
               required
               minLength={8}

@@ -2998,6 +2998,37 @@ button, input, textarea, select { font: inherit; }
   box-shadow: 0 0 0 4px rgba(37, 55, 148, .1);
 }
 
+.auth-password-control {
+  position: relative;
+}
+
+.auth-password-control input {
+  padding-right: 58px;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #625b50;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background-color .18s ease, color .18s ease;
+}
+
+.auth-password-toggle:hover {
+  background: rgba(37, 55, 148, .08);
+  color: var(--auth-blue);
+}
+
 .auth-submit {
   display: flex;
   align-items: center;
@@ -3358,6 +3389,7 @@ button, input, textarea, select { font: inherit; }
 .auth-back:focus-visible,
 .auth-alert a:focus-visible,
 .auth-field-label-row a:focus-visible,
+.auth-password-toggle:focus-visible,
 .auth-link-actions a:focus-visible {
   outline: 3px solid rgba(37, 55, 148, .42);
   outline-offset: 3px;

@@ -5,6 +5,7 @@ import { ArrowLeft } from '@phosphor-icons/react/ArrowLeft';
 import { SignIn } from '@phosphor-icons/react/SignIn';
 import { useState } from 'react';
 import AuthShell from '@/components/AuthShell';
+import PasswordInput from '@/components/PasswordInput';
 import { hasAwarenessAccess } from '@/lib/awareness-access';
 import { ACCESS_REQUIRED_MESSAGE, loginErrorMessage } from '@/lib/auth-errors';
 import { createClient } from '@/lib/supabase-browser';
@@ -80,9 +81,8 @@ export default function LoginClient({ nextPath, initialStatus, initialError }) {
             <label htmlFor="login-password">密码 · Password</label>
             <Link href="/forgot-password">忘记密码？ · Forgot password?</Link>
           </div>
-          <input
+          <PasswordInput
             id="login-password"
-            type="password"
             autoComplete="current-password"
             required
             value={password}
