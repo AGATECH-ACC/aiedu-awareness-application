@@ -28,8 +28,10 @@ middleware.js                        refreshes auth and gates /portal
 components/CardDeck.jsx              shared public/portal drawing UI
 components/Markdownish.jsx           minimal safe report renderer
 app/page.jsx                         public landing + single-card draw
-app/login/*                          magic-link and optional Google sign-in
-app/auth/callback/route.js            PKCE callback and expired-link handling
+app/login/*                          invite-only email/password sign-in
+app/forgot-password/*                password reset email request
+app/auth/set-password/*              invitation/recovery password creation
+app/portal/accounts/new/*            educator-only account invitations
 app/portal/*                         authenticated draw → report → history flow
 app/portal/client-reports/[id]       educator-only client report detail page
 app/api/report/route.js              validation, plan/cap gates, fixed report persistence
@@ -48,7 +50,9 @@ supabase/migrations/20260823173000_educator_clients.sql
                                       educator-owned verified client directory
 supabase/migrations/20260823174500_optimize_educator_client_indexes.sql
                                       composite ownership indexes
-supabase/tests/rls.test.sql           user/educator relationship policy checks
+supabase/migrations/20260824055230_restrict_awareness_to_invited_accounts.sql
+                                      invite-only app claim + restrictive RLS
+supabase/tests/rls.test.sql           access/ownership/educator policy checks
 ```
 
 Do not copy card meanings into another file. Both drawing and report generation
@@ -79,6 +83,7 @@ must continue importing from `lib/cards.js`.
    4. `20260823170000_educator_recipient_otp.sql`
    5. `20260823173000_educator_clients.sql`
    6. `20260823174500_optimize_educator_client_indexes.sql`
+   7. `20260824055230_restrict_awareness_to_invited_accounts.sql`
 
    These migrations create `awareness.profiles`, `awareness.educator_user_links`,
    `awareness.readings`, and `awareness.deep_reports`. Every profile references
@@ -89,11 +94,16 @@ must continue importing from `lib/cards.js`.
 4. Configure Supabase Auth URL settings:
 
    - Keep the shared AiEdu project's existing Site URL unchanged.
-   - Add `http://localhost:3100/auth/callback` to Redirect URLs for local work.
-   - Add `https://app.aiedu.academy/auth/callback` to Redirect URLs for production.
-   - Also add the production callback and each approved Vercel preview callback.
-   - Enable Google in Supabase and set `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=true` only
-     after its OAuth client is configured.
+   - Add `http://localhost:3100/auth/set-password` to Redirect URLs for local work.
+   - Add `https://app.aiedu.academy/auth/set-password` to Redirect URLs for production.
+   - Also add the set-password path for each approved Vercel preview domain.
+   - Keep email/password authentication enabled. This is a shared Supabase
+     project, so project-wide signup may remain enabled for other apps; the
+     final Awareness migration and server-issued `awareness_access` claim keep
+     this app invitation-only.
+   - Keep the Invite user and Reset password templates pointed at
+     `{{ .ConfirmationURL }}` so Supabase sends the client-only implicit link
+     directly to `/auth/set-password`.
 
 5. Start the app:
 
@@ -109,7 +119,6 @@ must continue importing from `lib/cards.js`.
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser + server | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser + server | Supabase publishable API key; RLS remains mandatory |
-| `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH` | Browser + server | `false`; enables the Google button only after provider setup |
 | `SUPABASE_SECRET_KEY` | **Server only** | Trusted recipient OTP/delivery writes; prefer a modern `sb_secret_` key |
 | `RESEND_API_KEY` | **Server only** | Existing Resend account key for recipient OTP and report emails |
 | `RESEND_FROM_EMAIL` | **Server only** | Sender on a domain verified in Resend |
@@ -118,7 +127,7 @@ must continue importing from `lib/cards.js`.
 | `NEXT_PUBLIC_REQUIRE_PLAN` | Browser + server | `false`; when true, `profiles.plan='free'` is gated |
 | `NEXT_PUBLIC_SITE_URL` | Browser + server | Canonical origin for metadata and links |
 
-Version 1 reports are generated locally from `lib/cards.js` and the reviewed
+Version 2 reports are generated locally from `lib/cards.js` and the reviewed
 bilingual deep-meaning data in `lib/card-insights.js`; no AI model or AI API key
 is used. AI-enhanced reports are intentionally reserved for a later version.
 The report endpoint also applies a fixed best-effort IP burst limit of 10
@@ -129,6 +138,18 @@ authoritative usage control.
 ## Authentication and data behavior
 
 - `/` is public and limits the deck to single-card readings.
+- Accounts are invitation-only. There is no public signup route and the browser
+  never calls `signUp()`, `signInWithOtp()`, or an OAuth provider.
+- An educator can open `/portal/accounts/new`; its server-authorized API calls
+  `inviteUserByEmail()`, grants server-only `awareness_access` app metadata, and
+  sends the recipient to `/auth/set-password`.
+- Restrictive RLS policies require that server-managed claim in addition to the
+  existing ownership policies. Existing Awareness users are backfilled by the
+  migration; future accounts created by other apps in the shared project cannot
+  use Awareness routes or tables unless invited here.
+- Invite and recovery links use Supabase's client-only implicit flow. Normal
+  sign-in uses email/password and stores its session in the SSR cookie client.
+- `/forgot-password` does not reveal whether an email address has an account.
 - `/portal` is checked in middleware and again in its Server Component.
 - `/api/report` independently verifies the user before any user data is read or
   written. Middleware is defense in depth, not the sole authorization layer.

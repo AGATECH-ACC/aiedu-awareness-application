@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import TopNav from '@/components/TopNav';
+import { hasAwarenessAccess } from '@/lib/awareness-access';
 import { createServerSupabase } from '@/lib/supabase-server';
 
 const benefits = [
@@ -33,10 +34,11 @@ const ritual = [
 export default async function HomePage() {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
+  const awarenessUser = hasAwarenessAccess(user) ? user : null;
 
   return (
     <main className="awareness-home">
-      <TopNav user={user} variant="card" />
+      <TopNav user={awarenessUser} variant="card" />
 
       <section className="home-hero" aria-labelledby="home-heading">
         <Image

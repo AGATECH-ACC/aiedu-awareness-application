@@ -10,6 +10,7 @@ import {
   List as MenuIcon,
   Plus,
   SignOut,
+  UserPlus,
   WarningCircle,
   X,
 } from '@phosphor-icons/react';
@@ -400,6 +401,10 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
             <span><strong>{label}</strong><small>{labelEn}</small></span>
           </button>
         ))}
+        <Link href="/portal/accounts/new" onClick={() => setDrawerOpen(false)}>
+          <UserPlus size={22} aria-hidden="true" />
+          <span><strong>邀请账户</strong><small>Invite account</small></span>
+        </Link>
       </nav>
 
       <div className="admin-sidebar-account">

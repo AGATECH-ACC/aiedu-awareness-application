@@ -1,11 +1,11 @@
 'use client';
 import Image from "next/image";
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { CHAPTERS, CARDS, byNum, SPREAD3, INNER_CHILD } from "@/lib/cards";
+import { CHAPTERS, CARDS, byNum, CURRENT_SPREADS } from "@/lib/cards";
 import { insightFor } from "@/lib/card-insights";
 
 /* ── 幸福人生觉察卡 · Happy Life Awareness Cards ──────────────────────
-   Draw one card, a three-card spread, or the Inner Child four-card spread.
+   Draw one card, a structured three-card spread, or four-card deep awareness.
    Draw at random, or enter the numbers of cards you drew by hand.        */
 
 
@@ -24,6 +24,23 @@ function drawN(n, pool) {
   const arr = [...pool], out = [];
   for (let i = 0; i < n && arr.length; i++) out.push(arr.splice(Math.floor(Math.random() * arr.length), 1)[0]);
   return out;
+}
+
+function metaForMode(mode) {
+  if (mode === 1) return [["当下的觉察", "This moment", "", "", 1, 40]];
+  return CURRENT_SPREADS[mode].positions.map(({ cn, en, guide_cn, guide_en, min, max }) => (
+    [cn, en, guide_cn, guide_en, min, max]
+  ));
+}
+
+function drawForMode(mode, positions) {
+  if (mode === 1) return drawN(1, CARDS);
+  return positions.map((position) => {
+    const min = position[4];
+    const max = position[5];
+    const pool = CARDS.filter((card) => card.n >= min && card.n <= max);
+    return drawN(1, pool)[0];
+  });
 }
 
 function CardArtwork({ card, side = "front", sizes, eager = false, decorative = false }) {
@@ -252,13 +269,12 @@ function ReadingRow({ card, badge, label, sub, desc, descEn, index }) {
 const MODES = [
   { m: 1, cn: "单张牌", en: "Single" },
   { m: 3, cn: "三张牌", en: "Three-Card" },
-  { m: 4, cn: "内在小孩", en: "Inner Child · 4" },
+  { m: 4, cn: "四卡深度觉察", en: "Deep Awareness · 4" },
 ];
 
 export default function App({ onReading, singleOnly = false, landing = false, initialMethod = "draw" } = {}) {
   const [mode, setMode] = useState(1);
   const [method, setMethod] = useState(initialMethod === "input" ? "input" : "draw"); // draw | input
-  const [set3, setSet3] = useState(0);
   const [inputs, setInputs] = useState(["", "", "", ""]);
   const [err, setErr] = useState("");
   const [reading, setReading] = useState(null);
@@ -268,14 +284,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
   const resultRef = useRef(null);
   const drawTimerRefs = useRef([]);
   const activeMode = singleOnly ? 1 : mode;
-
-  const pool = CARDS;
-
-  const metaFor = useCallback((m) => {
-    if (m === 1) return [["当下的觉察", "This moment", ""]];
-    if (m === 3) return SPREAD3[set3].pos.map(([cn, en]) => [cn, en, ""]);
-    return INNER_CHILD;
-  }, [set3]);
+  const activePositions = metaForMode(activeMode);
 
   const clearRevealTimers = useCallback(() => {
     drawTimerRefs.current.forEach((timer) => window.clearTimeout(timer));
@@ -287,6 +296,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
   const generate = useCallback((forcedCards, forcedMode = activeMode) => {
     clearRevealTimers();
     setErr("");
+    const nextPositions = metaForMode(forcedMode);
     let cards;
     if (forcedCards) {
       cards = forcedCards;
@@ -296,17 +306,30 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         setErr("请为每个位置输入 1–40 的编号。 Please enter a number 1–40 for each position.");
         return;
       }
+      const invalidPosition = nums.findIndex((number, index) => (
+        number < nextPositions[index][4] || number > nextPositions[index][5]
+      ));
+      if (invalidPosition !== -1) {
+        const position = nextPositions[invalidPosition];
+        setErr(`${invalidPosition + 1}. ${position[0]} 只可输入 ${position[4]}–${position[5]}。 ${position[1]} only accepts ${position[4]}–${position[5]}.`);
+        return;
+      }
       if (new Set(nums).size !== nums.length) {
         setErr("同一个牌阵里编号不能重复。 Numbers can't repeat in one spread.");
         return;
       }
       cards = nums.map((x) => byNum[x]);
     } else {
-      cards = drawN(forcedMode, pool);
+      cards = drawForMode(forcedMode, nextPositions);
     }
-    setPosMeta(metaFor(forcedMode));
+    setPosMeta(nextPositions);
     setReading(cards);
-    if (onReading) onReading({ mode: forcedMode, spreadKey: forcedMode === 3 ? String(set3) : forcedMode === 4 ? "inner" : "single", cardNumbers: cards.map((c) => c.n), positions: metaFor(forcedMode) });
+    if (onReading) onReading({
+      mode: forcedMode,
+      spreadKey: forcedMode === 1 ? "single" : CURRENT_SPREADS[forcedMode].key,
+      cardNumbers: cards.map((c) => c.n),
+      positions: nextPositions.map(([cn, en]) => [cn, en]),
+    });
     setDealKey((k) => k + 1);
     if (forcedMode === 1) {
       setDrawPhase("running");
@@ -325,7 +348,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
       const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
       resultRef.current?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest" });
     }, 120);
-  }, [method, inputs, activeMode, pool, metaFor, onReading, clearRevealTimers]);
+  }, [method, inputs, activeMode, onReading, clearRevealTimers]);
 
   const changeMode = useCallback((nextMode) => {
     clearRevealTimers();
@@ -425,26 +448,19 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           </div>
         )}
 
-        {/* 3-card position set picker */}
+        {/* Structured three-card explainer */}
         {activeMode === 3 && (
-          <div style={{ marginBottom: 14 }}>
-            <label htmlFor="three-card-spread" style={{ fontSize: 14, color: "#8a7f6c", fontWeight: 600, display: "block", marginBottom: 5 }}>选择牌阵含义 · Position meanings</label>
-            <div style={{ position: "relative" }}>
-              <select id="three-card-spread" className="aw" value={set3} onChange={(e) => setSet3(Number(e.target.value))} style={{
-                width: "100%", padding: "11px 34px 11px 14px", borderRadius: 12, border: "1.5px solid #cdbf9e",
-                background: "#fffdf8", fontSize: 16, fontWeight: 600, color: "#2a2622", cursor: "pointer",
-              }}>
-                {SPREAD3.map((s, i) => <option key={i} value={i}>{s.name}  ({s.en})</option>)}
-              </select>
-              <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#b5842b" }}>▾</span>
-            </div>
+          <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 14, color: "#7a6a44", lineHeight: 1.65 }}>
+            <b>{CURRENT_SPREADS[3].name}</b> · {CURRENT_SPREADS[3].en}<br />
+            <span>每个位置从对应卡组抽一张，不混抽。 · One card is drawn from each matching group.</span>
           </div>
         )}
 
-        {/* Inner child explainer */}
+        {/* Four-card deep awareness explainer */}
         {activeMode === 4 && (
-          <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 15, color: "#7a6a44", lineHeight: 1.65 }}>
-            <b>内在小孩牌阵</b> · Inner Child Spread — 帮助你找出内在小孩的需求与渴望。
+          <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 14, color: "#7a6a44", lineHeight: 1.65 }}>
+            <b>{CURRENT_SPREADS[4].name}</b> · {CURRENT_SPREADS[4].en}<br />
+            <span>模式 → 内在触发 → 需要 → 新选择 · Pattern → Trigger → Need → New Choice</span>
           </div>
         )}
 
@@ -453,21 +469,21 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(activeMode, 4)}, 1fr)`, gap: 8 }}>
               {Array.from({ length: activeMode }).map((_, i) => {
-                const meta = metaFor(activeMode)[i];
+                const meta = activePositions[i];
                 return (
                   <div key={i}>
                     <label htmlFor={`card-number-${i}`} style={{ fontSize: 12, color: "#8a7f6c", fontWeight: 700, display: "block", marginBottom: 3, textAlign: "center" }}>
-                      {activeMode === 1 ? "编号 №" : `${i + 1}. ${meta[0]}`}
+                      {activeMode === 1 ? "编号 №" : <>{i + 1}. {meta[0]}<br /><span lang="en" style={{ fontSize: 10, fontWeight: 600 }}>{meta[1]}</span></>}
                     </label>
-                    <input id={`card-number-${i}`} type="number" min={1} max={40} inputMode="numeric" value={inputs[i]}
+                    <input id={`card-number-${i}`} type="number" min={meta[4]} max={meta[5]} inputMode="numeric" value={inputs[i]}
                       onChange={(e) => { const v = [...inputs]; v[i] = e.target.value; setInputs(v); }}
-                      placeholder="1–40"
+                      placeholder={`${meta[4]}–${meta[5]}`}
                       style={{ width: "100%", boxSizing: "border-box", padding: "10px 6px", borderRadius: 10, border: "1.5px solid #cdbf9e", background: "#fffdf8", fontSize: 16, textAlign: "center", fontWeight: 700, color: "#2a2622" }} />
                   </div>
                 );
               })}
             </div>
-            {err && <div style={{ color: "#b04a2e", fontSize: 14, marginTop: 8, textAlign: "center" }}>{err}</div>}
+            {err && <div role="alert" style={{ color: "#b04a2e", fontSize: 14, marginTop: 8, textAlign: "center" }}>{err}</div>}
           </div>
         )}
 
@@ -534,30 +550,32 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           {/* Three-card row */}
           {reading && activeMode === 3 && (
             <div key={dealKey} style={{ marginTop: 20 }}>
-              <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{SPREAD3[set3].name} · {SPREAD3[set3].en}</div>
+              <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{CURRENT_SPREADS[3].name} · {CURRENT_SPREADS[3].en}</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, maxWidth: 360, margin: "0 auto" }}>
                 {reading.map((c, i) => <MiniCard key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} index={i} />)}
               </div>
               <div style={{ marginTop: 20, background: "#fffdf8", borderRadius: 18, border: "1px solid #e6d9bd", boxShadow: "0 6px 24px rgba(80,60,30,0.07)", padding: "6px 16px 16px" }}>
-                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} index={i} />)}
+                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} desc={posMeta[i][2]} descEn={posMeta[i][3]} index={i} />)}
               </div>
             </div>
           )}
 
-          {/* Inner child cross */}
+          {/* Four-card deep awareness flow */}
           {reading && activeMode === 4 && (
             <div key={dealKey} style={{ marginTop: 20 }}>
+              <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>
+                模式 → 内在触发 → 需要 → 新选择<br />
+                <span lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13 }}>Pattern → Trigger → Need → New Choice</span>
+              </div>
               <div style={{
-                display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, maxWidth: 340, margin: "0 auto",
-                gridTemplateAreas: `". p2 ." "p1 . p4" ". p3 ."`,
+                display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, maxWidth: 340, margin: "0 auto",
               }}>
-                <div style={{ gridArea: "p1" }}><MiniCard card={reading[0]} badge={1} label={INNER_CHILD[0][0]} sub={INNER_CHILD[0][1]} index={0} /></div>
-                <div style={{ gridArea: "p2" }}><MiniCard card={reading[1]} badge={2} label={INNER_CHILD[1][0]} sub={INNER_CHILD[1][1]} index={1} /></div>
-                <div style={{ gridArea: "p3" }}><MiniCard card={reading[2]} badge={3} label={INNER_CHILD[2][0]} sub={INNER_CHILD[2][1]} index={2} /></div>
-                <div style={{ gridArea: "p4" }}><MiniCard card={reading[3]} badge={4} label={INNER_CHILD[3][0]} sub={INNER_CHILD[3][1]} index={3} /></div>
+                {reading.map((card, index) => (
+                  <MiniCard key={card.n} card={card} badge={index + 1} label={posMeta[index][0]} sub={posMeta[index][1]} index={index} />
+                ))}
               </div>
               <div style={{ marginTop: 20, background: "#fffdf8", borderRadius: 18, border: "1px solid #e6d9bd", boxShadow: "0 6px 24px rgba(80,60,30,0.07)", padding: "6px 16px 16px" }}>
-                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={INNER_CHILD[i][0]} sub={INNER_CHILD[i][1]} desc={INNER_CHILD[i][2]} descEn={INNER_CHILD[i][3]} index={i} />)}
+                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} desc={posMeta[i][2]} descEn={posMeta[i][3]} index={i} />)}
               </div>
             </div>
           )}

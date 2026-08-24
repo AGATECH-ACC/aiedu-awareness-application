@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
+import { hasAwarenessAccess } from '@/lib/awareness-access';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { createAdminSupabase } from '@/lib/supabase-admin';
-import { byNum, INNER_CHILD, SPREAD3 } from '@/lib/cards';
 import { buildFixedReport, FIXED_REPORT_VERSION } from '@/lib/fixed-report';
+import { normalizeNewReading, normalizeSavedReading } from '@/lib/reading-validation';
 import { sendRecipientReportEmail } from '@/lib/report-email';
 import {
   countReportsSince,
@@ -18,77 +19,7 @@ import { checkReportBurstLimit, reportClientIp } from '@/lib/rate-limit';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const VALID_MODES = new Set([1, 3, 4]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function canonicalPositions(mode, spreadKey) {
-  if (mode === 1) return [['当下的觉察', 'This moment']];
-  if (mode === 4) return INNER_CHILD.map(([cn, en]) => [cn, en]);
-  return SPREAD3[Number(spreadKey)]?.pos || null;
-}
-
-function normalizeNewReading(body) {
-  if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    return { error: '请求内容必须是对象。 · The request body must be an object.' };
-  }
-
-  const { mode, spreadKey, cardNumbers, positions } = body;
-  if (!VALID_MODES.has(mode)) {
-    return { error: '牌阵模式无效。 · Mode must be 1, 3, or 4.' };
-  }
-  if (!Array.isArray(cardNumbers) || cardNumbers.length !== mode) {
-    return { error: `此牌阵需要 ${mode} 张牌。 · This mode requires exactly ${mode} cards.` };
-  }
-  if (!cardNumbers.every((number) => Number.isInteger(number) && byNum[number])) {
-    return { error: '牌卡编号必须是 1–40 的整数。 · Every card number must be an integer from 1–40.' };
-  }
-  if (new Set(cardNumbers).size !== cardNumbers.length) {
-    return { error: '同一牌阵不能有重复牌卡。 · Cards cannot repeat within a spread.' };
-  }
-  if (!Array.isArray(positions) || positions.length !== mode || !positions.every((position) => Array.isArray(position) && typeof position[0] === 'string' && typeof position[1] === 'string')) {
-    return { error: `此牌阵需要 ${mode} 个位置说明。 · This mode requires exactly ${mode} positions.` };
-  }
-
-  let normalizedSpreadKey;
-  if (mode === 1 && spreadKey === 'single') normalizedSpreadKey = 'single';
-  if (mode === 4 && spreadKey === 'inner') normalizedSpreadKey = 'inner';
-  if (mode === 3 && /^\d+$/.test(String(spreadKey)) && SPREAD3[Number(spreadKey)]) {
-    normalizedSpreadKey = String(Number(spreadKey));
-  }
-  if (normalizedSpreadKey === undefined) {
-    return { error: '牌阵位置组合无效。 · The spread key does not match the selected mode.' };
-  }
-
-  if (body.question != null && typeof body.question !== 'string') {
-    return { error: '提问必须是文字。 · The optional question must be text.' };
-  }
-  const question = typeof body.question === 'string' ? body.question.trim() : '';
-  if (question.length > 2000) {
-    return { error: '提问请限制在 2000 字以内。 · Please keep the question under 2,000 characters.' };
-  }
-
-  return {
-    value: {
-      mode,
-      spreadKey: normalizedSpreadKey,
-      cardNumbers,
-      positions: canonicalPositions(mode, normalizedSpreadKey),
-      question,
-    },
-  };
-}
-
-function normalizeSavedReading(reading) {
-  const cardNumbers = Array.isArray(reading?.cards) ? reading.cards.map((card) => card?.n) : [];
-  const positions = canonicalPositions(reading?.mode, reading?.spread_key);
-  return normalizeNewReading({
-    mode: reading?.mode,
-    spreadKey: reading?.spread_key,
-    cardNumbers,
-    positions,
-    question: reading?.question || '',
-  });
-}
 
 function dailyLimit() {
   const parsed = Number.parseInt(process.env.REPORT_DAILY_LIMIT || '5', 10);
@@ -234,6 +165,12 @@ export async function POST(request) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  if (!hasAwarenessAccess(user)) {
+    return NextResponse.json({
+      error: 'awareness_access_required',
+      message: '此账户尚未获邀使用觉察卡。 · This account has not been invited to Awareness Cards.',
+    }, { status: 403 });
+  }
 
   if (process.env.NEXT_PUBLIC_REQUIRE_PLAN === 'true') {
     try {
@@ -373,7 +310,7 @@ export async function POST(request) {
       }
     }
 
-    // Version 1 is deterministic: all copy comes from the reviewed bilingual
+    // Version 2 is deterministic: all copy comes from the reviewed bilingual
     // card dataset, so report creation does not depend on an external AI model.
     const model = FIXED_REPORT_VERSION;
     const content = buildFixedReport({ mode, spreadKey, positions, cardNumbers, question });

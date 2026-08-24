@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CircleNotch, FileText, Trash } from '@phosphor-icons/react';
 import CardDeck from '@/components/CardDeck';
 import Markdownish from '@/components/Markdownish';
-import { byNum } from '@/lib/cards';
+import { byNum, readingSpreadLabel } from '@/lib/cards';
 import { deleteReport, shareReport } from '@/lib/db';
 import { createClient } from '@/lib/supabase-browser';
 
@@ -32,15 +32,18 @@ function CardsSummary({ reading }) {
   if (!cards.length) return null;
 
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 6 }} aria-label="抽到的牌 · Drawn cards">
-      {cards.map((item, index) => {
-        const card = byNum[item?.n];
-        return (
-          <span key={`${item?.n}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f5ecd9', color: '#6d5d3c', borderRadius: 999, padding: '4px 8px', fontSize: 12 }}>
-            {card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : `#${item?.n}`}
-          </span>
-        );
-      })}
+    <div style={{ marginTop: 6 }} aria-label="抽到的牌 · Drawn cards">
+      <div style={{ color: '#806a3e', fontSize: 12, fontWeight: 800 }}>{readingSpreadLabel(reading?.mode, reading?.spread_key)}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 5 }}>
+        {cards.map((item, index) => {
+          const card = byNum[item?.n];
+          return (
+            <span key={`${item?.n}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f5ecd9', color: '#6d5d3c', borderRadius: 999, padding: '4px 8px', fontSize: 12 }}>
+              {card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : `#${item?.n}`}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }

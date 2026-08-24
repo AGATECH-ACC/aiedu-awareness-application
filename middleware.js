@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
+import { hasAwarenessAccess } from '@/lib/awareness-access';
 
 export async function middleware(request) {
   let response = NextResponse.next({ request });
@@ -27,18 +28,20 @@ export async function middleware(request) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
+  const hasAccess = hasAwarenessAccess(user);
   const path = request.nextUrl.pathname;
   const isProtectedPage = path === '/portal' || path.startsWith('/portal/');
 
-  if (!user && isProtectedPage) {
+  if ((!user || !hasAccess) && isProtectedPage) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     loginUrl.search = '';
     loginUrl.searchParams.set('next', `${path}${request.nextUrl.search}`);
+    if (user && !hasAccess) loginUrl.searchParams.set('error', 'invite-required');
     return NextResponse.redirect(loginUrl);
   }
 
-  if (user && (path === '/login' || path === '/signup')) {
+  if (user && hasAccess && path === '/login') {
     const portalUrl = request.nextUrl.clone();
     portalUrl.pathname = '/portal';
     portalUrl.search = '';

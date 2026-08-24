@@ -17,6 +17,7 @@ Apply these files in order against the target project:
 4. [Educator recipient OTP](supabase/migrations/20260823170000_educator_recipient_otp.sql)
 5. [Educator client directory](supabase/migrations/20260823173000_educator_clients.sql)
 6. [Optimize educator client indexes](supabase/migrations/20260823174500_optimize_educator_client_indexes.sql)
+7. [Restrict Awareness to invited accounts](supabase/migrations/20260824055230_restrict_awareness_to_invited_accounts.sql)
 
 - [ ] Confirm `awareness` is in the Data API exposed-schema list.
 - [ ] Confirm RLS is enabled on `awareness.profiles`,
@@ -26,8 +27,9 @@ Apply these files in order against the target project:
       `awareness.educator_report_deliveries`.
 - [ ] Confirm `authenticated` has no privileges on `recipient_verifications`;
       educators receive select-only access to their own delivery history.
-- [ ] Run `supabase test db` with `supabase/tests/rls.test.sql`; both test
-      users must remain isolated and the educator must see only the linked user.
+- [ ] Run `supabase test db` with `supabase/tests/rls.test.sql`; test users must
+      remain isolated, the educator must see only the linked user, and an
+      authenticated account without `awareness_access` must see no app data.
 - [ ] Verify `anon` has no direct table privileges on user data.
 - [ ] Verify `get_public_report(uuid)` returns only `content` and `created_at`,
       returns no row for private/wrong tokens, and has an empty function search path.
@@ -37,21 +39,31 @@ Apply these files in order against the target project:
 ## 3. Supabase Auth
 
 - [ ] Preserve the shared AiEdu Supabase project's existing Site URL.
-- [ ] Add `https://app.aiedu.academy/auth/callback`.
-- [ ] Add `http://localhost:3100/auth/callback` for local development.
-- [ ] Add the exact callback URL for every approved Vercel Preview domain (or a
+- [ ] Add `https://app.aiedu.academy/auth/set-password`.
+- [ ] Add `http://localhost:3100/auth/set-password` for local development.
+- [ ] Add the exact set-password URL for every approved Vercel Preview domain (or a
       narrowly scoped Supabase-supported preview wildcard).
-- [ ] Test an expired magic link: it must return to
-      `/login?error=expired` with bilingual guidance.
+- [ ] Keep email/password authentication enabled. Do not disable shared-project
+      signup without checking the other AiEdu apps; Awareness itself is gated by
+      server-managed `awareness_access` app metadata and restrictive RLS.
+- [ ] Set the Invite user and Reset password email-template links to
+      `{{ .ConfirmationURL }}`. Do not point either template at the removed PKCE callback.
+- [ ] Test expired and reused invite/recovery links: `/auth/set-password` must
+      show bilingual guidance and offer a new reset request.
 - [ ] Enable custom SMTP in Supabase Auth using the existing Resend account:
       host `smtp.resend.com`, port `465`, username `resend`, and the Resend API
       key as the SMTP password. Keep email confirmation enabled.
 - [ ] Use a sender address on a Resend-verified domain, such as
       `no-reply@aiedu.academy`, and set the sender name to `AiEDU Awareness`.
-- [ ] Verify both paths: `/login` must not create an unknown user, while
-      `/signup` must create the Auth user and its `awareness.profiles` row.
-- [ ] If Google is enabled, configure its OAuth client/secret in Supabase first,
-      then set `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=true` and test the full callback.
+- [ ] Verify the full invitation path: an educator sends an invitation, the
+      recipient creates a password, and `/login` accepts that email/password.
+- [ ] Verify `/login` rejects wrong credentials with the correct error and does
+      not create an unknown user.
+- [ ] Verify an account created directly through the shared project's public
+      signup has no `awareness_access` claim and receives no Awareness portal or
+      Data API access.
+- [ ] Verify `/forgot-password` returns the same success state for known and
+      unknown addresses, and a real invited account can choose a new password.
 
 ## 4. Vercel environment variables
 
@@ -60,7 +72,6 @@ Set the correct values in both Production and Preview unless intentionally scope
 - [ ] `NEXT_PUBLIC_SUPABASE_URL`
 - [ ] `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (preferred), or the existing
       `NEXT_PUBLIC_SUPABASE_ANON_KEY` fallback
-- [ ] `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=false` (or `true` only after provider setup)
 - [ ] `SUPABASE_SECRET_KEY` — server-only `sb_secret_` key for OTP/delivery writes
 - [ ] `RESEND_API_KEY` — server-only key from the existing Resend account
 - [ ] `RESEND_FROM_EMAIL` — sender address on the verified Resend domain
@@ -83,7 +94,7 @@ After changing a `NEXT_PUBLIC_` value, redeploy because it is embedded at build 
 ## 6. Post-deploy smoke test
 
 - [ ] Signed out: `/` loads the public landing page and can complete a single-card reading.
-- [ ] Public `/` does not expose the three-card or Inner Child mode controls.
+- [ ] Public `/` does not expose the three-card or four-card Deep Awareness mode controls.
 - [ ] Signed in: `/portal` loads the full deck, report creation, and report history.
 - [ ] Approved educator: `/portal` shows “Client reading” and “My reports”; a
       normal user must never see the educator workflow.
@@ -97,6 +108,12 @@ After changing a `NEXT_PUBLIC_` value, redeploy because it is embedded at build 
 - [ ] At ~380px there is no horizontal scroll; keyboard focus remains visible;
       reduced-motion preference disables nonessential motion.
 - [ ] Signed out: `/portal` redirects to `/login?next=/portal`, then returns after login.
+- [ ] Signed out: `/signup` is unavailable; the sign-in screen has no public
+      account-creation, magic-link, or OAuth action.
+- [ ] Approved educator: `/portal/accounts/new` sends a private password-setup
+      invitation; a normal user receives `404` and the API returns `403`.
+- [ ] Reset password: the request screen does not enumerate accounts, the email
+      link opens `/auth/set-password`, and the new password works at `/login`.
 - [ ] Sign out from the nav and portal; the session clears and returns to `/`.
 - [ ] Authenticated invalid report payload returns `400`; no DB rows are written.
 - [ ] Successful report creates one `readings` row and one `deep_reports` row.

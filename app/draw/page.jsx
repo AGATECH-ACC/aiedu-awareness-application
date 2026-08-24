@@ -1,5 +1,6 @@
 import CardDeck from '@/components/CardDeck';
 import TopNav from '@/components/TopNav';
+import { hasAwarenessAccess } from '@/lib/awareness-access';
 import { createServerSupabase } from '@/lib/supabase-server';
 
 export const metadata = {
@@ -10,11 +11,12 @@ export const metadata = {
 export default async function DrawPage({ searchParams }) {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
+  const awarenessUser = hasAwarenessAccess(user) ? user : null;
   const initialMethod = searchParams?.method === 'input' ? 'input' : 'draw';
 
   return (
     <main className="awareness-landing awareness-draw-page">
-      <TopNav user={user} variant="card" />
+      <TopNav user={awarenessUser} variant="card" />
 
       <section className="landing-title" aria-labelledby="draw-page-heading">
         <div className="landing-title-kicker">FREE ONE-CARD AWARENESS</div>

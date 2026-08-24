@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import ReportDocument from '@/components/ReportDocument';
 import TopNav from '@/components/TopNav';
-import { byNum } from '@/lib/cards';
+import { hasAwarenessAccess } from '@/lib/awareness-access';
+import { byNum, readingSpreadLabel } from '@/lib/cards';
 import { getReport } from '@/lib/db';
 import { createServerSupabase } from '@/lib/supabase-server';
 
@@ -22,19 +23,15 @@ function formattedDate(value) {
   });
 }
 
-function spreadLabel(mode) {
-  if (mode === 1) return '单张 · Single';
-  if (mode === 4) return '内在小孩 · Inner Child';
-  return '三张牌 · Three-card';
-}
-
 export default async function PersonalReportPage({ params }) {
   const { id } = await params;
   if (!UUID_PATTERN.test(id || '')) notFound();
 
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=${encodeURIComponent(`/portal/reports/${id}`)}`);
+  if (!user || !hasAwarenessAccess(user)) {
+    redirect(`/login?next=${encodeURIComponent(`/portal/reports/${id}`)}&error=invite-required`);
+  }
 
   const report = await getReport(supabase, { id, userId: user.id });
   if (!report?.content) notFound();
@@ -63,7 +60,7 @@ export default async function PersonalReportPage({ params }) {
         <section className="client-report-summary" aria-label="抽牌摘要 · Reading summary">
           <div>
             <span>牌阵 · Spread</span>
-            <strong>{spreadLabel(reading?.mode)}</strong>
+            <strong>{readingSpreadLabel(reading?.mode, reading?.spread_key)}</strong>
           </div>
           <div className="client-report-card-list">
             {cards.map((item, index) => {

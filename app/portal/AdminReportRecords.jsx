@@ -12,7 +12,7 @@ import {
   PaperPlaneTilt,
   UsersThree,
 } from '@phosphor-icons/react';
-import { byNum, CHAPTERS } from '@/lib/cards';
+import { byNum, readingSpreadLabel } from '@/lib/cards';
 
 function deliveryDate(value) {
   return new Date(value).toLocaleDateString('en-GB', {
@@ -75,14 +75,14 @@ function EmptyReports({ filtered }) {
 
 function ReportCard({ delivery }) {
   const card = deliveryCard(delivery);
-  const chapter = card ? CHAPTERS[card.ch] : null;
+  const reading = deliveryReading(delivery);
 
   return (
     <article className="admin-report-card">
       <div className="admin-report-card-main">
         <ReportThumbnail card={card} />
         <div className="admin-report-card-copy">
-          <span className="admin-report-eyebrow">{chapter ? `${chapter.cn} · ${chapter.en}` : 'AWAITING CARD · 等待卡牌'}</span>
+          <span className="admin-report-eyebrow">{reading ? readingSpreadLabel(reading.mode, reading.spread_key) : 'AWAITING CARD · 等待卡牌'}</span>
           <h3>{card ? `${card.cn} · ${card.en}` : '觉察报告 · Awareness report'}</h3>
           <strong>{delivery.recipient_name}</strong>
           <span>{delivery.recipient_email}</span>
@@ -100,6 +100,7 @@ function ReportCard({ delivery }) {
 
 function ReportListItem({ delivery }) {
   const card = deliveryCard(delivery);
+  const reading = deliveryReading(delivery);
 
   return (
     <article className="admin-report-row">
@@ -109,7 +110,7 @@ function ReportListItem({ delivery }) {
         <span>{delivery.recipient_email}</span>
       </div>
       <div className="admin-report-row-card">
-        <span>卡牌 · Card</span>
+        <span>{reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '卡牌 · Card'}</span>
         <strong>{card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : '等待卡牌 · Awaiting card'}</strong>
       </div>
       <time dateTime={delivery.created_at}>{deliveryDate(delivery.created_at)}</time>
@@ -146,7 +147,9 @@ export default function AdminReportRecords({ deliveries }) {
       .filter((item) => {
         if (!normalizedQuery) return true;
         const card = deliveryCard(item);
-        return [item.recipient_name, item.recipient_email, card?.cn, card?.en]
+        const reading = deliveryReading(item);
+        const spread = reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '';
+        return [item.recipient_name, item.recipient_email, card?.cn, card?.en, spread]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(normalizedQuery));
       })

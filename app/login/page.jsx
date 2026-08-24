@@ -5,8 +5,8 @@ export default function LoginPage({ searchParams }) {
   return (
     <LoginClient
       nextPath={safeNextPath(searchParams?.next)}
-      initialError={searchParams?.error === 'expired' ? 'expired' : ''}
-      initialMode="signin"
+      initialStatus={searchParams?.status === 'password-set' ? 'password-set' : ''}
+      initialError={searchParams?.error === 'invite-required' ? 'invite-required' : ''}
     />
   );
 }

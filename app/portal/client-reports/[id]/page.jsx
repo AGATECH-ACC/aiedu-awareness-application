@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import ReportDocument from '@/components/ReportDocument';
 import TopNav from '@/components/TopNav';
-import { byNum } from '@/lib/cards';
+import { hasAwarenessAccess } from '@/lib/awareness-access';
+import { byNum, readingSpreadLabel } from '@/lib/cards';
 import { getEducatorDelivery, getProfile } from '@/lib/db';
 import { createServerSupabase } from '@/lib/supabase-server';
 import DeliveryRetryButton from './DeliveryRetryButton';
@@ -35,7 +36,9 @@ export default async function ClientReportPage({ params }) {
 
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=${encodeURIComponent(`/portal/client-reports/${id}`)}`);
+  if (!user || !hasAwarenessAccess(user)) {
+    redirect(`/login?next=${encodeURIComponent(`/portal/client-reports/${id}`)}&error=invite-required`);
+  }
 
   const [profile, delivery] = await Promise.all([
     getProfile(supabase, user.id),
@@ -70,7 +73,7 @@ export default async function ClientReportPage({ params }) {
         <section className="client-report-summary" aria-label="抽牌摘要 · Reading summary">
           <div>
             <span>牌阵 · Spread</span>
-            <strong>{reading?.mode === 1 ? '单张 · Single' : reading?.mode === 4 ? '内在小孩 · Inner Child' : '三张牌 · Three-card'}</strong>
+            <strong>{readingSpreadLabel(reading?.mode, reading?.spread_key)}</strong>
           </div>
           <div className="client-report-card-list">
             {cards.map((item, index) => {

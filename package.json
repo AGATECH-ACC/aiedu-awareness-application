@@ -9,7 +9,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "email-templates:check": "node scripts/supabase-email-templates.mjs",
+    "email-templates:deploy": "node scripts/supabase-email-templates.mjs --deploy"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

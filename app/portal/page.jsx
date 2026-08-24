@@ -2,13 +2,14 @@ import { redirect } from 'next/navigation';
 import TopNav from '@/components/TopNav';
 import EducatorPortal from './EducatorPortal';
 import PortalClient from './PortalClient';
+import { hasAwarenessAccess } from '@/lib/awareness-access';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { getProfile, listEducatorDeliveries, listReports } from '@/lib/db';
 
 export default async function PortalPage() {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/portal');
+  if (!user || !hasAwarenessAccess(user)) redirect('/login?next=/portal&error=invite-required');
 
   let profile = null;
   try {
