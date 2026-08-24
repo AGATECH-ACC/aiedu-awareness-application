@@ -1,7 +1,7 @@
 'use client';
 import Image from "next/image";
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { CHAPTERS, CARDS, byNum, CURRENT_SPREADS } from "@/lib/cards";
+import { CHAPTERS, CARDS, byNum, CURRENT_SPREADS, SINGLE_CARD_RANGE } from "@/lib/cards";
 import { insightFor } from "@/lib/card-insights";
 
 /* ── 幸福人生觉察卡 · Happy Life Awareness Cards ──────────────────────
@@ -27,14 +27,13 @@ function drawN(n, pool) {
 }
 
 function metaForMode(mode) {
-  if (mode === 1) return [["当下的觉察", "This moment", "", "", 1, 40]];
+  if (mode === 1) return [["当下的觉察", "This moment", "", "", SINGLE_CARD_RANGE.min, SINGLE_CARD_RANGE.max]];
   return CURRENT_SPREADS[mode].positions.map(({ cn, en, guide_cn, guide_en, min, max }) => (
     [cn, en, guide_cn, guide_en, min, max]
   ));
 }
 
-function drawForMode(mode, positions) {
-  if (mode === 1) return drawN(1, CARDS);
+function drawForPositions(positions) {
   return positions.map((position) => {
     const min = position[4];
     const max = position[5];
@@ -302,8 +301,8 @@ export default function App({ onReading, singleOnly = false, landing = false, in
       cards = forcedCards;
     } else if (method === "input") {
       const nums = inputs.slice(0, forcedMode).map((s) => parseInt(s, 10));
-      if (nums.some((x) => !Number.isInteger(x) || x < 1 || x > 40)) {
-        setErr("请为每个位置输入 1–40 的编号。 Please enter a number 1–40 for each position.");
+      if (nums.some((x) => !Number.isInteger(x))) {
+        setErr("请为每个位置输入有效编号。 Please enter a valid number for each position.");
         return;
       }
       const invalidPosition = nums.findIndex((number, index) => (
@@ -320,7 +319,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
       }
       cards = nums.map((x) => byNum[x]);
     } else {
-      cards = drawForMode(forcedMode, nextPositions);
+      cards = drawForPositions(nextPositions);
     }
     setPosMeta(nextPositions);
     setReading(cards);
