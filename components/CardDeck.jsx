@@ -49,7 +49,7 @@ function CardArtwork({ card, side = "front", sizes, eager = false, decorative = 
     ? ""
     : isBack
       ? "幸福人生觉察卡背面"
-      : `第 ${String(card.n).padStart(2, "0")} 张：${card.cn} / ${card.en}`;
+      : `第 ${String(card.n).padStart(2, "0")} 张：${card.cn}`;
 
   return (
     <Image
@@ -147,7 +147,7 @@ function SingleCardReveal({ card, phase }) {
   );
 }
 
-function MiniCard({ card, badge, label, sub, index }) {
+function MiniCard({ card, badge, label, index }) {
   const chap = CHAPTERS[card.ch];
   return (
     <div style={{ animation: `fadeUp .5s ease both`, animationDelay: `${index * 140}ms`, textAlign: "center" }}>
@@ -156,7 +156,6 @@ function MiniCard({ card, badge, label, sub, index }) {
         <div style={{ position: "absolute", top: 5, left: 6, background: "rgba(255,255,255,0.92)", color: chap.color, fontWeight: 800, fontSize: 12, borderRadius: 6, padding: "1px 6px" }}>{badge}</div>
       </div>
       <div style={{ fontSize: 14, fontWeight: 700, color: chap.color, marginTop: 6 }}>{label}</div>
-      <div style={{ fontFamily: SERIF, fontSize: 12, fontStyle: "italic", color: "#9a8f78" }}>{sub}</div>
     </div>
   );
 }
@@ -205,7 +204,7 @@ function SpreadProgress({ cards, positions, revealedCount, activeIndex, drawing 
   );
 }
 
-function InsightSection({ label, value, valueEn, color, tint, question = false }) {
+function InsightSection({ label, value, color, tint, question = false }) {
   if (!value) return null;
   return (
     <div style={{
@@ -217,11 +216,6 @@ function InsightSection({ label, value, valueEn, color, tint, question = false }
     }}>
       <div style={{ color, fontSize: 13, fontWeight: 800, letterSpacing: 0.6 }}>{label}</div>
       <div style={{ color: "#40392f", fontSize: question ? 16 : 15, fontWeight: question ? 700 : 400, lineHeight: 1.75, marginTop: 4 }}>{value}</div>
-      {valueEn ? (
-        <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", color: "#776d5f", fontSize: question ? 15 : 14, fontWeight: question ? 600 : 400, lineHeight: 1.7, marginTop: 4 }}>
-          {valueEn}
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -234,44 +228,39 @@ function RichCardInsight({ card, compact = false }) {
   if (compact) {
     return (
       <div className="card-insight card-insight--compact" style={{ marginTop: 8 }}>
-        <InsightSection label="核心主题 · Core theme" value={insight.core} valueEn={insight.core_en} color={chap.color} tint={chap.tint} />
-        <InsightSection label="转化方向 · Growth direction" value={insight.shift} valueEn={insight.shift_en} color={chap.color} tint={chap.tint} />
-        <InsightSection label="觉察提问 · Reflection question" value={insight.question} valueEn={insight.question_en} color={chap.color} tint={chap.tint} question />
+        <InsightSection label="核心主题" value={insight.core} color={chap.color} tint={chap.tint} />
+        <InsightSection label="转化方向" value={insight.shift} color={chap.color} tint={chap.tint} />
+        <InsightSection label="觉察提问" value={insight.question} color={chap.color} tint={chap.tint} question />
       </div>
     );
   }
 
   return (
     <div className="card-insight" style={{ margin: "4px 0 18px", paddingBottom: 16, borderBottom: `1px solid ${chap.color}1f` }}>
-      <InsightSection label="核心主题 · Core theme" value={insight.core} valueEn={insight.core_en} color={chap.color} tint={chap.tint} question />
-      <InsightSection label="牌义解读 · What this card reveals" value={insight.meaning} valueEn={insight.meaning_en} color={chap.color} tint={chap.tint} />
+      <InsightSection label="核心主题" value={insight.core} color={chap.color} tint={chap.tint} question />
+      <InsightSection label="牌义解读" value={insight.meaning} color={chap.color} tint={chap.tint} />
       {insight.voices?.length ? (
         <div style={{ marginTop: 12 }}>
-          <div style={{ color: chap.color, fontSize: 13, fontWeight: 800, letterSpacing: 0.6 }}>可能的内在声音 · Inner voices</div>
+          <div style={{ color: chap.color, fontSize: 13, fontWeight: 800, letterSpacing: 0.6 }}>可能的内在声音</div>
           <ul style={{ margin: "6px 0 0", paddingLeft: 20, color: "#51483b", fontSize: 15, lineHeight: 1.7 }}>
             {insight.voices.map((voice, index) => (
               <li key={voice} style={{ marginTop: index === 0 ? 0 : 5 }}>
                 <div>“{voice}”</div>
-                {insight.voices_en?.[index] ? (
-                  <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", color: "#776d5f", fontSize: 14, lineHeight: 1.65, marginTop: 1 }}>
-                    “{insight.voices_en[index]}”
-                  </div>
-                ) : null}
               </li>
             ))}
           </ul>
         </div>
       ) : null}
-      <InsightSection label="你可能会看见 · You may notice" value={insight.signs} valueEn={insight.signs_en} color={chap.color} tint={chap.tint} />
-      <InsightSection label={insight.lensLabel} value={insight.lens} valueEn={insight.lens_en} color={chap.color} tint={chap.tint} />
-      <InsightSection label="这套模式的代价 · Possible cost" value={insight.cost} valueEn={insight.cost_en} color={chap.color} tint={chap.tint} />
-      <InsightSection label="转化方向 · Growth direction" value={insight.shift} valueEn={insight.shift_en} color={chap.color} tint={chap.tint} />
-      <InsightSection label="觉察提问 · Reflection question" value={insight.question} valueEn={insight.question_en} color={chap.color} tint={chap.tint} question />
+      <InsightSection label="你可能会看见" value={insight.signs} color={chap.color} tint={chap.tint} />
+      <InsightSection label={insight.lensLabel.split(' · ')[0]} value={insight.lens} color={chap.color} tint={chap.tint} />
+      <InsightSection label="这套模式的代价" value={insight.cost} color={chap.color} tint={chap.tint} />
+      <InsightSection label="转化方向" value={insight.shift} color={chap.color} tint={chap.tint} />
+      <InsightSection label="觉察提问" value={insight.question} color={chap.color} tint={chap.tint} question />
     </div>
   );
 }
 
-function ReadingRow({ card, badge, label, sub, desc, descEn, index }) {
+function ReadingRow({ card, badge, label, desc, index }) {
   const chap = CHAPTERS[card.ch];
   return (
     <div style={{ animation: `fadeUp .5s ease both`, animationDelay: `${index * 140 + 120}ms`, display: "flex", gap: 12, padding: "14px 0", borderTop: index === 0 ? "none" : "1px solid #eee4cf" }}>
@@ -284,35 +273,31 @@ function ReadingRow({ card, badge, label, sub, desc, descEn, index }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
           <span style={{ fontSize: 15, fontWeight: 800, color: chap.color }}>{label}</span>
-          <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: "#a99b82" }}>{sub}</span>
         </div>
         {desc ? (
           <div style={{ fontSize: 13, color: "#9a8f78", marginTop: 1 }}>
             <div>{desc}</div>
-            {descEn ? <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", marginTop: 1 }}>{descEn}</div> : null}
           </div>
         ) : null}
         <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 700, color: "#2a2622", marginTop: 4 }}>
-          {String(card.n).padStart(2, "0")}. {card.cn} <span style={{ fontSize: 13, color: "#8a7f6c", letterSpacing: 1 }}>{card.en}</span>
+          {String(card.n).padStart(2, "0")}. {card.cn}
         </div>
         <div style={{ fontSize: 15, color: "#3a352e", lineHeight: 1.65, marginTop: 5 }}>
-          <b style={{ color: chap.color }}>影响 · Affects you：</b>{card.affect_cn}
+          <b style={{ color: chap.color }}>影响：</b>{card.affect_cn}
         </div>
-        <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: "#7a7060", lineHeight: 1.6, marginTop: 2 }}>{card.affect_en}</div>
         <RichCardInsight card={card} compact />
         <div style={{ fontSize: 15, color: "#3a352e", lineHeight: 1.65, marginTop: 6 }}>
-          <b style={{ color: chap.color }}>练习 · Practice：</b>{card.practice_cn}
+          <b style={{ color: chap.color }}>练习：</b>{card.practice_cn}
         </div>
-        <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: "#7a7060", lineHeight: 1.6, marginTop: 2 }}>{card.practice_en}</div>
       </div>
     </div>
   );
 }
 
 const MODES = [
-  { m: 1, cn: "单张牌", en: "Single" },
-  { m: 3, cn: "三张牌", en: "Three-Card" },
-  { m: 4, cn: "四卡深度觉察", en: "Deep Awareness · 4" },
+  { m: 1, cn: "单张牌" },
+  { m: 3, cn: "三张牌" },
+  { m: 4, cn: "四卡深度觉察" },
 ];
 
 export default function App({ onReading, singleOnly = false, landing = false, initialMethod = "draw" } = {}) {
@@ -388,7 +373,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
     } else if (method === "input") {
       const nums = inputs.slice(0, forcedMode).map((s) => parseInt(s, 10));
       if (nums.some((x) => !Number.isInteger(x))) {
-        setErr("请为每个位置输入有效编号。 Please enter a valid number for each position.");
+        setErr("请为每个位置输入有效编号。");
         return;
       }
       const invalidPosition = nums.findIndex((number, index) => (
@@ -396,11 +381,11 @@ export default function App({ onReading, singleOnly = false, landing = false, in
       ));
       if (invalidPosition !== -1) {
         const position = nextPositions[invalidPosition];
-        setErr(`${invalidPosition + 1}. ${position[0]} 只可输入 ${position[4]}–${position[5]}。 ${position[1]} only accepts ${position[4]}–${position[5]}.`);
+        setErr(`${invalidPosition + 1}. ${position[0]} 只可输入 ${position[4]}–${position[5]}。`);
         return;
       }
       if (new Set(nums).size !== nums.length) {
-        setErr("同一个牌阵里编号不能重复。 Numbers can't repeat in one spread.");
+        setErr("同一个牌阵里编号不能重复。");
         return;
       }
       cards = nums.map((x) => byNum[x]);
@@ -462,16 +447,16 @@ export default function App({ onReading, singleOnly = false, landing = false, in
     }
   }, [shouldContinueSpread, continueSpreadDraw, generate]);
   const primaryActionLabel = isDrawInProgress
-    ? `第 ${activeDrawIndex + 1} 张牌抽取中… · Drawing ${activeDrawIndex + 1} of ${activeMode}…`
+    ? `第 ${activeDrawIndex + 1} 张牌抽取中…`
     : method === "input"
-      ? "查看解读 · Read"
+      ? "查看解读"
       : shouldContinueSpread
-        ? `抽第 ${revealedCount + 1} 张牌 · Draw ${revealedCount + 1} of ${activeMode}`
+        ? `抽第 ${revealedCount + 1} 张牌`
         : reading
-          ? "重新抽牌 · Draw again"
+          ? "重新抽牌"
           : activeMode > 1
-            ? `抽第一张牌 · Draw 1 of ${activeMode}`
-            : "抽 1 张牌 · Draw 1";
+            ? "抽第一张牌"
+            : "抽 1 张牌";
 
   return (
     <div id={landing ? "draw" : undefined} className={`card-deck${landing ? " card-deck--landing" : ""}`} style={landing ? {
@@ -497,30 +482,27 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         {landing ? null : (
           <header style={{ textAlign: "center", marginBottom: 16 }}>
             <div style={{ fontFamily: SERIF, fontSize: 25, fontWeight: 700, letterSpacing: 2 }}>幸福人生觉察卡</div>
-            <div style={{ fontFamily: SERIF, fontSize: 12, letterSpacing: 4, color: "#a9863c", marginTop: 4 }}>HAPPY LIFE AWARENESS CARDS</div>
           </header>
         )}
 
         <div className="draw-workspace">
-          <section className="draw-controls" aria-label="抽牌设置 · Draw settings">
+          <section className="draw-controls" aria-label="抽牌设置">
             {landing ? (
               <div className="draw-controls-intro">
-                <div>01 · ONE CARD AWARENESS</div>
+                <div>01 · 单张觉察</div>
                 <h2>让一张牌，<br />照见此刻的自己</h2>
                 <p>
-                  先深呼吸，把注意力带回当下。准备好后，抽取今天最需要看见的觉察。<br />
-                  <span>Take one quiet breath. Draw when you are ready to listen inward.</span>
+                  先深呼吸，把注意力带回当下。准备好后，抽取今天最需要看见的觉察。
                 </p>
                 <aside className="draw-purpose" aria-labelledby="draw-purpose-title">
-                  <div id="draw-purpose-title">为什么抽一张牌 · Why draw a card?</div>
+                  <div id="draw-purpose-title">为什么抽一张牌？</div>
                   <p>
-                    抽牌不是预测答案，而是给自己一个停顿。图像与提问帮助你离开惯性，看见此刻的感受、需要与下一步。<br />
-                    <span>A card does not predict your future. It creates a pause to notice what you feel, what you need, and what you may choose next.</span>
+                    抽牌不是预测答案，而是给自己一个停顿。图像与提问帮助你离开惯性，看见此刻的感受、需要与下一步。
                   </p>
                   <ol>
-                    <li><strong>停一停</strong><small>Pause</small></li>
-                    <li><strong>看见</strong><small>Notice</small></li>
-                    <li><strong>选择</strong><small>Choose</small></li>
+                    <li><strong>停一停</strong></li>
+                    <li><strong>看见</strong></li>
+                    <li><strong>选择</strong></li>
                   </ol>
                 </aside>
               </div>
@@ -529,7 +511,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         {/* Mode */}
         {singleOnly ? null : (
           <div className="deck-mode-switch" style={{ display: "flex", gap: 6, background: "#f0e7d4", padding: 5, borderRadius: 14, marginBottom: 12 }}>
-            {MODES.map(({ m, cn, en }) => {
+            {MODES.map(({ m, cn }) => {
               const active = mode === m;
               return (
                 <button type="button" key={m} aria-pressed={active} onClick={() => changeMode(m)} disabled={isDrawInProgress} style={{
@@ -538,7 +520,6 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                   fontWeight: 700, fontSize: 14, transition: "all .2s", opacity: isDrawInProgress && !active ? 0.55 : 1,
                 }}>
                   <div>{cn}</div>
-                  <div style={{ fontFamily: SERIF, fontSize: 12, fontStyle: "italic", opacity: 0.8, marginTop: 1 }}>{en}</div>
                 </button>
               );
             })}
@@ -555,7 +536,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                   border: `1.5px solid ${active ? "#b5842b" : "#cdbf9e"}`, background: active ? "#b5842b" : "transparent",
                   color: active ? "#fff" : "#8a7a54", borderRadius: 999, padding: "6px 15px", fontSize: 14, fontWeight: 600,
                   cursor: isDrawInProgress ? "wait" : "pointer", opacity: isDrawInProgress && !active ? 0.55 : 1,
-                }}>{cn} · {en}</button>
+                }}>{cn}</button>
               );
             })}
           </div>
@@ -564,16 +545,16 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         {/* Structured three-card explainer */}
         {activeMode === 3 && (
           <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 14, color: "#7a6a44", lineHeight: 1.65 }}>
-            <b>{CURRENT_SPREADS[3].name}</b> · {CURRENT_SPREADS[3].en}<br />
-            <span>每个位置从对应卡组抽一张，不混抽。 · One card is drawn from each matching group.</span>
+            <b>{CURRENT_SPREADS[3].name}</b><br />
+            <span>每个位置从对应卡组抽一张，不混抽。</span>
           </div>
         )}
 
         {/* Four-card deep awareness explainer */}
         {activeMode === 4 && (
           <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 14, color: "#7a6a44", lineHeight: 1.65 }}>
-            <b>{CURRENT_SPREADS[4].name}</b> · {CURRENT_SPREADS[4].en}<br />
-            <span>模式 → 内在触发 → 需要 → 新选择 · Pattern → Trigger → Need → New Choice</span>
+            <b>{CURRENT_SPREADS[4].name}</b><br />
+            <span>模式 → 内在触发 → 需要 → 新选择</span>
           </div>
         )}
 
@@ -586,7 +567,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                 return (
                   <div key={i}>
                     <label htmlFor={`card-number-${i}`} style={{ fontSize: 12, color: "#8a7f6c", fontWeight: 700, display: "block", marginBottom: 3, textAlign: "center" }}>
-                      {activeMode === 1 ? "编号 №" : <>{i + 1}. {meta[0]}<br /><span lang="en" style={{ fontSize: 10, fontWeight: 600 }}>{meta[1]}</span></>}
+                      {activeMode === 1 ? "编号 №" : <>{i + 1}. {meta[0]}</>}
                     </label>
                     <input id={`card-number-${i}`} type="number" min={meta[4]} max={meta[5]} inputMode="numeric" value={inputs[i]}
                       onChange={(e) => { const v = [...inputs]; v[i] = e.target.value; setInputs(v); }}
@@ -613,7 +594,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           </section>
 
         {/* ── RESULT ── */}
-        <section className="draw-stage" ref={resultRef} aria-live="polite" aria-label="抽牌结果 · Draw result">
+        <section className="draw-stage" ref={resultRef} aria-live="polite" aria-label="抽牌结果">
           {landing && !reading ? (
             <div className="draw-stage-empty">
               <div className="draw-stage-card-back">
@@ -621,7 +602,6 @@ export default function App({ onReading, singleOnly = false, landing = false, in
               </div>
               <div className="draw-stage-prompt">
                 <span>准备好时，抽一张牌</span>
-                <small>When you are ready, draw one card.</small>
               </div>
             </div>
           ) : null}
@@ -641,13 +621,13 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                   boxShadow: "0 6px 24px rgba(80,60,30,0.08)", overflow: "hidden", animation: "fadeUp .5s ease both", animationDelay: "150ms",
                 }}>
                   <div style={{ background: chap.tint, padding: "12px 18px", borderBottom: `1px solid ${chap.color}22` }}>
-                    <div style={{ fontSize: 13, color: chap.color, fontWeight: 700, letterSpacing: 1 }}>第 {String(reading[0].n).padStart(2, "0")} 张 · {chap.cn} / {chap.en}</div>
-                    <div style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, marginTop: 2 }}>{reading[0].cn} <span style={{ fontSize: 14, color: "#8a7f6c", letterSpacing: 1 }}>{reading[0].en}</span></div>
+                    <div style={{ fontSize: 13, color: chap.color, fontWeight: 700, letterSpacing: 1 }}>第 {String(reading[0].n).padStart(2, "0")} 张 · {chap.cn}</div>
+                    <div style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, marginTop: 2 }}>{reading[0].cn}</div>
                   </div>
                   <div style={{ padding: "16px 18px 18px" }}>
-                    <Block label="此刻的提醒" sub="Message for this moment" color={chap.color} cn={reading[0].affect_cn} en={reading[0].affect_en} />
+                    <Block label="此刻的提醒" color={chap.color} cn={reading[0].affect_cn} />
                     <RichCardInsight card={reading[0]} />
-                    <Block label="今日练习" sub="Today's practice" color={chap.color} cn={reading[0].practice_cn} en={reading[0].practice_en} last />
+                    <Block label="今日练习" color={chap.color} cn={reading[0].practice_cn} last />
                   </div>
                 </div>
               ) : null}
@@ -659,13 +639,10 @@ export default function App({ onReading, singleOnly = false, landing = false, in
             <div key={`ritual-${dealKey}`} style={{ marginTop: 20 }}>
               <div style={{ textAlign: "center", marginBottom: 14 }}>
                 <div style={{ color: "#8b6929", fontSize: 12, fontWeight: 800, letterSpacing: 1.2 }}>
-                  {spreadComplete ? "牌阵完成 · SPREAD COMPLETE" : `第 ${activeDrawIndex + 1} 个位置 · POSITION ${activeDrawIndex + 1} OF ${activeMode}`}
+                  {spreadComplete ? "牌阵完成" : `第 ${activeDrawIndex + 1} 个位置，共 ${activeMode} 个位置`}
                 </div>
                 <div style={{ color: "#2a2622", fontFamily: SERIF, fontSize: 20, fontWeight: 700, marginTop: 4 }}>
                   {spreadComplete ? "让完整的牌阵慢慢浮现" : posMeta[activeDrawIndex]?.[0]}
-                </div>
-                <div lang="en" style={{ color: "#8a7f6c", fontFamily: SERIF, fontSize: 14, fontStyle: "italic", marginTop: 2 }}>
-                  {spreadComplete ? "Pause and take in the whole spread." : posMeta[activeDrawIndex]?.[1]}
                 </div>
               </div>
 
@@ -690,26 +667,21 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                   <div style={{ color: CHAPTERS[reading[activeDrawIndex].ch].color, fontSize: 15, fontWeight: 800 }}>
                     {String(reading[activeDrawIndex].n).padStart(2, "0")}. {reading[activeDrawIndex].cn}
                   </div>
-                  <div lang="en" style={{ color: "#8a7f6c", fontFamily: SERIF, fontSize: 14, fontStyle: "italic", marginTop: 2 }}>
-                    {reading[activeDrawIndex].en}
-                  </div>
                   {!spreadComplete ? (
                     <>
                       <p style={{ color: "#7a6f5a", fontSize: 14, lineHeight: 1.6, margin: "14px 0 10px" }}>
-                        停一停，感受这张牌。准备好后，再抽下一张。<br />
-                        <span lang="en" style={{ fontFamily: SERIF, fontStyle: "italic" }}>Pause with this card. Continue when you feel ready.</span>
+                        停一停，感受这张牌。准备好后，再抽下一张。
                       </p>
                       <button type="button" onClick={continueSpreadDraw} style={{
                         border: 0, borderRadius: 999, padding: "11px 22px", background: "#8b6929", color: "#fffdf8",
                         cursor: "pointer", fontSize: 15, fontWeight: 750,
                       }}>
-                        抽第 {revealedCount + 1} 张牌 · Draw {revealedCount + 1} of {activeMode}
+                        抽第 {revealedCount + 1} 张牌
                       </button>
                     </>
                   ) : (
                     <p style={{ color: "#6f5a30", fontSize: 14, fontWeight: 700, lineHeight: 1.6, margin: "14px 0 4px" }}>
-                      所有位置已经揭晓。完整解读在下方。<br />
-                      <span lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 600 }}>Every position is revealed. Your full reading follows below.</span>
+                      所有位置已经揭晓。完整解读在下方。
                     </p>
                   )}
                 </div>
@@ -720,12 +692,12 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           {/* Three-card row */}
           {reading && activeMode === 3 && spreadComplete && (
             <div key={`spread-three-${dealKey}`} style={{ marginTop: 20 }}>
-              <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{CURRENT_SPREADS[3].name} · {CURRENT_SPREADS[3].en}</div>
+              <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{CURRENT_SPREADS[3].name}</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, maxWidth: 360, margin: "0 auto" }}>
-                {reading.map((c, i) => <MiniCard key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} index={i} />)}
+                {reading.map((c, i) => <MiniCard key={i} card={c} badge={i + 1} label={posMeta[i][0]} index={i} />)}
               </div>
               <div style={{ marginTop: 20, background: "#fffdf8", borderRadius: 18, border: "1px solid #e6d9bd", boxShadow: "0 6px 24px rgba(80,60,30,0.07)", padding: "6px 16px 16px" }}>
-                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} desc={posMeta[i][2]} descEn={posMeta[i][3]} index={i} />)}
+                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={posMeta[i][0]} desc={posMeta[i][2]} index={i} />)}
               </div>
             </div>
           )}
@@ -734,18 +706,17 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           {reading && activeMode === 4 && spreadComplete && (
             <div key={`spread-four-${dealKey}`} style={{ marginTop: 20 }}>
               <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>
-                模式 → 内在触发 → 需要 → 新选择<br />
-                <span lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13 }}>Pattern → Trigger → Need → New Choice</span>
+                模式 → 内在触发 → 需要 → 新选择
               </div>
               <div style={{
                 display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, maxWidth: 340, margin: "0 auto",
               }}>
                 {reading.map((card, index) => (
-                  <MiniCard key={card.n} card={card} badge={index + 1} label={posMeta[index][0]} sub={posMeta[index][1]} index={index} />
+                  <MiniCard key={card.n} card={card} badge={index + 1} label={posMeta[index][0]} index={index} />
                 ))}
               </div>
               <div style={{ marginTop: 20, background: "#fffdf8", borderRadius: 18, border: "1px solid #e6d9bd", boxShadow: "0 6px 24px rgba(80,60,30,0.07)", padding: "6px 16px 16px" }}>
-                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} desc={posMeta[i][2]} descEn={posMeta[i][3]} index={i} />)}
+                {reading.map((c, i) => <ReadingRow key={i} card={c} badge={i + 1} label={posMeta[i][0]} desc={posMeta[i][2]} index={i} />)}
               </div>
             </div>
           )}
@@ -753,23 +724,21 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         </div>
 
         <footer className="card-deck-disclaimer" style={{ textAlign: "center", marginTop: 30, fontSize: 13, color: "#a99b82", lineHeight: 1.65 }}>
-          用于自我觉察与反思，不是诊断或建议。<br />A gentle tool for self-reflection — not diagnosis or advice.
+          用于自我觉察与反思，不是诊断或建议。
         </footer>
       </div>
     </div>
   );
 }
 
-function Block({ label, sub, cn, en, color, last }) {
+function Block({ label, cn, color, last }) {
   return (
     <div style={{ marginBottom: last ? 0 : 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
         <span style={{ width: 6, height: 6, borderRadius: 999, background: color }} />
         <span style={{ fontSize: 14, fontWeight: 700, color: "#2a2622" }}>{label}</span>
-        <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: "#a99b82" }}>{sub}</span>
       </div>
       <div style={{ fontSize: 16, lineHeight: 1.75, color: "#3a352e" }}>{cn}</div>
-      <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.7, color: "#7a7060", marginTop: 4 }}>{en}</div>
     </div>
   );
 }
