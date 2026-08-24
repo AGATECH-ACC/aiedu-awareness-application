@@ -1910,7 +1910,14 @@ button, input, textarea, select { font: inherit; }
   color: #8a6727;
   font-size: var(--type-secondary);
 }
-.educator-primary-button:disabled,
+.educator-primary-button:disabled {
+  border-color: #aeb9c5;
+  background: #dce2e8;
+  color: #455568;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 1;
+}
 .educator-secondary-button:disabled,
 .educator-text-button:disabled { cursor: not-allowed; opacity: .5; }
 
@@ -2011,6 +2018,13 @@ button, input, textarea, select { font: inherit; }
   --admin-blue: #263b91;
   --admin-gold: #b8771d;
   --admin-line: #decda9;
+  /* Keep the shared client-reading controls on the admin palette. */
+  --educator-paper: var(--admin-paper);
+  --educator-ink: var(--admin-ink);
+  --educator-navy: var(--admin-navy);
+  --educator-blue: var(--admin-blue);
+  --educator-red: #ed2f3d;
+  --educator-gold: var(--admin-gold);
   min-height: 100vh;
   background: var(--admin-canvas);
   color: var(--admin-ink);
@@ -2538,6 +2552,15 @@ button, input, textarea, select { font: inherit; }
   padding: 10px 0 22px;
 }
 
+.public-report-page {
+  min-height: 100vh;
+  padding: 20px 16px 52px;
+  background: radial-gradient(130% 80% at 50% -10%, #fdf6ea 0%, #f6eede 45%, #efe6d4 100%);
+  color: #2a2622;
+}
+
+.public-report-shell { width: min(920px, 100%); margin: 0 auto; }
+
 .public-report-brand {
   color: #2a2622;
   text-align: center;
@@ -2568,6 +2591,31 @@ button, input, textarea, select { font: inherit; }
 }
 
 .public-report-back > span:first-child { font-size: 15px; }
+.public-report-disclaimer {
+  margin: -1px 22px 0;
+  padding: 18px 16px;
+  border: 1px solid #ddceb0;
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  background: rgba(255, 253, 248, .76);
+  color: #8a7d68;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: center;
+}
+.public-report-cta { margin-top: 26px; color: #6f624e; text-align: center; }
+.public-report-cta > div { font: 17px Georgia, serif; }
+.public-report-cta a {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #b5842b;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+}
 
 .client-report-page {
   min-height: 100vh;
@@ -2623,7 +2671,8 @@ button, input, textarea, select { font: inherit; }
 .client-report-retry div { margin-top: 8px; color: #8f3f2d; font-size: var(--type-secondary); }
 .client-report-document { padding: 14px clamp(20px, 5vw, 46px) 38px; border: 1px solid #ddceb0; border-radius: 20px; background: #fffdf8; box-shadow: 0 16px 42px rgba(71, 55, 29, .08); }
 .client-report-document-title { padding: 18px 0 14px; border-bottom: 1px solid #eadfc4; }
-.client-report-document-title h2 { margin: 7px 0 0; font-family: "Songti SC", STSong, Georgia, serif; font-size: 24px; }
+.client-report-document-title :is(h1, h2) { margin: 7px 0 0; font-family: "Songti SC", STSong, Georgia, serif; font-size: clamp(24px, 4vw, 32px); line-height: 1.2; }
+.client-report-document-title time { display: block; margin-top: 7px; color: #92846c; font-size: 14px; }
 .client-report-card-showcase {
   display: grid;
   grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);

@@ -70,7 +70,7 @@ export async function POST(request, { params }) {
 
   const { data: report, error: reportError } = await admin
     .from('deep_reports')
-    .select('id, share_token, is_public')
+    .select('id, share_token, is_public, reading:readings!deep_reports_reading_id_fkey ( mode, spread_key, cards )')
     .eq('id', delivery.report_id)
     .eq('user_id', context.user.id)
     .maybeSingle();
@@ -80,11 +80,13 @@ export async function POST(request, { params }) {
   }
 
   const reportUrl = `${reportOrigin(request)}/r/${report.share_token}`;
+  const reading = Array.isArray(report.reading) ? report.reading[0] : report.reading;
   try {
     const providerId = await sendRecipientReportEmail({
       name: delivery.recipient_name,
       email: delivery.recipient_email,
       reportUrl,
+      reading,
     });
     const emailedAt = new Date().toISOString();
     const { error: updateError } = await admin

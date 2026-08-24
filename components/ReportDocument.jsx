@@ -1,8 +1,18 @@
 import Image from 'next/image';
 import Markdownish from '@/components/Markdownish';
-import { byNum, CHAPTERS } from '@/lib/cards';
+import { byNum, CHAPTERS, readingReportTitle } from '@/lib/cards';
 
-export default function ReportDocument({ report, reading }) {
+function formattedReportDate(value) {
+  if (!value) return null;
+  return new Date(value).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'Asia/Kuala_Lumpur',
+  });
+}
+
+export default function ReportDocument({ report, reading, createdAt = null, primaryTitle = false }) {
   const cards = Array.isArray(reading?.cards) ? reading.cards : [];
   const visualCards = cards
     .map((item, index) => {
@@ -17,12 +27,15 @@ export default function ReportDocument({ report, reading }) {
     })
     .filter(Boolean);
   const leadCard = visualCards[0]?.card;
+  const Heading = primaryTitle ? 'h1' : 'h2';
+  const reportDate = formattedReportDate(createdAt);
 
   return (
     <article className="client-report-document">
       <div className="client-report-document-title">
         <span>HAPPY LIFE AWARENESS CARDS</span>
-        <h2>深度觉察报告 · Deep Awareness Report</h2>
+        <Heading>{readingReportTitle(reading?.mode)}</Heading>
+        {reportDate ? <time dateTime={createdAt}>{reportDate}</time> : null}
       </div>
 
       {visualCards.length ? (

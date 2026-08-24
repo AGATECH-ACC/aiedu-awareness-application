@@ -1,7 +1,8 @@
 import { cache } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Markdownish from '@/components/Markdownish';
+import ReportDocument from '@/components/ReportDocument';
+import { readingReportTitle } from '@/lib/cards';
 import { createServerSupabase } from '@/lib/supabase-server';
 import ReportBackButton from './ReportBackButton';
 
@@ -10,7 +11,10 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
 const loadPublicReport = cache(async (token) => {
   if (!UUID_PATTERN.test(token || '')) return null;
   const supabase = createServerSupabase();
-  const { data, error } = await supabase.rpc('get_public_report', { token });
+  let { data, error } = await supabase.rpc('get_public_report_v2', { token });
+  if (error?.code === 'PGRST202') {
+    ({ data, error } = await supabase.rpc('get_public_report', { token }));
+  }
   if (error) {
     console.error('Unable to load public report', error);
     return null;
@@ -22,11 +26,12 @@ export async function generateMetadata({ params }) {
   const report = await loadPublicReport(params.token);
   if (!report) return { title: '报告不存在 · Report not found', robots: { index: false, follow: false } };
 
-  const title = '一份幸福人生觉察报告 · A Happy Life Awareness Report';
+  const title = readingReportTitle(report.mode);
   const description = '一份温柔、双语的自我觉察与反思报告。A gentle bilingual reflection from the Happy Life Awareness Cards.';
   return {
     title,
     description,
+    robots: { index: false, follow: false },
     openGraph: {
       title,
       description,
@@ -41,10 +46,16 @@ export async function generateMetadata({ params }) {
 export default async function PublicReportPage({ params }) {
   const report = await loadPublicReport(params.token);
   if (!report) notFound();
+  const reading = Array.isArray(report.cards) ? {
+    mode: report.mode,
+    spread_key: report.spread_key,
+    question: report.question,
+    cards: report.cards,
+  } : null;
 
   return (
-    <main style={{ minHeight: '100vh', background: 'radial-gradient(130% 80% at 50% -10%, #fdf6ea 0%, #f6eede 45%, #efe6d4 100%)', color: '#2a2622', padding: '20px 16px 46px' }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <main className="public-report-page">
+      <div className="public-report-shell">
         <header className="public-report-header">
           <ReportBackButton />
           <Link href="/" className="public-report-brand">
@@ -54,22 +65,15 @@ export default async function PublicReportPage({ params }) {
           <span aria-hidden="true" />
         </header>
 
-        <article style={{ background: '#fffdf8', border: '1px solid #e2d5b8', borderRadius: 20, boxShadow: '0 10px 36px rgba(80,60,30,.09)', padding: '12px clamp(18px, 5vw, 38px) 30px' }}>
-          <div style={{ borderBottom: '1px solid #eadfc4', padding: '14px 0 12px', marginBottom: 4 }}>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(20px, 4vw, 28px)', margin: 0 }}>深度觉察报告 · Deep Awareness Report</h1>
-            <time dateTime={report.created_at} style={{ display: 'block', color: '#92846c', fontSize: 14, marginTop: 6 }}>
-              {new Date(report.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </time>
-          </div>
-          <Markdownish text={report.content} />
-          <div style={{ borderTop: '1px solid #eadfc4', marginTop: 24, paddingTop: 15, color: '#8a7d68', textAlign: 'center', fontSize: 14, lineHeight: 1.7 }}>
-            用于自我觉察与反思，不是心理诊断、治疗或医疗建议。<br />For self-reflection only — not diagnosis, therapy, or medical advice.
-          </div>
-        </article>
+        <ReportDocument report={report} reading={reading} createdAt={report.created_at} primaryTitle />
 
-        <aside style={{ textAlign: 'center', marginTop: 22, color: '#6f624e' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: 17 }}>也为自己抽一张牌 · Draw a card for yourself</div>
-          <Link href="/draw" style={{ display: 'inline-block', marginTop: 10, padding: '10px 18px', borderRadius: 999, background: '#b5842b', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 16 }}>体验觉察卡 · Try the deck</Link>
+        <div className="public-report-disclaimer">
+          用于自我觉察与反思，不是心理诊断、治疗或医疗建议。<br />For self-reflection only — not diagnosis, therapy, or medical advice.
+        </div>
+
+        <aside className="public-report-cta">
+          <div>也为自己抽一张牌 · Draw a card for yourself</div>
+          <Link href="/draw">体验觉察卡 · Try the deck</Link>
         </aside>
       </div>
     </main>

@@ -121,6 +121,7 @@ async function deliverRecipientReport({ admin, authorization, report, reading, r
       name: authorization.recipient_name,
       email: authorization.recipient_email,
       reportUrl,
+      reading,
     });
     const emailedAt = new Date().toISOString();
     await admin
