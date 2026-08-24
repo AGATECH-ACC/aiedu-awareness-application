@@ -137,10 +137,10 @@ function MiniCard({ card, badge, label, sub, index }) {
     <div style={{ animation: `fadeUp .5s ease both`, animationDelay: `${index * 140}ms`, textAlign: "center" }}>
       <div style={{ position: "relative", borderRadius: 12, overflow: "hidden", aspectRatio: CARD_ASPECT_RATIO, background: "#fff", boxShadow: "0 4px 12px rgba(60,45,25,0.12)" }}>
         <CardArtwork card={card} sizes="(max-width: 480px) 29vw, 110px" eager />
-        <div style={{ position: "absolute", top: 5, left: 6, background: "rgba(255,255,255,0.92)", color: chap.color, fontWeight: 800, fontSize: 11, borderRadius: 6, padding: "1px 6px" }}>{badge}</div>
+        <div style={{ position: "absolute", top: 5, left: 6, background: "rgba(255,255,255,0.92)", color: chap.color, fontWeight: 800, fontSize: 12, borderRadius: 6, padding: "1px 6px" }}>{badge}</div>
       </div>
-      <div style={{ fontSize: 11.5, fontWeight: 700, color: chap.color, marginTop: 6 }}>{label}</div>
-      <div style={{ fontFamily: SERIF, fontSize: 9.5, fontStyle: "italic", color: "#9a8f78" }}>{sub}</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: chap.color, marginTop: 6 }}>{label}</div>
+      <div style={{ fontFamily: SERIF, fontSize: 12, fontStyle: "italic", color: "#9a8f78" }}>{sub}</div>
     </div>
   );
 }
@@ -155,10 +155,10 @@ function InsightSection({ label, value, valueEn, color, tint, question = false }
       background: question ? tint : "transparent",
       border: question ? `1px solid ${color}24` : "none",
     }}>
-      <div style={{ color, fontSize: 11, fontWeight: 800, letterSpacing: 0.6 }}>{label}</div>
-      <div style={{ color: "#40392f", fontSize: question ? 13 : 12.5, fontWeight: question ? 700 : 400, lineHeight: 1.7, marginTop: 4 }}>{value}</div>
+      <div style={{ color, fontSize: 13, fontWeight: 800, letterSpacing: 0.6 }}>{label}</div>
+      <div style={{ color: "#40392f", fontSize: question ? 16 : 15, fontWeight: question ? 700 : 400, lineHeight: 1.75, marginTop: 4 }}>{value}</div>
       {valueEn ? (
-        <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", color: "#776d5f", fontSize: question ? 12.5 : 12, fontWeight: question ? 600 : 400, lineHeight: 1.65, marginTop: 4 }}>
+        <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", color: "#776d5f", fontSize: question ? 15 : 14, fontWeight: question ? 600 : 400, lineHeight: 1.7, marginTop: 4 }}>
           {valueEn}
         </div>
       ) : null}
@@ -187,13 +187,13 @@ function RichCardInsight({ card, compact = false }) {
       <InsightSection label="牌义解读 · What this card reveals" value={insight.meaning} valueEn={insight.meaning_en} color={chap.color} tint={chap.tint} />
       {insight.voices?.length ? (
         <div style={{ marginTop: 12 }}>
-          <div style={{ color: chap.color, fontSize: 11, fontWeight: 800, letterSpacing: 0.6 }}>可能的内在声音 · Inner voices</div>
-          <ul style={{ margin: "6px 0 0", paddingLeft: 20, color: "#51483b", fontSize: 12.5, lineHeight: 1.65 }}>
+          <div style={{ color: chap.color, fontSize: 13, fontWeight: 800, letterSpacing: 0.6 }}>可能的内在声音 · Inner voices</div>
+          <ul style={{ margin: "6px 0 0", paddingLeft: 20, color: "#51483b", fontSize: 15, lineHeight: 1.7 }}>
             {insight.voices.map((voice, index) => (
               <li key={voice} style={{ marginTop: index === 0 ? 0 : 5 }}>
                 <div>“{voice}”</div>
                 {insight.voices_en?.[index] ? (
-                  <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", color: "#776d5f", fontSize: 12, lineHeight: 1.55, marginTop: 1 }}>
+                  <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", color: "#776d5f", fontSize: 14, lineHeight: 1.65, marginTop: 1 }}>
                     “{insight.voices_en[index]}”
                   </div>
                 ) : null}
@@ -218,32 +218,32 @@ function ReadingRow({ card, badge, label, sub, desc, descEn, index }) {
       <div style={{ flex: "0 0 64px" }}>
         <div style={{ position: "relative", borderRadius: 10, overflow: "hidden", aspectRatio: CARD_ASPECT_RATIO, background: "#fff", boxShadow: "0 3px 10px rgba(60,45,25,0.1)" }}>
           <CardArtwork card={card} sizes="64px" eager decorative />
-          <div style={{ position: "absolute", top: 3, left: 4, background: "rgba(255,255,255,0.92)", color: chap.color, fontWeight: 800, fontSize: 9, borderRadius: 5, padding: "0 4px" }}>{badge}</div>
+          <div style={{ position: "absolute", top: 3, left: 4, background: "rgba(255,255,255,0.92)", color: chap.color, fontWeight: 800, fontSize: 12, borderRadius: 5, padding: "0 4px" }}>{badge}</div>
         </div>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 13.5, fontWeight: 800, color: chap.color }}>{label}</span>
-          <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 11, color: "#a99b82" }}>{sub}</span>
+          <span style={{ fontSize: 15, fontWeight: 800, color: chap.color }}>{label}</span>
+          <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: "#a99b82" }}>{sub}</span>
         </div>
         {desc ? (
-          <div style={{ fontSize: 11, color: "#9a8f78", marginTop: 1 }}>
+          <div style={{ fontSize: 13, color: "#9a8f78", marginTop: 1 }}>
             <div>{desc}</div>
             {descEn ? <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", marginTop: 1 }}>{descEn}</div> : null}
           </div>
         ) : null}
-        <div style={{ fontFamily: SERIF, fontSize: 15, fontWeight: 700, color: "#2a2622", marginTop: 4 }}>
-          {String(card.n).padStart(2, "0")}. {card.cn} <span style={{ fontSize: 11, color: "#8a7f6c", letterSpacing: 1 }}>{card.en}</span>
+        <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 700, color: "#2a2622", marginTop: 4 }}>
+          {String(card.n).padStart(2, "0")}. {card.cn} <span style={{ fontSize: 13, color: "#8a7f6c", letterSpacing: 1 }}>{card.en}</span>
         </div>
-        <div style={{ fontSize: 12, color: "#3a352e", lineHeight: 1.55, marginTop: 5 }}>
+        <div style={{ fontSize: 15, color: "#3a352e", lineHeight: 1.65, marginTop: 5 }}>
           <b style={{ color: chap.color }}>影响 · Affects you：</b>{card.affect_cn}
         </div>
-        <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 11.5, color: "#7a7060", lineHeight: 1.5, marginTop: 2 }}>{card.affect_en}</div>
+        <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: "#7a7060", lineHeight: 1.6, marginTop: 2 }}>{card.affect_en}</div>
         <RichCardInsight card={card} compact />
-        <div style={{ fontSize: 12, color: "#3a352e", lineHeight: 1.55, marginTop: 6 }}>
+        <div style={{ fontSize: 15, color: "#3a352e", lineHeight: 1.65, marginTop: 6 }}>
           <b style={{ color: chap.color }}>练习 · Practice：</b>{card.practice_cn}
         </div>
-        <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 11.5, color: "#7a7060", lineHeight: 1.5, marginTop: 2 }}>{card.practice_en}</div>
+        <div lang="en" style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 14, color: "#7a7060", lineHeight: 1.6, marginTop: 2 }}>{card.practice_en}</div>
       </div>
     </div>
   );
@@ -362,7 +362,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         {landing ? null : (
           <header style={{ textAlign: "center", marginBottom: 16 }}>
             <div style={{ fontFamily: SERIF, fontSize: 25, fontWeight: 700, letterSpacing: 2 }}>幸福人生觉察卡</div>
-            <div style={{ fontFamily: SERIF, fontSize: 10.5, letterSpacing: 4, color: "#a9863c", marginTop: 4 }}>HAPPY LIFE AWARENESS CARDS</div>
+            <div style={{ fontFamily: SERIF, fontSize: 12, letterSpacing: 4, color: "#a9863c", marginTop: 4 }}>HAPPY LIFE AWARENESS CARDS</div>
           </header>
         )}
 
@@ -400,10 +400,10 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                 <button type="button" key={m} aria-pressed={active} onClick={() => changeMode(m)} style={{
                   flex: 1, border: "none", borderRadius: 10, padding: "9px 4px", cursor: "pointer",
                   background: active ? "#2a2622" : "transparent", color: active ? "#f3e6bf" : "#6a5f4a",
-                  fontWeight: 700, fontSize: 13, transition: "all .2s",
+                  fontWeight: 700, fontSize: 14, transition: "all .2s",
                 }}>
                   <div>{cn}</div>
-                  <div style={{ fontFamily: SERIF, fontSize: 9, fontStyle: "italic", opacity: 0.8, marginTop: 1 }}>{en}</div>
+                  <div style={{ fontFamily: SERIF, fontSize: 12, fontStyle: "italic", opacity: 0.8, marginTop: 1 }}>{en}</div>
                 </button>
               );
             })}
@@ -418,7 +418,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
               return (
                 <button type="button" key={k} aria-pressed={active} onClick={() => setMethod(k)} style={{
                   border: `1.5px solid ${active ? "#b5842b" : "#cdbf9e"}`, background: active ? "#b5842b" : "transparent",
-                  color: active ? "#fff" : "#8a7a54", borderRadius: 999, padding: "6px 15px", fontSize: 12.5, fontWeight: 600, cursor: "pointer",
+                  color: active ? "#fff" : "#8a7a54", borderRadius: 999, padding: "6px 15px", fontSize: 14, fontWeight: 600, cursor: "pointer",
                 }}>{cn} · {en}</button>
               );
             })}
@@ -428,11 +428,11 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         {/* 3-card position set picker */}
         {activeMode === 3 && (
           <div style={{ marginBottom: 14 }}>
-            <label htmlFor="three-card-spread" style={{ fontSize: 11.5, color: "#8a7f6c", fontWeight: 600, display: "block", marginBottom: 5 }}>选择牌阵含义 · Position meanings</label>
+            <label htmlFor="three-card-spread" style={{ fontSize: 14, color: "#8a7f6c", fontWeight: 600, display: "block", marginBottom: 5 }}>选择牌阵含义 · Position meanings</label>
             <div style={{ position: "relative" }}>
               <select id="three-card-spread" className="aw" value={set3} onChange={(e) => setSet3(Number(e.target.value))} style={{
                 width: "100%", padding: "11px 34px 11px 14px", borderRadius: 12, border: "1.5px solid #cdbf9e",
-                background: "#fffdf8", fontSize: 13.5, fontWeight: 600, color: "#2a2622", cursor: "pointer",
+                background: "#fffdf8", fontSize: 16, fontWeight: 600, color: "#2a2622", cursor: "pointer",
               }}>
                 {SPREAD3.map((s, i) => <option key={i} value={i}>{s.name}  ({s.en})</option>)}
               </select>
@@ -443,7 +443,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
 
         {/* Inner child explainer */}
         {activeMode === 4 && (
-          <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 12, color: "#7a6a44", lineHeight: 1.6 }}>
+          <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 15, color: "#7a6a44", lineHeight: 1.65 }}>
             <b>内在小孩牌阵</b> · Inner Child Spread — 帮助你找出内在小孩的需求与渴望。
           </div>
         )}
@@ -456,18 +456,18 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                 const meta = metaFor(activeMode)[i];
                 return (
                   <div key={i}>
-                    <label htmlFor={`card-number-${i}`} style={{ fontSize: 10.5, color: "#8a7f6c", fontWeight: 700, display: "block", marginBottom: 3, textAlign: "center" }}>
+                    <label htmlFor={`card-number-${i}`} style={{ fontSize: 12, color: "#8a7f6c", fontWeight: 700, display: "block", marginBottom: 3, textAlign: "center" }}>
                       {activeMode === 1 ? "编号 №" : `${i + 1}. ${meta[0]}`}
                     </label>
                     <input id={`card-number-${i}`} type="number" min={1} max={40} inputMode="numeric" value={inputs[i]}
                       onChange={(e) => { const v = [...inputs]; v[i] = e.target.value; setInputs(v); }}
                       placeholder="1–40"
-                      style={{ width: "100%", boxSizing: "border-box", padding: "10px 6px", borderRadius: 10, border: "1.5px solid #cdbf9e", background: "#fffdf8", fontSize: 15, textAlign: "center", fontWeight: 700, color: "#2a2622" }} />
+                      style={{ width: "100%", boxSizing: "border-box", padding: "10px 6px", borderRadius: 10, border: "1.5px solid #cdbf9e", background: "#fffdf8", fontSize: 16, textAlign: "center", fontWeight: 700, color: "#2a2622" }} />
                   </div>
                 );
               })}
             </div>
-            {err && <div style={{ color: "#b04a2e", fontSize: 12, marginTop: 8, textAlign: "center" }}>{err}</div>}
+            {err && <div style={{ color: "#b04a2e", fontSize: 14, marginTop: 8, textAlign: "center" }}>{err}</div>}
           </div>
         )}
 
@@ -476,7 +476,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           <button className="deck-primary-action" type="button" onClick={() => generate()} disabled={isDrawInProgress} aria-busy={isDrawInProgress} style={{
             background: "#2a2622", color: "#f3e6bf", border: "none", borderRadius: 999, padding: "12px 26px",
             minWidth: 168, minHeight: 44, display: "inline-flex", alignItems: "center", justifyContent: "center",
-            fontSize: 15, fontWeight: 700, cursor: isDrawInProgress ? "wait" : "pointer", opacity: isDrawInProgress ? 0.72 : 1,
+            fontSize: 16, fontWeight: 700, cursor: isDrawInProgress ? "wait" : "pointer", opacity: isDrawInProgress ? 0.72 : 1,
           }}>
             {isDrawInProgress
               ? method === "input" ? "查看解读 · Read" : `抽 ${activeMode} 张牌 · Draw ${activeMode}`
@@ -518,8 +518,8 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                   boxShadow: "0 6px 24px rgba(80,60,30,0.08)", overflow: "hidden", animation: "fadeUp .5s ease both", animationDelay: "150ms",
                 }}>
                   <div style={{ background: chap.tint, padding: "12px 18px", borderBottom: `1px solid ${chap.color}22` }}>
-                    <div style={{ fontSize: 12, color: chap.color, fontWeight: 700, letterSpacing: 1 }}>第 {String(reading[0].n).padStart(2, "0")} 张 · {chap.cn} / {chap.en}</div>
-                    <div style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, marginTop: 2 }}>{reading[0].cn} <span style={{ fontSize: 13, color: "#8a7f6c", letterSpacing: 1 }}>{reading[0].en}</span></div>
+                    <div style={{ fontSize: 13, color: chap.color, fontWeight: 700, letterSpacing: 1 }}>第 {String(reading[0].n).padStart(2, "0")} 张 · {chap.cn} / {chap.en}</div>
+                    <div style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, marginTop: 2 }}>{reading[0].cn} <span style={{ fontSize: 14, color: "#8a7f6c", letterSpacing: 1 }}>{reading[0].en}</span></div>
                   </div>
                   <div style={{ padding: "16px 18px 18px" }}>
                     <Block label="此刻的提醒" sub="Message for this moment" color={chap.color} cn={reading[0].affect_cn} en={reading[0].affect_en} />
@@ -534,7 +534,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           {/* Three-card row */}
           {reading && activeMode === 3 && (
             <div key={dealKey} style={{ marginTop: 20 }}>
-              <div style={{ textAlign: "center", fontSize: 12.5, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{SPREAD3[set3].name} · {SPREAD3[set3].en}</div>
+              <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{SPREAD3[set3].name} · {SPREAD3[set3].en}</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, maxWidth: 360, margin: "0 auto" }}>
                 {reading.map((c, i) => <MiniCard key={i} card={c} badge={i + 1} label={posMeta[i][0]} sub={posMeta[i][1]} index={i} />)}
               </div>
@@ -564,7 +564,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         </section>
         </div>
 
-        <footer className="card-deck-disclaimer" style={{ textAlign: "center", marginTop: 30, fontSize: 11, color: "#a99b82", lineHeight: 1.6 }}>
+        <footer className="card-deck-disclaimer" style={{ textAlign: "center", marginTop: 30, fontSize: 13, color: "#a99b82", lineHeight: 1.65 }}>
           用于自我觉察与反思，不是诊断或建议。<br />A gentle tool for self-reflection — not diagnosis or advice.
         </footer>
       </div>
@@ -577,11 +577,11 @@ function Block({ label, sub, cn, en, color, last }) {
     <div style={{ marginBottom: last ? 0 : 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
         <span style={{ width: 6, height: 6, borderRadius: 999, background: color }} />
-        <span style={{ fontSize: 13, fontWeight: 700, color: "#2a2622" }}>{label}</span>
-        <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 11, color: "#a99b82" }}>{sub}</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: "#2a2622" }}>{label}</span>
+        <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 13, color: "#a99b82" }}>{sub}</span>
       </div>
-      <div style={{ fontSize: 13.5, lineHeight: 1.65, color: "#3a352e" }}>{cn}</div>
-      <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 12.5, lineHeight: 1.6, color: "#7a7060", marginTop: 4 }}>{en}</div>
+      <div style={{ fontSize: 16, lineHeight: 1.75, color: "#3a352e" }}>{cn}</div>
+      <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 15, lineHeight: 1.7, color: "#7a7060", marginTop: 4 }}>{en}</div>
     </div>
   );
 }

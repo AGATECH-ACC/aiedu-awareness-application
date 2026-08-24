@@ -18,7 +18,7 @@ export default function Markdownish({ text }) {
   const flush = () => {
     if (!list) return;
     const key = `${listType}-${blocks.length}`;
-    const style = { margin: '6px 0 12px', paddingLeft: 22, color: '#3a352e' };
+    const style = { margin: '7px 0 14px', paddingLeft: 22, color: '#3a352e', fontSize: 16 };
     blocks.push(listType === 'ol' ? <ol key={key} style={style}>{list}</ol> : <ul key={key} style={style}>{list}</ul>);
     list = null;
     listType = null;
@@ -29,13 +29,13 @@ export default function Markdownish({ text }) {
     const ordered = l.match(/^\d+\.\s+(.+)$/);
     if (l.startsWith('### ')) {
       flush();
-      blocks.push(<h4 key={idx} style={{ fontSize: 14, color: '#5e5039', margin: '14px 0 6px' }}>{l.slice(4)}</h4>);
+      blocks.push(<h4 key={idx} style={{ fontSize: 16, color: '#5e5039', margin: '16px 0 7px' }}>{l.slice(4)}</h4>);
     } else if (l.startsWith('## ')) {
       flush();
-      blocks.push(<h3 key={idx} style={{ fontFamily: 'Georgia, serif', fontSize: 16, color: '#b5842b', margin: '18px 0 8px', borderBottom: '1px solid #eadfc4', paddingBottom: 5 }}>{l.slice(3)}</h3>);
+      blocks.push(<h3 key={idx} style={{ fontFamily: 'Georgia, serif', fontSize: 18, color: '#b5842b', margin: '20px 0 9px', borderBottom: '1px solid #eadfc4', paddingBottom: 5 }}>{l.slice(3)}</h3>);
     } else if (l.startsWith('# ')) {
       flush();
-      blocks.push(<h2 key={idx} style={{ fontFamily: 'Georgia, serif', fontSize: 19, margin: '16px 0 8px' }}>{l.slice(2)}</h2>);
+      blocks.push(<h2 key={idx} style={{ fontFamily: 'Georgia, serif', fontSize: 22, margin: '18px 0 9px' }}>{l.slice(2)}</h2>);
     } else if (l.startsWith('- ') || l.startsWith('* ')) {
       if (listType && listType !== 'ul') flush();
       if (!list) list = [];
@@ -48,12 +48,12 @@ export default function Markdownish({ text }) {
       list.push(<li key={idx} style={{ margin: '4px 0', lineHeight: 1.65 }}>{inline(ordered[1])}</li>);
     } else if (l.startsWith('> ')) {
       flush();
-      blocks.push(<blockquote key={idx} style={{ margin: '10px 0', padding: '10px 12px', borderLeft: '3px solid #b5842b', background: '#f7efdf', color: '#5e5039', lineHeight: 1.65 }}>{inline(l.slice(2))}</blockquote>);
+      blocks.push(<blockquote key={idx} style={{ margin: '12px 0', padding: '12px 14px', borderLeft: '3px solid #b5842b', background: '#f7efdf', color: '#5e5039', fontSize: 16, lineHeight: 1.72 }}>{inline(l.slice(2))}</blockquote>);
     } else if (l === '') {
       flush();
     } else {
       flush();
-      blocks.push(<p key={idx} style={{ margin: '6px 0', lineHeight: 1.7, color: '#3a352e', fontSize: 14 }}>{inline(l)}</p>);
+      blocks.push(<p key={idx} style={{ margin: '7px 0', lineHeight: 1.78, color: '#3a352e', fontSize: 16 }}>{inline(l)}</p>);
     }
   });
   flush();

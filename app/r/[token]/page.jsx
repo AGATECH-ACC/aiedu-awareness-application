@@ -49,7 +49,7 @@ export default async function PublicReportPage({ params }) {
           <ReportBackButton />
           <Link href="/" className="public-report-brand">
             <div style={{ fontFamily: 'Georgia, serif', fontSize: 25, fontWeight: 700, letterSpacing: 2 }}>幸福人生觉察卡</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: 10, letterSpacing: 3.5, color: '#a9863c', marginTop: 4 }}>HAPPY LIFE AWARENESS CARDS</div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: 12, letterSpacing: 3.2, color: '#a9863c', marginTop: 4 }}>HAPPY LIFE AWARENESS CARDS</div>
           </Link>
           <span aria-hidden="true" />
         </header>
@@ -57,19 +57,19 @@ export default async function PublicReportPage({ params }) {
         <article style={{ background: '#fffdf8', border: '1px solid #e2d5b8', borderRadius: 20, boxShadow: '0 10px 36px rgba(80,60,30,.09)', padding: '12px clamp(18px, 5vw, 38px) 30px' }}>
           <div style={{ borderBottom: '1px solid #eadfc4', padding: '14px 0 12px', marginBottom: 4 }}>
             <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(20px, 4vw, 28px)', margin: 0 }}>深度觉察报告 · Deep Awareness Report</h1>
-            <time dateTime={report.created_at} style={{ display: 'block', color: '#92846c', fontSize: 11.5, marginTop: 6 }}>
+            <time dateTime={report.created_at} style={{ display: 'block', color: '#92846c', fontSize: 14, marginTop: 6 }}>
               {new Date(report.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
             </time>
           </div>
           <Markdownish text={report.content} />
-          <div style={{ borderTop: '1px solid #eadfc4', marginTop: 24, paddingTop: 15, color: '#8a7d68', textAlign: 'center', fontSize: 11.5, lineHeight: 1.65 }}>
+          <div style={{ borderTop: '1px solid #eadfc4', marginTop: 24, paddingTop: 15, color: '#8a7d68', textAlign: 'center', fontSize: 14, lineHeight: 1.7 }}>
             用于自我觉察与反思，不是心理诊断、治疗或医疗建议。<br />For self-reflection only — not diagnosis, therapy, or medical advice.
           </div>
         </article>
 
         <aside style={{ textAlign: 'center', marginTop: 22, color: '#6f624e' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: 17 }}>也为自己抽一张牌 · Draw a card for yourself</div>
-          <Link href="/draw" style={{ display: 'inline-block', marginTop: 10, padding: '10px 18px', borderRadius: 999, background: '#b5842b', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>体验觉察卡 · Try the deck</Link>
+          <Link href="/draw" style={{ display: 'inline-block', marginTop: 10, padding: '10px 18px', borderRadius: 999, background: '#b5842b', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: 16 }}>体验觉察卡 · Try the deck</Link>
         </aside>
       </div>
     </main>

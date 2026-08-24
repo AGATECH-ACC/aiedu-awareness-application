@@ -1,6 +1,12 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; max-width: 100%; overflow-x: clip; }
 body { min-width: 0; }
+:root {
+  --type-body: 16px;
+  --type-secondary: 14px;
+  --type-caption: 12px;
+  --type-control: 16px;
+}
 a { color: inherit; }
 button, input, textarea, select { font: inherit; }
 
@@ -32,7 +38,7 @@ button, input, textarea, select { font: inherit; }
   display: flex;
   gap: 10px;
   align-items: center;
-  font-size: 13.5px;
+  font-size: var(--type-secondary);
 }
 
 .top-nav-draw { color: #7a6f5a; text-decoration: none; }
@@ -57,7 +63,7 @@ button, input, textarea, select { font: inherit; }
   border-radius: 50%;
   background: #b5842b;
   color: #fff;
-  font-size: 11px;
+  font-size: var(--type-caption);
 }
 
 .top-nav-signout {
@@ -66,7 +72,7 @@ button, input, textarea, select { font: inherit; }
   background: transparent;
   color: #8a6c31;
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--type-secondary);
   font-weight: 600;
 }
 
@@ -221,7 +227,7 @@ button, input, textarea, select { font: inherit; }
 
 .home-eyebrow {
   margin-bottom: 23px;
-  font-size: 11px;
+  font-size: var(--type-caption);
 }
 
 .home-experience-copy h2 {
@@ -350,7 +356,7 @@ button, input, textarea, select { font: inherit; }
 }
 
 .home-continue > div > p {
-  font-size: 10px;
+  font-size: var(--type-caption);
 }
 
 .home-continue h2 {
@@ -361,13 +367,13 @@ button, input, textarea, select { font: inherit; }
 }
 
 .home-continue span {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.55;
 }
 
 .home-continue i {
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: var(--type-secondary);
 }
 
 .home-continue > a {
@@ -395,7 +401,7 @@ button, input, textarea, select { font: inherit; }
   padding: 9px 0 11px;
   color: #8e806d;
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 12px;
+  font-size: var(--type-secondary);
 }
 
 @media (max-width: 980px) {
@@ -421,7 +427,7 @@ button, input, textarea, select { font: inherit; }
   .top-nav--hero .top-nav-portal { min-height: 38px; padding: 8px 10px; }
   .home-title { padding: 34px 18px 24px; }
   .home-title h1 { font-size: 42px; letter-spacing: .05em; }
-  .home-title-en { font-size: 11px; letter-spacing: .2em; }
+  .home-title-en { font-size: 12px; letter-spacing: .2em; }
   .home-title-promise { font-size: 12px; letter-spacing: .08em; }
   .home-experience {
     grid-template-columns: 1fr;
@@ -487,7 +493,7 @@ button, input, textarea, select { font: inherit; }
   margin: 0;
   color: var(--home-gold);
   font-family: Baskerville, Georgia, serif;
-  font-size: 11px;
+  font-size: var(--type-caption);
   font-weight: 700;
   letter-spacing: .27em;
 }
@@ -552,7 +558,7 @@ button, input, textarea, select { font: inherit; }
   margin-top: 8px;
   color: #6f5f4d;
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: 15px;
   font-style: italic;
   letter-spacing: .02em;
   line-height: 1.5;
@@ -574,7 +580,7 @@ button, input, textarea, select { font: inherit; }
   border: 1px solid var(--home-navy);
   border-radius: 8px;
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 14px;
+  font-size: var(--type-control);
   font-weight: 700;
   letter-spacing: .03em;
   text-align: center;
@@ -641,14 +647,14 @@ button, input, textarea, select { font: inherit; }
 
 .home-hero-details span {
   color: #5d5144;
-  font-size: 11px;
+  font-size: var(--type-secondary);
   line-height: 1.35;
 }
 
 .home-hero-details i {
   color: #8c7459;
   font-family: Baskerville, Georgia, serif;
-  font-size: 9.5px;
+  font-size: var(--type-caption);
   white-space: nowrap;
 }
 
@@ -701,7 +707,7 @@ button, input, textarea, select { font: inherit; }
   background: rgba(16, 43, 77, .94);
   color: var(--home-paper);
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 15px;
+  font-size: var(--type-body);
   letter-spacing: .04em;
   line-height: 1.65;
 }
@@ -731,7 +737,7 @@ button, input, textarea, select { font: inherit; }
 .home-section-lead {
   margin: 28px 0 0;
   color: #554b3f;
-  font-size: 15px;
+  font-size: var(--type-body);
   line-height: 2;
 }
 
@@ -739,7 +745,7 @@ button, input, textarea, select { font: inherit; }
   margin: 14px 0 0;
   color: #88735b;
   font-family: Baskerville, Georgia, serif;
-  font-size: 14px;
+  font-size: 15px;
   font-style: italic;
   line-height: 1.65;
 }
@@ -752,14 +758,14 @@ button, input, textarea, select { font: inherit; }
   border-left: 2px solid var(--home-gold);
   background: #f3e9d5;
   color: var(--home-navy);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.6;
 }
 
 .home-note i {
   color: #857158;
   font-family: Baskerville, Georgia, serif;
-  font-size: 12px;
+  font-size: var(--type-secondary);
 }
 
 .home-why {
@@ -787,7 +793,7 @@ button, input, textarea, select { font: inherit; }
 .home-why-title > p:not(.home-kicker) {
   margin: 28px 0 0;
   color: #e6d9c0;
-  font-size: 14px;
+  font-size: var(--type-body);
   line-height: 1.9;
 }
 
@@ -796,7 +802,7 @@ button, input, textarea, select { font: inherit; }
   margin-top: 13px;
   color: #c8ae82;
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: 15px;
   font-style: italic;
   line-height: 1.6;
 }
@@ -833,14 +839,14 @@ button, input, textarea, select { font: inherit; }
   margin-left: 11px;
   color: #cfb27e;
   font-family: Baskerville, Georgia, serif;
-  font-size: 12px;
+  font-size: var(--type-secondary);
   font-style: italic;
 }
 
 .home-why-list p {
   margin: 8px 0 0;
   color: #d9ceb9;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.7;
 }
 
@@ -885,13 +891,13 @@ button, input, textarea, select { font: inherit; }
   margin-left: 10px;
   color: #9a784f;
   font-family: Baskerville, Georgia, serif;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .home-benefit-list p {
   margin: 8px 0 0;
   color: #625548;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.7;
 }
 
@@ -917,13 +923,13 @@ button, input, textarea, select { font: inherit; }
   background: rgba(255, 249, 236, .95);
   color: var(--home-navy);
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 13px;
+  font-size: var(--type-secondary);
 }
 
 .home-image-caption i {
   color: #977449;
   font-family: Baskerville, Georgia, serif;
-  font-size: 11px;
+  font-size: var(--type-caption);
 }
 
 .home-ritual {
@@ -946,7 +952,7 @@ button, input, textarea, select { font: inherit; }
   margin: 12px 0 0;
   color: #8b7357;
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: var(--type-secondary);
   font-style: italic;
 }
 
@@ -972,7 +978,7 @@ button, input, textarea, select { font: inherit; }
 .home-ritual-steps span {
   color: var(--home-gold);
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: var(--type-secondary);
   font-weight: 700;
   letter-spacing: .14em;
 }
@@ -988,13 +994,13 @@ button, input, textarea, select { font: inherit; }
 .home-ritual-steps i {
   color: #9a784f;
   font-family: Baskerville, Georgia, serif;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .home-ritual-steps p {
   margin: 13px 0 0;
   color: #645648;
-  font-size: 12.5px;
+  font-size: 15px;
   line-height: 1.75;
 }
 
@@ -1086,7 +1092,7 @@ button, input, textarea, select { font: inherit; }
     background: #f1e7d4;
   }
   .home-kicker {
-    font-size: 9px;
+    font-size: var(--type-caption);
     letter-spacing: .21em;
   }
   .home-hero h1 {
@@ -1094,7 +1100,7 @@ button, input, textarea, select { font: inherit; }
     font-size: clamp(49px, 14vw, 64px);
   }
   .home-hero-en {
-    font-size: 10px;
+    font-size: var(--type-caption);
     letter-spacing: .18em;
   }
   .home-hero-lead {
@@ -1120,7 +1126,7 @@ button, input, textarea, select { font: inherit; }
     font-size: 18px;
   }
   .home-hero-details span {
-    font-size: 9.5px;
+    font-size: var(--type-caption);
   }
   .home-hero-details i {
     white-space: normal;
@@ -1139,7 +1145,7 @@ button, input, textarea, select { font: inherit; }
     right: 15px;
     bottom: 15px;
     padding: 13px 15px;
-    font-size: 13px;
+    font-size: 15px;
   }
   .home-story-copy h2,
   .home-benefits-copy h2,
@@ -1275,7 +1281,7 @@ button, input, textarea, select { font: inherit; }
 .top-nav--card .top-nav-brand-copy small {
   color: var(--gold);
   font-family: Baskerville, Georgia, serif;
-  font-size: 8.5px;
+  font-size: 11px;
   font-style: normal;
   letter-spacing: .2em;
   text-transform: uppercase;
@@ -1309,7 +1315,7 @@ button, input, textarea, select { font: inherit; }
 .top-nav--card .top-nav-draw small,
 .top-nav--card .top-nav-signin small {
   color: inherit;
-  font: italic 400 11px Baskerville, Georgia, serif;
+  font: italic 400 12px Baskerville, Georgia, serif;
   letter-spacing: .02em;
 }
 
@@ -1362,7 +1368,7 @@ button, input, textarea, select { font: inherit; }
 .landing-title-en {
   color: var(--gold);
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: var(--type-secondary);
   font-weight: 700;
   letter-spacing: .32em;
 }
@@ -1371,7 +1377,7 @@ button, input, textarea, select { font: inherit; }
   margin: 24px 0 0;
   color: #31478d;
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 14px;
+  font-size: var(--type-body);
   letter-spacing: .15em;
   line-height: 1.9;
 }
@@ -1379,7 +1385,7 @@ button, input, textarea, select { font: inherit; }
 .landing-title p span {
   color: #766149;
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: 15px;
   font-style: italic;
   letter-spacing: .04em;
 }
@@ -1420,7 +1426,7 @@ button, input, textarea, select { font: inherit; }
 .draw-controls-intro > div {
   color: var(--gold);
   font-family: Baskerville, Georgia, serif;
-  font-size: 11px;
+  font-size: var(--type-caption);
   font-weight: 700;
   letter-spacing: .22em;
 }
@@ -1437,14 +1443,14 @@ button, input, textarea, select { font: inherit; }
 .draw-controls-intro p {
   margin: 0 0 34px;
   color: #5f5549;
-  font-size: 14px;
+  font-size: var(--type-body);
   line-height: 1.85;
 }
 
 .draw-controls-intro p span {
   color: #7c705f;
   font-family: Baskerville, Georgia, serif;
-  font-size: 13px;
+  font-size: 15px;
   font-style: italic;
 }
 
@@ -1458,7 +1464,7 @@ button, input, textarea, select { font: inherit; }
 .draw-purpose > div {
   color: var(--gold);
   font-family: Baskerville, Georgia, serif;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: .08em;
 }
@@ -1466,7 +1472,7 @@ button, input, textarea, select { font: inherit; }
 .draw-purpose p {
   margin: 9px 0 15px;
   color: #51493f;
-  font-size: 12.5px;
+  font-size: 15px;
   line-height: 1.7;
 }
 
@@ -1475,7 +1481,7 @@ button, input, textarea, select { font: inherit; }
   margin-top: 4px;
   color: #7c705f;
   font-family: Baskerville, Georgia, serif;
-  font-size: 11.5px;
+  font-size: var(--type-secondary);
   font-style: italic;
   line-height: 1.55;
 }
@@ -1504,14 +1510,14 @@ button, input, textarea, select { font: inherit; }
 .draw-purpose li strong {
   color: var(--deep-navy);
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: .06em;
 }
 
 .draw-purpose li small {
   color: #8a7456;
   font-family: Baskerville, Georgia, serif;
-  font-size: 10px;
+  font-size: var(--type-caption);
   font-style: italic;
 }
 
@@ -1581,14 +1587,14 @@ button, input, textarea, select { font: inherit; }
   color: var(--deep-navy);
   text-align: center;
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 14px;
+  font-size: var(--type-body);
   letter-spacing: .08em;
 }
 
 .draw-stage-prompt small {
   color: #81725e;
   font-family: Baskerville, Georgia, serif;
-  font-size: 12px;
+  font-size: var(--type-secondary);
   font-style: italic;
   letter-spacing: .02em;
 }
@@ -1617,7 +1623,7 @@ button, input, textarea, select { font: inherit; }
 .landing-signin-kicker {
   color: #d8ae63;
   font-family: Baskerville, Georgia, serif;
-  font-size: 10px;
+  font-size: var(--type-caption);
   font-weight: 700;
   letter-spacing: .2em;
 }
@@ -1632,7 +1638,7 @@ button, input, textarea, select { font: inherit; }
 .landing-signin p {
   margin: 0;
   color: #e7decd;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.75;
 }
 
@@ -1663,7 +1669,7 @@ button, input, textarea, select { font: inherit; }
   padding: 0 24px 28px;
   color: #87745c;
   font-family: Baskerville, Georgia, serif;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: .08em;
 }
 
@@ -1710,7 +1716,7 @@ button, input, textarea, select { font: inherit; }
 .educator-section-title > span {
   color: var(--educator-gold);
   font-family: Baskerville, Georgia, serif;
-  font-size: 10px;
+  font-size: var(--type-caption);
   font-weight: 700;
   letter-spacing: .2em;
 }
@@ -1752,8 +1758,8 @@ button, input, textarea, select { font: inherit; }
 
 .educator-identity strong,
 .educator-identity small { display: block; }
-.educator-identity strong { color: #3f372d; font-size: 13px; }
-.educator-identity small { margin-top: 3px; color: #85765f; font-size: 11px; overflow-wrap: anywhere; }
+.educator-identity strong { color: #3f372d; font-size: var(--type-secondary); }
+.educator-identity small { margin-top: 3px; color: #85765f; font-size: var(--type-caption); overflow-wrap: anywhere; }
 
 .educator-tabs {
   display: grid;
@@ -1784,7 +1790,7 @@ button, input, textarea, select { font: inherit; }
 .educator-tabs span,
 .educator-tabs small { display: block; }
 .educator-tabs span { font-weight: 800; }
-.educator-tabs small { margin-top: 2px; font: italic 11px Baskerville, Georgia, serif; opacity: .78; }
+.educator-tabs small { margin-top: 2px; font: italic 12px Baskerville, Georgia, serif; opacity: .78; }
 
 .educator-client-flow { max-width: 820px; margin: 0 auto; }
 
@@ -1803,7 +1809,7 @@ button, input, textarea, select { font: inherit; }
   padding: 10px;
   border-bottom: 2px solid #d9cdb5;
   color: #8e816d;
-  font-size: 11.5px;
+  font-size: var(--type-secondary);
   line-height: 1.25;
 }
 
@@ -1815,10 +1821,10 @@ button, input, textarea, select { font: inherit; }
   height: 25px;
   border: 1px solid #cdbd9e;
   border-radius: 50%;
-  font: 700 11px Georgia, serif;
+  font: 700 12px Georgia, serif;
 }
 
-.educator-step small { font: italic 10px Baskerville, Georgia, serif; }
+.educator-step small { font: italic 12px Baskerville, Georgia, serif; }
 .educator-step.is-active { border-color: var(--educator-blue); color: var(--educator-navy); font-weight: 800; }
 .educator-step.is-active > span { border-color: var(--educator-blue); background: var(--educator-blue); color: #fff; }
 .educator-step.is-done { border-color: #5f815e; color: #4f724e; }
@@ -1841,7 +1847,7 @@ button, input, textarea, select { font: inherit; }
   font-family: "Songti SC", STSong, Georgia, serif;
   font-size: 23px;
 }
-.educator-panel-heading p { margin: 0 0 20px; color: #716553; font-size: 12.5px; line-height: 1.75; }
+.educator-panel-heading p { margin: 0 0 20px; color: #716553; font-size: 15px; line-height: 1.75; }
 
 .educator-form-grid {
   display: grid;
@@ -1853,7 +1859,7 @@ button, input, textarea, select { font: inherit; }
   display: block;
   margin-bottom: 7px;
   color: #51483c;
-  font-size: 12px;
+  font-size: var(--type-secondary);
   font-weight: 800;
 }
 
@@ -1902,7 +1908,7 @@ button, input, textarea, select { font: inherit; }
   margin: 13px auto 0;
   background: transparent;
   color: #8a6727;
-  font-size: 12px;
+  font-size: var(--type-secondary);
 }
 .educator-primary-button:disabled,
 .educator-secondary-button:disabled,
@@ -1932,17 +1938,17 @@ button, input, textarea, select { font: inherit; }
 .recipient-verified > span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #5f815e; color: #fff; font-weight: 900; }
 .recipient-verified strong,
 .recipient-verified small { display: block; }
-.recipient-verified small { margin-top: 2px; color: #647861; font-size: 11px; }
+.recipient-verified small { margin-top: 2px; color: #647861; font-size: 13px; }
 
 .educator-generate-panel { max-width: 540px; margin: 18px auto 0; }
-.educator-elapsed { margin-top: 8px; color: #837762; font-size: 11px; text-align: center; }
+.educator-elapsed { margin-top: 8px; color: #837762; font-size: 13px; text-align: center; }
 
 .delivery-result { display: flex; align-items: center; gap: 12px; padding: 15px; border-radius: 12px; }
 .delivery-result.is-sent { border: 1px solid #a9c3a1; background: #edf5e9; color: #405b3e; }
 .delivery-result.is-failed { border: 1px solid #e0aa9a; background: #fff0ea; color: #8a3e2d; }
 .delivery-result > span { display: grid; flex: 0 0 auto; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: currentColor; color: #fff; font-weight: 900; }
 .delivery-result h2 { margin: 0; font-size: 16px; }
-.delivery-result p { margin: 3px 0 0; font-size: 12px; }
+.delivery-result p { margin: 3px 0 0; font-size: var(--type-secondary); }
 
 .educator-error {
   max-width: 680px;
@@ -1952,7 +1958,7 @@ button, input, textarea, select { font: inherit; }
   border-radius: 10px;
   background: #fff0ea;
   color: #8f3f2d;
-  font-size: 12.5px;
+  font-size: var(--type-secondary);
   line-height: 1.6;
 }
 
@@ -1962,7 +1968,7 @@ button, input, textarea, select { font: inherit; }
 .educator-empty { padding: 30px 18px; border: 1px dashed #d5c49f; border-radius: 15px; background: rgba(255,253,248,.72); color: #756850; text-align: center; }
 .educator-empty > span { display: block; margin-bottom: 8px; color: var(--educator-gold); font-size: 25px; }
 .educator-empty strong { color: #443b30; }
-.educator-empty p { margin: 6px 0 0; font-size: 12px; line-height: 1.65; }
+.educator-empty p { margin: 6px 0 0; font-size: var(--type-secondary); line-height: 1.65; }
 
 .educator-delivery-list { display: grid; gap: 9px; margin-top: 12px; }
 .educator-delivery { border: 1px solid #dfd2b8; border-radius: 12px; background: #fffdf8; overflow: hidden; }
@@ -1980,12 +1986,12 @@ button, input, textarea, select { font: inherit; }
 .educator-delivery-recipient { min-width: 0; flex: 1; }
 .educator-delivery-recipient strong,
 .educator-delivery-recipient span { display: block; }
-.educator-delivery-recipient strong { color: #3b342b; font-size: 13px; }
-.educator-delivery-recipient span { margin-top: 2px; color: #8a7c65; font-size: 11px; overflow-wrap: anywhere; }
+.educator-delivery-recipient strong { color: #3b342b; font-size: var(--type-secondary); }
+.educator-delivery-recipient span { margin-top: 2px; color: #8a7c65; font-size: var(--type-caption); overflow-wrap: anywhere; }
 .educator-delivery-meta { flex: 0 0 auto; text-align: right; }
-.educator-delivery-meta time { display: block; margin-top: 4px; color: #93856e; font-size: 10px; }
-.educator-delivery-open { display: block; margin-top: 5px; color: var(--educator-blue); font-size: 10px; font-weight: 800; }
-.delivery-status { font-size: 10px; font-weight: 800; }
+.educator-delivery-meta time { display: block; margin-top: 4px; color: #93856e; font-size: var(--type-caption); }
+.educator-delivery-open { display: block; margin-top: 5px; color: var(--educator-blue); font-size: var(--type-caption); font-weight: 800; }
+.delivery-status { font-size: var(--type-caption); font-weight: 800; }
 .delivery-status.is-sent { color: #52744f; }
 .delivery-status.is-failed { color: #a24631; }
 .delivery-status.is-pending { color: #8a6727; }
@@ -2046,7 +2052,7 @@ button, input, textarea, select { font: inherit; }
 .admin-brand span {
   margin-top: 7px;
   color: var(--admin-gold);
-  font: 800 8.5px/1 Georgia, serif;
+  font: 800 12px/1 Georgia, serif;
   letter-spacing: .24em;
 }
 
@@ -2070,7 +2076,7 @@ button, input, textarea, select { font: inherit; }
 }
 
 .admin-sidebar-caption small {
-  font: 800 8px/1 Georgia, serif;
+  font: 800 12px/1 Georgia, serif;
   letter-spacing: .23em;
 }
 
@@ -2112,8 +2118,8 @@ button, input, textarea, select { font: inherit; }
 .admin-nav button > span { min-width: 0; }
 .admin-nav strong,
 .admin-nav small { display: block; }
-.admin-nav strong { font-size: 13px; }
-.admin-nav small { margin-top: 3px; font: italic 11px/1.15 Baskerville, Georgia, serif; opacity: .78; }
+.admin-nav strong { font-size: var(--type-secondary); }
+.admin-nav small { margin-top: 3px; font: italic 12px/1.15 Baskerville, Georgia, serif; opacity: .78; }
 
 .admin-sidebar-account {
   margin-top: auto;
@@ -2137,8 +2143,8 @@ button, input, textarea, select { font: inherit; }
 
 .admin-account-copy strong,
 .admin-account-copy span { display: block; }
-.admin-account-copy strong { color: #3f3931; font-size: 12px; }
-.admin-account-copy span { margin-top: 4px; color: #8a7d69; font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; }
+.admin-account-copy strong { color: #3f3931; font-size: var(--type-secondary); }
+.admin-account-copy span { margin-top: 4px; color: #8a7d69; font-size: var(--type-caption); line-height: 1.45; overflow-wrap: anywhere; }
 
 .admin-sidebar-account > button {
   display: flex;
@@ -2151,7 +2157,7 @@ button, input, textarea, select { font: inherit; }
   border-top: 1px solid #eadfc9;
   background: transparent;
   color: #9a681d;
-  font-size: 11px;
+  font-size: var(--type-secondary);
   font-weight: 800;
   cursor: pointer;
 }
@@ -2178,7 +2184,7 @@ button, input, textarea, select { font: inherit; }
 .admin-page-header > div { min-width: 0; }
 .admin-page-header > div > span {
   color: var(--admin-gold);
-  font: 800 9px/1 Georgia, serif;
+  font: 800 12px/1 Georgia, serif;
   letter-spacing: .2em;
 }
 .admin-page-header h1 {
@@ -2188,7 +2194,7 @@ button, input, textarea, select { font: inherit; }
   line-height: 1.12;
   letter-spacing: .025em;
 }
-.admin-page-header p { max-width: 760px; margin: 0; color: var(--admin-muted); font-size: 12.5px; line-height: 1.65; }
+.admin-page-header p { max-width: 760px; margin: 0; color: var(--admin-muted); font-size: 15px; line-height: 1.65; }
 
 .admin-new-reading,
 .admin-back-to-reports {
@@ -2208,9 +2214,9 @@ button, input, textarea, select { font: inherit; }
 }
 
 .admin-back-to-reports { background: #fffaf0; color: var(--admin-navy); box-shadow: none; }
-.admin-new-reading > span { font-size: 12px; font-weight: 800; text-align: left; }
-.admin-new-reading small { display: block; margin-top: 2px; font: italic 10px Georgia, serif; opacity: .78; }
-.admin-back-to-reports > span { font-size: 11px; font-weight: 800; }
+.admin-new-reading > span { font-size: var(--type-secondary); font-weight: 800; text-align: left; }
+.admin-new-reading small { display: block; margin-top: 2px; font: italic 12px Georgia, serif; opacity: .78; }
+.admin-back-to-reports > span { font-size: var(--type-secondary); font-weight: 800; }
 
 .admin-page-content {
   max-width: 1320px;
@@ -2242,7 +2248,7 @@ button, input, textarea, select { font: inherit; }
 .admin-metric strong,
 .admin-metric span { display: block; }
 .admin-metric strong { color: var(--admin-ink); font: 800 27px/1 Georgia, serif; }
-.admin-metric span { margin-top: 7px; color: #625a50; font-size: 10.5px; line-height: 1.25; }
+.admin-metric span { margin-top: 7px; color: #625a50; font-size: 13px; line-height: 1.25; }
 
 .admin-record-toolbar {
   display: grid;
@@ -2267,7 +2273,7 @@ button, input, textarea, select { font: inherit; }
   padding: 0 14px;
   color: #8a7f70;
 }
-.admin-record-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #302c27; font-size: 12px; }
+.admin-record-search input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #302c27; font-size: var(--type-secondary); }
 .admin-record-search input::placeholder { color: #968b7b; }
 
 .admin-record-select select {
@@ -2278,7 +2284,7 @@ button, input, textarea, select { font: inherit; }
   outline: 0;
   background: transparent;
   color: #544c42;
-  font-size: 11.5px;
+  font-size: var(--type-secondary);
   cursor: pointer;
 }
 
@@ -2294,7 +2300,7 @@ button, input, textarea, select { font: inherit; }
   border-radius: 6px;
   background: transparent;
   color: #6e6559;
-  font-size: 11px;
+  font-size: var(--type-secondary);
   font-weight: 800;
   cursor: pointer;
 }
@@ -2350,7 +2356,7 @@ button, input, textarea, select { font: inherit; }
   display: block;
   overflow: hidden;
   color: var(--admin-gold);
-  font: 800 8px/1.2 Georgia, serif;
+  font: 800 12px/1.2 Georgia, serif;
   letter-spacing: .09em;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2365,9 +2371,9 @@ button, input, textarea, select { font: inherit; }
 .admin-report-card-copy > strong,
 .admin-report-card-copy > span,
 .admin-report-card-copy > time { display: block; }
-.admin-report-card-copy > strong { overflow: hidden; color: #443c31; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.admin-report-card-copy > span:not(.admin-report-eyebrow):not(.admin-report-status) { margin-top: 4px; overflow: hidden; color: #837867; font-size: 9.5px; text-overflow: ellipsis; white-space: nowrap; }
-.admin-report-card-copy > time { margin-top: 13px; color: #706759; font-size: 9.5px; }
+.admin-report-card-copy > strong { overflow: hidden; color: #443c31; font-size: var(--type-secondary); text-overflow: ellipsis; white-space: nowrap; }
+.admin-report-card-copy > span:not(.admin-report-eyebrow):not(.admin-report-status) { margin-top: 4px; overflow: hidden; color: #837867; font-size: var(--type-caption); text-overflow: ellipsis; white-space: nowrap; }
+.admin-report-card-copy > time { margin-top: 13px; color: #706759; font-size: var(--type-caption); }
 
 .admin-report-status {
   display: inline-flex !important;
@@ -2376,7 +2382,7 @@ button, input, textarea, select { font: inherit; }
   margin-top: 8px;
   padding: 4px 7px;
   border-radius: 999px;
-  font-size: 8.5px !important;
+  font-size: 12px !important;
   font-weight: 800;
 }
 .admin-report-status.is-sent { background: #e8f2e7; color: #4e7951; }
@@ -2393,7 +2399,7 @@ button, input, textarea, select { font: inherit; }
   padding: 0 4px;
   border-top: 1px solid #e7dbc3;
   color: var(--admin-navy);
-  font: 800 10.5px/1 Georgia, serif;
+  font: 800 14px/1 Georgia, serif;
   text-decoration: none;
 }
 .admin-report-card-link:hover { color: var(--admin-gold); }
@@ -2415,11 +2421,11 @@ button, input, textarea, select { font: inherit; }
 .admin-report-row-recipient span,
 .admin-report-row-card span,
 .admin-report-row-card strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.admin-report-row-recipient strong { color: #37322c; font-size: 12px; }
-.admin-report-row-recipient span { margin-top: 4px; color: #877b68; font-size: 9.5px; }
-.admin-report-row-card span { color: var(--admin-gold); font: 800 8px/1 Georgia, serif; letter-spacing: .12em; }
-.admin-report-row-card strong { margin-top: 6px; color: #534a3f; font-size: 10.5px; }
-.admin-report-row > time { color: #796f61; font-size: 9.5px; }
+.admin-report-row-recipient strong { color: #37322c; font-size: var(--type-secondary); }
+.admin-report-row-recipient span { margin-top: 4px; color: #877b68; font-size: var(--type-caption); }
+.admin-report-row-card span { color: var(--admin-gold); font: 800 12px/1 Georgia, serif; letter-spacing: .1em; }
+.admin-report-row-card strong { margin-top: 6px; color: #534a3f; font-size: var(--type-secondary); }
+.admin-report-row > time { color: #796f61; font-size: var(--type-caption); }
 .admin-report-row-link { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #d7c6a5; border-radius: 7px; color: var(--admin-navy); }
 .admin-report-row-link:hover { border-color: var(--admin-gold); color: var(--admin-gold); }
 
@@ -2435,7 +2441,7 @@ button, input, textarea, select { font: inherit; }
   text-align: center;
 }
 .admin-records-empty strong { margin-top: 13px; color: #3f3931; font-size: 14px; }
-.admin-records-empty p { max-width: 500px; margin: 7px 0 0; color: #796f5f; font-size: 11.5px; line-height: 1.65; }
+.admin-records-empty p { max-width: 500px; margin: 7px 0 0; color: #796f5f; font-size: var(--type-secondary); line-height: 1.65; }
 
 .portal-client--admin { max-width: 980px !important; }
 
@@ -2482,7 +2488,7 @@ button, input, textarea, select { font: inherit; }
   }
   .admin-mobile-bar > button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fffdf8; color: var(--admin-navy); cursor: pointer; }
   .admin-mobile-bar > a { overflow: hidden; color: #29241f; font-family: "Songti SC", STSong, Georgia, serif; font-size: 15px; font-weight: 800; letter-spacing: .06em; text-align: center; text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
-  .admin-mobile-bar > a span { color: var(--admin-gold); font: italic 10px Georgia, serif; }
+  .admin-mobile-bar > a span { color: var(--admin-gold); font: italic 12px Georgia, serif; }
   .admin-mobile-avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--admin-navy); color: #fff0cf; font: 800 12px Georgia, serif; }
   .admin-main { margin-left: 0; }
   .admin-page-header { padding: 35px 24px 26px; }
@@ -2514,7 +2520,7 @@ button, input, textarea, select { font: inherit; }
   .admin-mobile-bar > a span { display: none; }
   .admin-page-header { padding: 28px 16px 22px; }
   .admin-page-content { padding: 0 16px 46px; }
-  .admin-page-header p { font-size: 11.5px; }
+  .admin-page-header p { font-size: var(--type-secondary); }
   .admin-report-card-main { grid-template-columns: 98px minmax(0, 1fr); gap: 12px; }
   .admin-report-thumbnail.is-large { width: 98px; }
   .admin-report-card-copy h3 { font-size: 18px; }
@@ -2545,7 +2551,7 @@ button, input, textarea, select { font: inherit; }
   border-radius: 999px;
   background: rgba(255, 253, 248, .88);
   color: #745d2f;
-  font: 800 10.5px/1.2 Arial, sans-serif;
+  font: 800 14px/1.2 Arial, sans-serif;
   white-space: nowrap;
   cursor: pointer;
   transition: background .18s ease, border-color .18s ease, transform .18s ease;
@@ -2565,7 +2571,7 @@ button, input, textarea, select { font: inherit; }
   color: #2a2622;
 }
 .client-report-shell { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 34px 0 64px; }
-.client-report-back { display: inline-block; color: #745d2f; font-size: 12px; font-weight: 800; text-decoration: none; }
+.client-report-back { display: inline-block; color: #745d2f; font-size: var(--type-secondary); font-weight: 800; text-decoration: none; }
 .client-report-header {
   display: flex;
   align-items: center;
@@ -2579,17 +2585,17 @@ button, input, textarea, select { font: inherit; }
   box-shadow: 0 12px 34px rgba(71, 55, 29, .07);
 }
 .client-report-header span,
-.client-report-document-title span { color: #a66c20; font: 800 10px Georgia, serif; letter-spacing: .16em; }
+.client-report-document-title span { color: #a66c20; font: 800 12px Georgia, serif; letter-spacing: .14em; }
 .client-report-header h1 { margin: 8px 0 3px; font-family: "Songti SC", STSong, Georgia, serif; font-size: 30px; }
-.client-report-header p { margin: 0; color: #766a58; font-size: 12.5px; overflow-wrap: anywhere; }
+.client-report-header p { margin: 0; color: #766a58; font-size: var(--type-secondary); overflow-wrap: anywhere; }
 .client-report-status { flex: 0 0 auto; min-width: 210px; padding: 14px 16px; border: 1px solid #d8c8a8; border-radius: 12px; background: #f8efdc; }
 .client-report-status strong,
 .client-report-status small { display: block; }
-.client-report-status strong { color: #8a6727; font-size: 12px; }
+.client-report-status strong { color: #8a6727; font-size: var(--type-secondary); }
 .client-report-status.is-sent strong { color: #52744f; }
 .client-report-status.is-failed strong { color: #a24631; }
 .client-report-status.is-private strong { color: #334f7d; }
-.client-report-status small { margin-top: 5px; color: #82745f; font-size: 10.5px; }
+.client-report-status small { margin-top: 5px; color: #82745f; font-size: var(--type-caption); }
 .client-report-summary {
   display: flex;
   align-items: center;
@@ -2603,14 +2609,14 @@ button, input, textarea, select { font: inherit; }
 .client-report-summary > div:first-child { flex: 0 0 auto; }
 .client-report-summary > div:first-child span,
 .client-report-summary > div:first-child strong { display: block; }
-.client-report-summary > div:first-child span { color: #8b7b62; font-size: 9.5px; }
-.client-report-summary > div:first-child strong { margin-top: 2px; color: #443b31; font-size: 12px; }
+.client-report-summary > div:first-child span { color: #8b7b62; font-size: var(--type-caption); }
+.client-report-summary > div:first-child strong { margin-top: 2px; color: #443b31; font-size: var(--type-secondary); }
 .client-report-card-list { display: flex; flex: 1; flex-wrap: wrap; gap: 6px; }
-.client-report-card-list span { padding: 5px 8px; border-radius: 999px; background: #f2e6cd; color: #6d5831; font-size: 10px; }
-.client-report-recipient-view { flex: 0 0 auto; color: var(--educator-blue); font-size: 10.5px; font-weight: 800; text-decoration: none; }
+.client-report-card-list span { padding: 5px 8px; border-radius: 999px; background: #f2e6cd; color: #6d5831; font-size: var(--type-caption); }
+.client-report-recipient-view { flex: 0 0 auto; color: var(--educator-blue); font-size: var(--type-secondary); font-weight: 800; text-decoration: none; }
 .client-report-retry { margin: -8px 0 18px; padding: 12px 16px; border: 1px solid #e3b3a5; border-radius: 12px; background: #fff1eb; }
 .client-report-retry .educator-secondary-button { margin: 0; }
-.client-report-retry div { margin-top: 8px; color: #8f3f2d; font-size: 11px; }
+.client-report-retry div { margin-top: 8px; color: #8f3f2d; font-size: var(--type-secondary); }
 .client-report-document { padding: 14px clamp(20px, 5vw, 46px) 38px; border: 1px solid #ddceb0; border-radius: 20px; background: #fffdf8; box-shadow: 0 16px 42px rgba(71, 55, 29, .08); }
 .client-report-document-title { padding: 18px 0 14px; border-bottom: 1px solid #eadfc4; }
 .client-report-document-title h2 { margin: 7px 0 0; font-family: "Songti SC", STSong, Georgia, serif; font-size: 24px; }
@@ -2649,26 +2655,26 @@ button, input, textarea, select { font: inherit; }
 .client-report-card-figure figcaption span,
 .client-report-card-figure figcaption strong,
 .client-report-card-figure figcaption small { display: block; }
-.client-report-card-figure figcaption span { color: #8b7553; font-size: 9.5px; }
-.client-report-card-figure figcaption strong { margin-top: 3px; color: #352e26; font: 700 12px/1.35 Georgia, "Songti SC", serif; }
-.client-report-card-figure figcaption small { margin-top: 3px; font-size: 9px; font-weight: 800; }
-.client-report-card-orientation > span { color: #a66c20; font: 800 9.5px Georgia, serif; letter-spacing: .16em; }
+.client-report-card-figure figcaption span { color: #8b7553; font-size: var(--type-caption); }
+.client-report-card-figure figcaption strong { margin-top: 3px; color: #352e26; font: 700 14px/1.35 Georgia, "Songti SC", serif; }
+.client-report-card-figure figcaption small { margin-top: 3px; font-size: var(--type-caption); font-weight: 800; }
+.client-report-card-orientation > span { color: #a66c20; font: 800 12px Georgia, serif; letter-spacing: .14em; }
 .client-report-card-orientation h3 { margin: 8px 0 13px; font-family: "Songti SC", STSong, Georgia, serif; font-size: clamp(22px, 3.3vw, 31px); line-height: 1.22; }
-.client-report-card-orientation > p { margin: 6px 0; color: #443b30; font-size: 13px; line-height: 1.7; }
-.client-report-card-orientation .client-report-card-orientation-en { color: #756851; font: italic 12.5px/1.65 Georgia, serif; }
+.client-report-card-orientation > p { margin: 6px 0; color: #443b30; font-size: var(--type-body); line-height: 1.75; }
+.client-report-card-orientation .client-report-card-orientation-en { color: #756851; font: italic 15px/1.7 Georgia, serif; }
 .client-report-card-orientation blockquote { margin: 0 0 15px; padding: 10px 12px; border-left: 3px solid #b5842b; background: rgba(255, 253, 248, .66); color: #554837; }
-.client-report-card-orientation blockquote strong { display: block; color: #9a681f; font-size: 9.5px; }
-.client-report-card-orientation blockquote p { margin: 4px 0 0; font-size: 12px; line-height: 1.55; }
+.client-report-card-orientation blockquote strong { display: block; color: #9a681f; font-size: var(--type-caption); }
+.client-report-card-orientation blockquote p { margin: 4px 0 0; font-size: 15px; line-height: 1.65; }
 .client-report-reading-note { margin-top: 17px; padding-top: 14px; border-top: 1px solid rgba(175, 139, 76, .34); }
-.client-report-reading-note strong { color: #7b5b24; font-size: 11px; }
-.client-report-reading-note p { margin: 5px 0 0; color: #70634f; font-size: 10.5px; line-height: 1.6; }
+.client-report-reading-note strong { color: #7b5b24; font-size: 13px; }
+.client-report-reading-note p { margin: 5px 0 0; color: #70634f; font-size: var(--type-secondary); line-height: 1.7; }
 .client-report-body { padding-top: 2px; }
 .client-report-body::before {
   content: "FULL READING · 完整解读";
   display: block;
   margin-bottom: 14px;
   color: #a66c20;
-  font: 800 9.5px Georgia, serif;
+  font: 800 12px Georgia, serif;
   letter-spacing: .16em;
 }
 
@@ -2712,8 +2718,8 @@ button, input, textarea, select { font: inherit; }
   .top-nav--card .top-nav-brand { align-items: center; flex-direction: row; gap: 9px; font-size: 12px; }
   .top-nav--card .top-nav-brand-logo { display: block; width: 62px; }
   .top-nav-brand-copy { gap: 2px; padding-left: 0; border-left: 0; }
-  .top-nav-brand-copy strong { font-size: 10.5px; letter-spacing: .07em; }
-  .top-nav--card .top-nav-brand-copy small { font-size: 6.5px; letter-spacing: .14em; }
+  .top-nav-brand-copy strong { font-size: 13px; letter-spacing: .07em; }
+  .top-nav--card .top-nav-brand-copy small { font-size: 10.5px; letter-spacing: .11em; }
   .top-nav--card .top-nav-actions { gap: 2px; padding: 3px; }
   .top-nav--card .top-nav-draw { display: none; }
   .top-nav--card .top-nav-signin,
@@ -2724,8 +2730,8 @@ button, input, textarea, select { font: inherit; }
 
   .landing-title { padding: 44px 20px 34px; }
   .landing-title h1 { font-size: 40px; letter-spacing: .04em; }
-  .landing-title-en { font-size: 10px; letter-spacing: .2em; }
-  .landing-title p { font-size: 12px; letter-spacing: .08em; }
+  .landing-title-en { font-size: 12px; letter-spacing: .16em; }
+  .landing-title p { font-size: 15px; letter-spacing: .06em; }
 
   .card-deck--landing { padding: 0 12px 42px !important; }
   .card-deck--landing .draw-controls,
@@ -2775,7 +2781,7 @@ button, input, textarea, select { font: inherit; }
     justify-self: center;
     width: calc((100% - 14px) / 2);
   }
-  .client-report-card-figure figcaption strong { font-size: 11px; }
+  .client-report-card-figure figcaption strong { font-size: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2892,7 +2898,7 @@ button, input, textarea, select { font: inherit; }
   margin: 8px 0 0;
   color: #927348;
   font-family: Baskerville, Georgia, serif;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: .11em;
   text-transform: uppercase;
 }
@@ -2950,7 +2956,7 @@ button, input, textarea, select { font: inherit; }
   margin-bottom: 8px;
   color: #403930;
   font-family: "Songti SC", STSong, Georgia, serif;
-  font-size: 15px;
+  font-size: var(--type-body);
   font-weight: 700;
   letter-spacing: .03em;
 }
@@ -2958,7 +2964,7 @@ button, input, textarea, select { font: inherit; }
 .auth-field label span {
   color: #8d816b;
   font-family: Baskerville, Georgia, serif;
-  font-size: 12px;
+  font-size: var(--type-secondary);
   font-weight: 400;
 }
 
@@ -3030,7 +3036,7 @@ button, input, textarea, select { font: inherit; }
   gap: 9px;
   margin-top: 17px;
   color: #9b8b6f;
-  font-size: 12px;
+  font-size: var(--type-secondary);
   text-align: center;
 }
 
@@ -3071,7 +3077,7 @@ button, input, textarea, select { font: inherit; }
   background: #fff0ea;
   color: #913b29;
   padding: 12px 14px;
-  font-size: 13px;
+  font-size: var(--type-secondary);
   line-height: 1.55;
 }
 
@@ -3174,17 +3180,17 @@ button, input, textarea, select { font: inherit; }
   .auth-content { padding: 40px 22px 26px; }
   .auth-brand-logo { width: min(235px, 74%); margin-bottom: 12px; }
   .auth-brand h1 { font-size: 34px; letter-spacing: .04em; }
-  .auth-brand-en { font-size: 10px; letter-spacing: .14em; }
-  .auth-brand-promise { font-size: 12px; line-height: 1.65; }
+  .auth-brand-en { font-size: 12px; letter-spacing: .14em; }
+  .auth-brand-promise { font-size: 14px; line-height: 1.65; }
   .auth-brand-promise-en { display: none; }
   .auth-workspace { margin-top: 28px; }
   .auth-tabs { min-height: 61px; }
   .auth-tab span { font-size: 15px; }
-  .auth-tab small { font-size: 11px; }
+  .auth-tab small { font-size: 12px; }
   .auth-field input { min-height: 58px; font-size: 16px; }
-  .auth-submit { min-height: 62px; font-size: 14px; padding-inline: 14px; }
-  .auth-help { font-size: 12.5px; }
-  .auth-back { margin-top: 25px; font-size: 13px; }
+  .auth-submit { min-height: 62px; font-size: 16px; padding-inline: 14px; }
+  .auth-help { font-size: 14px; }
+  .auth-back { margin-top: 25px; font-size: 14px; }
   .auth-visual { min-height: 350px; }
   .auth-card-art { width: min(55vw, 220px); }
   .auth-botanical { right: 4%; width: 175px; }

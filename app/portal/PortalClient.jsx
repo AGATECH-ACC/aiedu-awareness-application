@@ -36,7 +36,7 @@ function CardsSummary({ reading }) {
       {cards.map((item, index) => {
         const card = byNum[item?.n];
         return (
-          <span key={`${item?.n}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f5ecd9', color: '#6d5d3c', borderRadius: 999, padding: '3px 8px', fontSize: 10.5 }}>
+          <span key={`${item?.n}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f5ecd9', color: '#6d5d3c', borderRadius: 999, padding: '4px 8px', fontSize: 12 }}>
             {card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : `#${item?.n}`}
           </span>
         );
@@ -186,7 +186,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
         @media (prefers-reduced-motion: reduce) { .portal-spinner { animation: none !important; } }
       `}</style>
       {showAccountHeader ? (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '4px 16px 0', fontSize: 12.5, color: '#7a6f5a' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '4px 16px 0', fontSize: 14, color: '#7a6f5a' }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>已登入 · {email}</span>
           <button type="button" onClick={signOut} style={{ flex: '0 0 auto', border: 'none', background: 'transparent', color: '#b5842b', fontWeight: 600, cursor: 'pointer' }}>登出 · Sign out</button>
         </div>
@@ -197,23 +197,23 @@ export default function PortalClient({ userId, email, initialReports, requirePla
       <div style={{ padding: '0 16px' }}>
         <section aria-labelledby="deep-report-title" style={{ background: '#fffdf8', border: '1px solid #e6d9bd', borderRadius: 18, padding: 18, marginTop: 4 }}>
           <div id="deep-report-title" style={{ fontWeight: 800, color: '#2a2622' }}>深度报告 · Deep Report</div>
-          <div style={{ fontSize: 12.5, color: '#7a6f5a', margin: '4px 0 10px' }}>
+          <div style={{ fontSize: 14, color: '#7a6f5a', margin: '4px 0 10px' }}>
             {latest ? '已捕捉本次抽牌，可生成报告。 · This reading is ready.' : '先在上方抽一次牌。 · Draw above first.'}
           </div>
           <label htmlFor="reflection-question" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>反思问题 · Reflection question</label>
           <textarea id="reflection-question" value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={2000}
             placeholder="（可选）此刻你想觉察的问题或情境… Optional: a question or situation you're reflecting on"
-            style={{ width: '100%', boxSizing: 'border-box', minHeight: 64, padding: 10, borderRadius: 10, border: '1.5px solid #cdbf9e', fontSize: 13, resize: 'vertical' }} />
+            style={{ width: '100%', boxSizing: 'border-box', minHeight: 64, padding: 10, borderRadius: 10, border: '1.5px solid #cdbf9e', fontSize: 16, resize: 'vertical' }} />
           {planRequired ? (
             <div style={{ marginTop: 10, padding: 12, borderRadius: 12, background: '#f5ecd6', border: '1px solid #dfc78f', textAlign: 'center' }}>
-              <div style={{ color: '#654f26', fontWeight: 800, fontSize: 13 }}>升级后生成深度报告 · Upgrade for Deep Reports</div>
-              <div style={{ color: '#7c6c4f', fontSize: 11.5, lineHeight: 1.55, marginTop: 3 }}>你的抽牌仍可免费使用，升级方案后可生成并保存双语深度报告。<br />Card draws remain free; upgrade to generate and save bilingual deep reports.</div>
+              <div style={{ color: '#654f26', fontWeight: 800, fontSize: 15 }}>升级后生成深度报告 · Upgrade for Deep Reports</div>
+              <div style={{ color: '#7c6c4f', fontSize: 14, lineHeight: 1.65, marginTop: 3 }}>你的抽牌仍可免费使用，升级方案后可生成并保存双语深度报告。<br />Card draws remain free; upgrade to generate and save bilingual deep reports.</div>
               <button type="button" onClick={startCheckout} style={{ marginTop: 9, border: 0, borderRadius: 999, padding: '8px 14px', background: '#8b6929', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>了解升级 · Upgrade</button>
-              {upgradeMessage && <div role="status" style={{ marginTop: 7, color: '#775f31', fontSize: 10.5 }}>{upgradeMessage}</div>}
+              {upgradeMessage && <div role="status" style={{ marginTop: 7, color: '#775f31', fontSize: 12 }}>{upgradeMessage}</div>}
             </div>
           ) : (
             <button type="button" onClick={() => generate()} disabled={!latest || busy}
-              style={{ width: '100%', marginTop: 10, padding: 12, borderRadius: 10, border: 'none', background: '#2a2622', color: '#f3e6bf', fontWeight: 700, fontSize: 15, cursor: !latest || busy ? 'default' : 'pointer', opacity: !latest || busy ? 0.55 : 1 }}>
+              style={{ width: '100%', marginTop: 10, padding: 12, borderRadius: 10, border: 'none', background: '#2a2622', color: '#f3e6bf', fontWeight: 700, fontSize: 16, cursor: !latest || busy ? 'default' : 'pointer', opacity: !latest || busy ? 0.55 : 1 }}>
               {busy ? (
                 <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                   <CircleNotch className="portal-spinner" size={15} weight="bold" aria-hidden="true" />
@@ -222,10 +222,10 @@ export default function PortalClient({ userId, email, initialReports, requirePla
               ) : '生成深度报告 · Generate'}
             </button>
           )}
-          {busy && <div role="status" aria-live="polite" style={{ textAlign: 'center', color: '#8a7f6c', fontSize: 11.5, marginTop: 7 }}>已等待 {elapsed} 秒 · {elapsed}s elapsed</div>}
+          {busy && <div role="status" aria-live="polite" style={{ textAlign: 'center', color: '#8a7f6c', fontSize: 13, marginTop: 7 }}>已等待 {elapsed} 秒 · {elapsed}s elapsed</div>}
 
           {errorState && (
-            <div role="alert" style={{ marginTop: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid #e5b6a7', background: '#fff2ed', color: '#913f2c', fontSize: 12.5, lineHeight: 1.55 }}>
+            <div role="alert" style={{ marginTop: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid #e5b6a7', background: '#fff2ed', color: '#913f2c', fontSize: 14, lineHeight: 1.65 }}>
               <div>{errorState.message}</div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 {errorState.status === 401 && <Link href="/login?next=/portal" style={{ color: '#913f2c', fontWeight: 800 }}>重新登入 · Sign in</Link>}
@@ -251,14 +251,14 @@ export default function PortalClient({ userId, email, initialReports, requirePla
             <div style={{ background: 'rgba(255,253,248,.72)', border: '1px dashed #d8c8a6', borderRadius: 14, padding: '22px 18px', textAlign: 'center', color: '#7a6f5a' }}>
               <FileText size={25} weight="duotone" aria-hidden="true" style={{ marginBottom: 5 }} />
               <div style={{ fontWeight: 700, color: '#4f4638' }}>还没有历史报告 · No reports yet</div>
-              <div style={{ fontSize: 12, lineHeight: 1.6, marginTop: 4 }}>完成一次抽牌并生成报告后，会保存在这里。<br />Draw cards and generate a report to begin your history.</div>
+              <div style={{ fontSize: 14, lineHeight: 1.65, marginTop: 4 }}>完成一次抽牌并生成报告后，会保存在这里。<br />Draw cards and generate a report to begin your history.</div>
             </div>
           ) : reports.map((item) => (
             <article key={item.id} style={{ background: '#fffdf8', border: '1px solid #eadfc4', borderRadius: 12, marginBottom: 8, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'stretch' }}>
                 <Link href={`/portal/reports/${item.id}`}
                   aria-label={`查看报告 ${reportDate(item.created_at)} · View report`}
-                  style={{ minWidth: 0, flex: 1, color: 'inherit', textAlign: 'left', background: 'transparent', padding: '11px 14px', textDecoration: 'none', fontSize: 13 }}>
+                  style={{ minWidth: 0, flex: 1, color: 'inherit', textAlign: 'left', background: 'transparent', padding: '11px 14px', textDecoration: 'none', fontSize: 14 }}>
                   <span style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                     <span style={{ color: '#3a352e' }}>{reportDate(item.created_at)}</span>
                     <span style={{ flex: '0 0 auto', color: '#b5842b', fontWeight: 750 }}>查看报告 →</span>
@@ -272,7 +272,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #f2ead8', padding: '6px 10px', background: '#fffcf5' }}>
                 <button type="button" onClick={() => makeShareable(item)} disabled={sharingId === item.id}
-                  style={{ border: 0, background: 'transparent', color: '#8a6727', cursor: sharingId === item.id ? 'wait' : 'pointer', fontSize: 11.5, fontWeight: 750 }}>
+                  style={{ border: 0, background: 'transparent', color: '#8a6727', cursor: sharingId === item.id ? 'wait' : 'pointer', fontSize: 14, fontWeight: 750 }}>
                   {sharingId === item.id ? '建立中… · Creating…' : item.is_public ? '分享连结 · Share link' : '分享 · Share'}
                 </button>
               </div>
@@ -280,12 +280,12 @@ export default function PortalClient({ userId, email, initialReports, requirePla
                 <div style={{ borderTop: '1px solid #efe5d0', background: '#f8f1e2', padding: '9px 10px' }}>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <input aria-label="公开分享连结 · Public share link" readOnly value={shareState.url} onFocus={(event) => event.currentTarget.select()}
-                      style={{ minWidth: 0, flex: 1, border: '1px solid #d7c59f', borderRadius: 8, background: '#fffdf8', color: '#5d513d', padding: '7px 8px', fontSize: 11 }} />
-                    <button type="button" onClick={copyShareLink} style={{ flex: '0 0 auto', border: 0, borderRadius: 8, background: '#7d642f', color: '#fff', padding: '7px 10px', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                      style={{ minWidth: 0, flex: 1, border: '1px solid #d7c59f', borderRadius: 8, background: '#fffdf8', color: '#5d513d', padding: '7px 8px', fontSize: 13 }} />
+                    <button type="button" onClick={copyShareLink} style={{ flex: '0 0 auto', border: 0, borderRadius: 8, background: '#7d642f', color: '#fff', padding: '7px 10px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
                       {shareState.copied ? '已复制 · Copied' : '复制 · Copy'}
                     </button>
                   </div>
-                  {shareState.copyFailed && <div style={{ color: '#8b4a37', fontSize: 10.5, marginTop: 4 }}>请手动复制上方连结。 · Please copy the link manually.</div>}
+                  {shareState.copyFailed && <div style={{ color: '#8b4a37', fontSize: 12, marginTop: 4 }}>请手动复制上方连结。 · Please copy the link manually.</div>}
                 </div>
               )}
             </article>
