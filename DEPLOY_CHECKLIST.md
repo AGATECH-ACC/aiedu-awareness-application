@@ -18,6 +18,7 @@ Apply these files in order against the target project:
 5. [Educator client directory](supabase/migrations/20260823173000_educator_clients.sql)
 6. [Optimize educator client indexes](supabase/migrations/20260823174500_optimize_educator_client_indexes.sql)
 7. [Restrict Awareness to invited accounts](supabase/migrations/20260824055230_restrict_awareness_to_invited_accounts.sql)
+8. [Promote Awareness profiles to educator](supabase/migrations/20260824070321_promote_awareness_profiles_to_educator.sql)
 
 - [ ] Confirm `awareness` is in the Data API exposed-schema list.
 - [ ] Confirm RLS is enabled on `awareness.profiles`,
@@ -111,7 +112,8 @@ After changing a `NEXT_PUBLIC_` value, redeploy because it is embedded at build 
 - [ ] Signed out: `/signup` is unavailable; the sign-in screen has no public
       account-creation, magic-link, or OAuth action.
 - [ ] Approved educator: `/portal/accounts/new` sends a private password-setup
-      invitation; a normal user receives `404` and the API returns `403`.
+      invitation and the recipient opens the educator workspace after login;
+      a normal user receives `404` and the API returns `403`.
 - [ ] Reset password: the request screen does not enumerate accounts, the email
       link opens `/auth/set-password`, and the new password works at `/login`.
 - [ ] Sign out from the nav and portal; the session clears and returns to `/`.

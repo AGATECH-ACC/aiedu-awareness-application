@@ -25,6 +25,18 @@ function normalizeInvitation(body) {
   return { name, email };
 }
 
+async function rollbackIncompleteInvitation(admin, userId, reason) {
+  const { error: cleanupError } = await admin.auth.admin.deleteUser(userId);
+  if (cleanupError) {
+    console.error('Unable to roll back incomplete account invitation', {
+      reason,
+      code: cleanupError.code,
+      status: cleanupError.status,
+      userId,
+    });
+  }
+}
+
 export async function POST(request) {
   let context;
   try {
@@ -95,6 +107,22 @@ export async function POST(request) {
     return problem(502, 'invitation_failed', '邀请暂时无法完成，请稍后再试。 · The invitation could not be completed. Please try again.');
   }
 
+  const { data: educatorProfile, error: roleError } = await admin
+    .from('profiles')
+    .update({ role: 'educator' })
+    .eq('id', invitedUser.id)
+    .select('id, role')
+    .maybeSingle();
+  if (roleError || educatorProfile?.role !== 'educator') {
+    console.error('Unable to grant invited account educator role', {
+      code: roleError?.code,
+      status: roleError?.status,
+      userId: invitedUser.id,
+    });
+    await rollbackIncompleteInvitation(admin, invitedUser.id, 'educator_role_failed');
+    return problem(502, 'role_assignment_failed', '教育者账户暂时无法完成，请稍后再试。 · The educator account could not be completed. Please try again.');
+  }
+
   const { error: accessError } = await admin.auth.admin.updateUserById(invitedUser.id, {
     app_metadata: {
       ...(invitedUser.app_metadata || {}),
@@ -103,14 +131,7 @@ export async function POST(request) {
   });
   if (accessError) {
     console.error('Unable to grant invited account access', { code: accessError.code, status: accessError.status });
-    const { error: cleanupError } = await admin.auth.admin.deleteUser(invitedUser.id);
-    if (cleanupError) {
-      console.error('Unable to roll back incomplete account invitation', {
-        code: cleanupError.code,
-        status: cleanupError.status,
-        userId: invitedUser.id,
-      });
-    }
+    await rollbackIncompleteInvitation(admin, invitedUser.id, 'awareness_access_failed');
     return problem(502, 'access_grant_failed', '邀请暂时无法完成，请稍后再试。 · The invitation could not be completed. Please try again.');
   }
 
@@ -118,6 +139,7 @@ export async function POST(request) {
     userId: invitedUser.id,
     name: invitation.name,
     email: invitation.email,
+    role: educatorProfile.role,
     passwordSetupSent: true,
   }, { status: 201 });
 }

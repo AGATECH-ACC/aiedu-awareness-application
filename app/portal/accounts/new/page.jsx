@@ -6,7 +6,7 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import AccountInviteForm from './AccountInviteForm';
 
 export const metadata = {
-  title: '邀请新账户 · Invite Account',
+  title: '邀请教育者账户 · Invite Educator',
   robots: { index: false, follow: false },
 };
 

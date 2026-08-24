@@ -52,6 +52,8 @@ supabase/migrations/20260823174500_optimize_educator_client_indexes.sql
                                       composite ownership indexes
 supabase/migrations/20260824055230_restrict_awareness_to_invited_accounts.sql
                                       invite-only app claim + restrictive RLS
+supabase/migrations/20260824070321_promote_awareness_profiles_to_educator.sql
+                                      promote current profiles for educator-only rollout
 supabase/tests/rls.test.sql           access/ownership/educator policy checks
 ```
 
@@ -84,6 +86,7 @@ must continue importing from `lib/cards.js`.
    5. `20260823173000_educator_clients.sql`
    6. `20260823174500_optimize_educator_client_indexes.sql`
    7. `20260824055230_restrict_awareness_to_invited_accounts.sql`
+   8. `20260824070321_promote_awareness_profiles_to_educator.sql`
 
    These migrations create `awareness.profiles`, `awareness.educator_user_links`,
    `awareness.readings`, and `awareness.deep_reports`. Every profile references
@@ -141,8 +144,11 @@ authoritative usage control.
 - Accounts are invitation-only. There is no public signup route and the browser
   never calls `signUp()`, `signInWithOtp()`, or an OAuth provider.
 - An educator can open `/portal/accounts/new`; its server-authorized API calls
-  `inviteUserByEmail()`, grants server-only `awareness_access` app metadata, and
-  sends the recipient to `/auth/set-password`.
+  `inviteUserByEmail()`, grants the `educator` profile role plus server-only
+  `awareness_access` app metadata, and sends the recipient to `/auth/set-password`.
+- The educator rollout migration promotes every existing Awareness profile to
+  `educator`. The `user` role and table default remain available, but the
+  private invite page always creates educators.
 - Restrictive RLS policies require that server-managed claim in addition to the
   existing ownership policies. Existing Awareness users are backfilled by the
   migration; future accounts created by other apps in the shared project cannot

@@ -45,16 +45,17 @@ export default function AccountInviteForm() {
     return (
       <section className="account-invite-card account-invite-success" aria-live="polite">
         <CheckCircle size={48} weight="duotone" aria-hidden="true" />
-        <span className="account-invite-eyebrow">INVITATION SENT</span>
-        <h1>账户邀请已寄出</h1>
-        <p lang="en">The account invitation has been sent.</p>
+        <span className="account-invite-eyebrow">EDUCATOR INVITATION SENT</span>
+        <h1>教育者账户邀请已寄出</h1>
+        <p lang="en">The educator account invitation has been sent.</p>
         <dl>
           <div><dt>姓名 · Name</dt><dd>{invited.name}</dd></div>
           <div><dt>电邮 · Email</dt><dd>{invited.email}</dd></div>
+          <div><dt>角色 · Role</dt><dd>教育者 · Educator</dd></div>
         </dl>
         <p className="account-invite-guidance">
-          对方会收到私人连结，可先建立自己的密码，再使用电邮和密码登入。<br />
-          <span lang="en">They will receive a private link to create their password, then sign in with their email and password.</span>
+          对方会收到私人连结，可先建立自己的密码，再登入教育者工作台。<br />
+          <span lang="en">They will receive a private link to create their password, then sign in to the educator workspace.</span>
         </p>
         <div className="account-invite-actions">
           <button type="button" onClick={inviteAnother}>邀请另一位 · Invite another</button>
@@ -67,11 +68,11 @@ export default function AccountInviteForm() {
   return (
     <section className="account-invite-card" aria-labelledby="account-invite-title">
       <div className="account-invite-heading">
-        <span className="account-invite-eyebrow">PRIVATE ACCOUNT INVITATION</span>
-        <h1 id="account-invite-title">邀请新账户</h1>
+        <span className="account-invite-eyebrow">PRIVATE EDUCATOR INVITATION</span>
+        <h1 id="account-invite-title">邀请教育者账户</h1>
         <p>
-          这不是公开注册。只有已登入的教育者可以寄出邀请。<br />
-          <span lang="en">This is not public registration. Only a signed-in educator can send an invitation.</span>
+          这不是公开注册。只有已登入的教育者可以邀请另一位教育者。<br />
+          <span lang="en">This is not public registration. Only a signed-in educator can invite another educator.</span>
         </p>
       </div>
 
@@ -104,14 +105,14 @@ export default function AccountInviteForm() {
         <div className="account-invite-security">
           <ShieldCheck size={23} weight="duotone" aria-hidden="true" />
           <p>
-            新账户一律建立为普通用户，并须从私人电邮连结建立密码；教育者权限不会从此页面授予。<br />
-            <span lang="en">Every invited account starts as a standard user and must create a password from its private email link. Educator access cannot be granted here.</span>
+            此页面邀请的账户一律授予教育者角色，并须从私人电邮连结建立密码。普通用户角色仍保留，但不会由此页面建立。<br />
+            <span lang="en">Every account invited here receives the educator role and must create a password from its private email link. The standard user role remains available but is not assigned by this page.</span>
           </p>
         </div>
 
         <button className="account-invite-submit" type="submit" disabled={busy || !name.trim() || !email.trim()}>
           <EnvelopeSimple size={23} aria-hidden="true" />
-          <span>{busy ? '寄送中… · Sending…' : '寄出账户邀请 · Send account invitation'}</span>
+          <span>{busy ? '寄送中… · Sending…' : '寄出教育者邀请 · Send educator invitation'}</span>
         </button>
       </form>
 
