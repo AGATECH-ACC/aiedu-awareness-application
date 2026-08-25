@@ -10,12 +10,12 @@ import { deleteReport, shareReport } from '@/lib/db';
 import { createClient } from '@/lib/supabase-browser';
 
 const ERROR_COPY = {
-  401: '登入状态已过期，请重新登入。 · Your session has expired. Please sign in again.',
-  429: '今日深度报告已达上限，请明天再来。 · You have reached today’s Deep Report limit. Please return tomorrow.',
+  401: '登入状态已过期，请重新登入。',
+  429: '今日深度报告已达上限，请明天再来。',
 };
 
 function reportDate(value) {
-  return new Date(value).toLocaleString('en-GB', {
+  return new Date(value).toLocaleString('zh-CN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -32,14 +32,14 @@ function CardsSummary({ reading }) {
   if (!cards.length) return null;
 
   return (
-    <div style={{ marginTop: 6 }} aria-label="抽到的牌 · Drawn cards">
+    <div style={{ marginTop: 6 }} aria-label="抽到的牌">
       <div style={{ color: '#806a3e', fontSize: 12, fontWeight: 800 }}>{readingSpreadLabel(reading?.mode, reading?.spread_key)}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 5 }}>
         {cards.map((item, index) => {
           const card = byNum[item?.n];
           return (
             <span key={`${item?.n}-${index}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#f5ecd9', color: '#6d5d3c', borderRadius: 999, padding: '4px 8px', fontSize: 12 }}>
-              {card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : `#${item?.n}`}
+              {card ? `${String(card.n).padStart(2, '0')} ${card.cn}` : `#${item?.n}`}
             </span>
           );
         })}
@@ -91,7 +91,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
       if (!response.ok) {
         setErrorState({
           status: response.status,
-          message: data.message || ERROR_COPY[response.status] || '操作失败，请稍后再试。 · Something went wrong. Please try again.',
+          message: data.message || ERROR_COPY[response.status] || '操作失败，请稍后再试。',
           readingId: data.readingId || retryReadingId || null,
         });
         return;
@@ -111,7 +111,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
     } catch {
       setErrorState({
         status: 0,
-        message: '网络连接中断，请检查网络后重试。 · The connection was interrupted. Check your network and try again.',
+        message: '网络连接中断，请检查网络后重试。',
         readingId: retryReadingId,
       });
     } finally {
@@ -120,7 +120,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
   }
 
   async function removeReport(id) {
-    const confirmed = window.confirm('确定删除这份报告吗？此操作无法撤销。\nDelete this report? This cannot be undone.');
+    const confirmed = window.confirm('确定删除这份报告吗？此操作无法撤销。');
     if (!confirmed) return;
 
     setDeletingId(id);
@@ -130,7 +130,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
       if (!deleted) throw new Error('not_deleted');
       setReports((current) => current.filter((item) => item.id !== id));
     } catch {
-      setErrorState({ status: 0, message: '无法删除报告，请稍后再试。 · Could not delete the report. Please try again.' });
+      setErrorState({ status: 0, message: '无法删除报告，请稍后再试。' });
     } finally {
       setDeletingId(null);
     }
@@ -155,7 +155,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
         copied: false,
       });
     } catch {
-      setErrorState({ status: 0, message: '无法建立分享连结，请稍后再试。 · Could not create a share link. Please try again.' });
+      setErrorState({ status: 0, message: '无法建立分享连结，请稍后再试。' });
     } finally {
       setSharingId(null);
     }
@@ -178,7 +178,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
 
   // TODO(payments): connect this stub to the approved Curlec/Stripe checkout flow.
   function startCheckout() {
-    setUpgradeMessage('付款功能尚未连接，请联系团队升级。 · Checkout is not connected yet; please contact the team to upgrade.');
+    setUpgradeMessage('付款功能尚未连接，请联系团队升级。');
   }
 
   return (
@@ -199,19 +199,19 @@ export default function PortalClient({ userId, email, initialReports, requirePla
 
       <div style={{ padding: '0 16px' }}>
         <section aria-labelledby="deep-report-title" style={{ background: '#fffdf8', border: '1px solid #e6d9bd', borderRadius: 18, padding: 18, marginTop: 4 }}>
-          <div id="deep-report-title" style={{ fontWeight: 800, color: '#2a2622' }}>深度报告 · Deep Report</div>
+          <div id="deep-report-title" style={{ fontWeight: 800, color: '#2a2622' }}>深度报告</div>
           <div style={{ fontSize: 14, color: '#7a6f5a', margin: '4px 0 10px' }}>
-            {latest ? '已捕捉本次抽牌，可生成报告。 · This reading is ready.' : '先在上方抽一次牌。 · Draw above first.'}
+            {latest ? '已捕捉本次抽牌，可生成报告。' : '先在上方抽一次牌。'}
           </div>
-          <label htmlFor="reflection-question" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>反思问题 · Reflection question</label>
+          <label htmlFor="reflection-question" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>反思问题</label>
           <textarea id="reflection-question" value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={2000}
-            placeholder="（可选）此刻你想觉察的问题或情境… Optional: a question or situation you're reflecting on"
+            placeholder="（可选）此刻你想觉察的问题或情境…"
             style={{ width: '100%', boxSizing: 'border-box', minHeight: 64, padding: 10, borderRadius: 10, border: '1.5px solid #cdbf9e', fontSize: 16, resize: 'vertical' }} />
           {planRequired ? (
             <div style={{ marginTop: 10, padding: 12, borderRadius: 12, background: '#f5ecd6', border: '1px solid #dfc78f', textAlign: 'center' }}>
-              <div style={{ color: '#654f26', fontWeight: 800, fontSize: 15 }}>升级后生成深度报告 · Upgrade for Deep Reports</div>
-              <div style={{ color: '#7c6c4f', fontSize: 14, lineHeight: 1.65, marginTop: 3 }}>你的抽牌仍可免费使用，升级方案后可生成并保存双语深度报告。<br />Card draws remain free; upgrade to generate and save bilingual deep reports.</div>
-              <button type="button" onClick={startCheckout} style={{ marginTop: 9, border: 0, borderRadius: 999, padding: '8px 14px', background: '#8b6929', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>了解升级 · Upgrade</button>
+              <div style={{ color: '#654f26', fontWeight: 800, fontSize: 15 }}>升级后生成深度报告</div>
+              <div style={{ color: '#7c6c4f', fontSize: 14, lineHeight: 1.65, marginTop: 3 }}>你的抽牌仍可免费使用，升级方案后可生成并保存深度报告。</div>
+              <button type="button" onClick={startCheckout} style={{ marginTop: 9, border: 0, borderRadius: 999, padding: '8px 14px', background: '#8b6929', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>了解升级</button>
               {upgradeMessage && <div role="status" style={{ marginTop: 7, color: '#775f31', fontSize: 12 }}>{upgradeMessage}</div>}
             </div>
           ) : (
@@ -220,21 +220,21 @@ export default function PortalClient({ userId, email, initialReports, requirePla
               {busy ? (
                 <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                   <CircleNotch className="portal-spinner" size={15} weight="bold" aria-hidden="true" />
-                  生成中… · Generating
+                  生成中…
                 </span>
-              ) : '生成深度报告 · Generate'}
+              ) : '生成深度报告'}
             </button>
           )}
-          {busy && <div role="status" aria-live="polite" style={{ textAlign: 'center', color: '#8a7f6c', fontSize: 13, marginTop: 7 }}>已等待 {elapsed} 秒 · {elapsed}s elapsed</div>}
+          {busy && <div role="status" aria-live="polite" style={{ textAlign: 'center', color: '#8a7f6c', fontSize: 13, marginTop: 7 }}>已等待 {elapsed} 秒</div>}
 
           {errorState && (
             <div role="alert" style={{ marginTop: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid #e5b6a7', background: '#fff2ed', color: '#913f2c', fontSize: 14, lineHeight: 1.65 }}>
               <div>{errorState.message}</div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                {errorState.status === 401 && <Link href="/login?next=/portal" style={{ color: '#913f2c', fontWeight: 800 }}>重新登入 · Sign in</Link>}
+                {errorState.status === 401 && <Link href="/login?next=/portal" style={{ color: '#913f2c', fontWeight: 800 }}>重新登入</Link>}
                 {errorState.readingId && (
                   <button type="button" onClick={() => generate(errorState.readingId)} disabled={busy} style={{ border: 0, borderRadius: 999, padding: '7px 12px', background: '#913f2c', color: '#fff', cursor: busy ? 'wait' : 'pointer', fontWeight: 700 }}>
-                    用同一次抽牌重试 · Retry this reading
+                    用同一次抽牌重试
                   </button>
                 )}
               </div>
@@ -243,24 +243,24 @@ export default function PortalClient({ userId, email, initialReports, requirePla
         </section>
 
         {report && (
-          <section aria-label="最新深度报告 · Latest Deep Report" style={{ background: '#fffdf8', border: '1px solid #e6d9bd', borderRadius: 18, padding: '6px 18px 18px', marginTop: 14 }}>
+          <section aria-label="最新深度报告" style={{ background: '#fffdf8', border: '1px solid #e6d9bd', borderRadius: 18, padding: '6px 18px 18px', marginTop: 14 }}>
             <Markdownish text={report} />
           </section>
         )}
 
         <section aria-labelledby="history-title" style={{ marginTop: 22 }}>
-          <div id="history-title" style={{ fontWeight: 800, color: '#2a2622', marginBottom: 8 }}>历史报告 · History</div>
+          <div id="history-title" style={{ fontWeight: 800, color: '#2a2622', marginBottom: 8 }}>历史报告</div>
           {reports.length === 0 ? (
             <div style={{ background: 'rgba(255,253,248,.72)', border: '1px dashed #d8c8a6', borderRadius: 14, padding: '22px 18px', textAlign: 'center', color: '#7a6f5a' }}>
               <FileText size={25} weight="duotone" aria-hidden="true" style={{ marginBottom: 5 }} />
-              <div style={{ fontWeight: 700, color: '#4f4638' }}>还没有历史报告 · No reports yet</div>
-              <div style={{ fontSize: 14, lineHeight: 1.65, marginTop: 4 }}>完成一次抽牌并生成报告后，会保存在这里。<br />Draw cards and generate a report to begin your history.</div>
+              <div style={{ fontWeight: 700, color: '#4f4638' }}>还没有历史报告</div>
+              <div style={{ fontSize: 14, lineHeight: 1.65, marginTop: 4 }}>完成一次抽牌并生成报告后，会保存在这里。</div>
             </div>
           ) : reports.map((item) => (
             <article key={item.id} style={{ background: '#fffdf8', border: '1px solid #eadfc4', borderRadius: 12, marginBottom: 8, overflow: 'hidden' }}>
               <div style={{ display: 'flex', alignItems: 'stretch' }}>
                 <Link href={`/portal/reports/${item.id}`}
-                  aria-label={`查看报告 ${reportDate(item.created_at)} · View report`}
+                  aria-label={`查看报告 ${reportDate(item.created_at)}`}
                   style={{ minWidth: 0, flex: 1, color: 'inherit', textAlign: 'left', background: 'transparent', padding: '11px 14px', textDecoration: 'none', fontSize: 14 }}>
                   <span style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                     <span style={{ color: '#3a352e' }}>{reportDate(item.created_at)}</span>
@@ -268,27 +268,27 @@ export default function PortalClient({ userId, email, initialReports, requirePla
                   </span>
                   <CardsSummary reading={item.readings} />
                 </Link>
-                <button type="button" aria-label="删除报告 · Delete report" onClick={() => removeReport(item.id)} disabled={deletingId === item.id}
+                <button type="button" aria-label="删除报告" onClick={() => removeReport(item.id)} disabled={deletingId === item.id}
                   style={{ flex: '0 0 auto', width: 52, border: 0, borderLeft: '1px solid #efe5d0', background: '#fffaf0', color: '#a34b38', cursor: deletingId === item.id ? 'wait' : 'pointer', fontSize: 16 }}>
-                  {deletingId === item.id ? <CircleNotch className="portal-spinner" size={16} aria-label="删除中 · Deleting" /> : <Trash size={17} aria-hidden="true" />}
+                  {deletingId === item.id ? <CircleNotch className="portal-spinner" size={16} aria-label="删除中" /> : <Trash size={17} aria-hidden="true" />}
                 </button>
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #f2ead8', padding: '6px 10px', background: '#fffcf5' }}>
                 <button type="button" onClick={() => makeShareable(item)} disabled={sharingId === item.id}
                   style={{ border: 0, background: 'transparent', color: '#8a6727', cursor: sharingId === item.id ? 'wait' : 'pointer', fontSize: 14, fontWeight: 750 }}>
-                  {sharingId === item.id ? '建立中… · Creating…' : item.is_public ? '分享连结 · Share link' : '分享 · Share'}
+                  {sharingId === item.id ? '建立中…' : item.is_public ? '分享连结' : '分享'}
                 </button>
               </div>
               {shareState?.reportId === item.id && (
                 <div style={{ borderTop: '1px solid #efe5d0', background: '#f8f1e2', padding: '9px 10px' }}>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <input aria-label="公开分享连结 · Public share link" readOnly value={shareState.url} onFocus={(event) => event.currentTarget.select()}
+                    <input aria-label="公开分享连结" readOnly value={shareState.url} onFocus={(event) => event.currentTarget.select()}
                       style={{ minWidth: 0, flex: 1, border: '1px solid #d7c59f', borderRadius: 8, background: '#fffdf8', color: '#5d513d', padding: '7px 8px', fontSize: 13 }} />
                     <button type="button" onClick={copyShareLink} style={{ flex: '0 0 auto', border: 0, borderRadius: 8, background: '#7d642f', color: '#fff', padding: '7px 10px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
-                      {shareState.copied ? '已复制 · Copied' : '复制 · Copy'}
+                      {shareState.copied ? '已复制' : '复制'}
                     </button>
                   </div>
-                  {shareState.copyFailed && <div style={{ color: '#8b4a37', fontSize: 12, marginTop: 4 }}>请手动复制上方连结。 · Please copy the link manually.</div>}
+                  {shareState.copyFailed && <div style={{ color: '#8b4a37', fontSize: 12, marginTop: 4 }}>请手动复制上方连结。</div>}
                 </div>
               )}
             </article>

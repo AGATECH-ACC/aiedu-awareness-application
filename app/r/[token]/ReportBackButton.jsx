@@ -19,10 +19,10 @@ export default function ReportBackButton() {
       type="button"
       className="public-report-back"
       onClick={handleBack}
-      aria-label="返回上一页 · Go back"
+      aria-label="返回上一页"
     >
       <span aria-hidden="true">←</span>
-      <span>返回 · Back</span>
+      <span>返回</span>
     </button>
   );
 }

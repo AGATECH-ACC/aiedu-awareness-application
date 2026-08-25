@@ -26,7 +26,7 @@ function reportOrigin(request) {
 export async function POST(request, { params }) {
   const deliveryId = params?.id;
   if (!UUID_PATTERN.test(deliveryId || '')) {
-    return problem(400, 'invalid_delivery_id', '邮件记录格式无效。 · Invalid delivery ID.');
+    return problem(400, 'invalid_delivery_id', '邮件记录格式无效。');
   }
 
   let context;
@@ -34,12 +34,12 @@ export async function POST(request, { params }) {
     context = await getEducatorRequestContext();
   } catch (error) {
     console.error('Unable to authorize report resend', error);
-    return problem(500, 'authorization_failed', '暂时无法验证教育者身份。 · Could not verify the educator account.');
+    return problem(500, 'authorization_failed', '暂时无法验证教育者身份。');
   }
   if (context.error) {
     return problem(context.status, context.error, context.status === 401
-      ? '请重新登入。 · Please sign in again.'
-      : '此功能只开放给教育者。 · This feature is available to educators only.');
+      ? '请重新登入。'
+      : '此功能只开放给教育者。');
   }
 
   let admin;
@@ -47,7 +47,7 @@ export async function POST(request, { params }) {
     admin = createAdminSupabase();
   } catch (error) {
     console.error('Report delivery backend is not configured', error);
-    return problem(503, 'delivery_not_configured', '报告寄送尚未完成服务器设置。 · Report delivery is not configured yet.');
+    return problem(503, 'delivery_not_configured', '报告寄送尚未完成服务器设置。');
   }
 
   const { data: delivery, error } = await admin
@@ -58,14 +58,14 @@ export async function POST(request, { params }) {
     .maybeSingle();
   if (error) {
     console.error('Unable to load report delivery', error);
-    return problem(500, 'delivery_lookup_failed', '暂时无法读取邮件记录。 · Could not load the delivery.');
+    return problem(500, 'delivery_lookup_failed', '暂时无法读取邮件记录。');
   }
-  if (!delivery) return problem(404, 'delivery_not_found', '找不到这份邮件记录。 · Delivery not found.');
+  if (!delivery) return problem(404, 'delivery_not_found', '找不到这份邮件记录。');
   if (delivery.status === 'sent') {
     return NextResponse.json({ deliveryId, status: 'sent', emailedAt: delivery.emailed_at, reused: true });
   }
   if (Date.now() - new Date(delivery.updated_at).getTime() < 60_000) {
-    return problem(429, 'resend_too_soon', '请稍候一分钟再重新寄送。 · Wait one minute before resending.');
+    return problem(429, 'resend_too_soon', '请稍候一分钟再重新寄送。');
   }
 
   const { data: report, error: reportError } = await admin
@@ -76,7 +76,7 @@ export async function POST(request, { params }) {
     .maybeSingle();
   if (reportError || !report?.is_public || !report?.share_token) {
     console.error('Unable to load shared report for resend', reportError);
-    return problem(409, 'report_not_shareable', '报告分享连结尚未准备好。 · The report link is not ready.');
+    return problem(409, 'report_not_shareable', '报告分享连结尚未准备好。');
   }
 
   const reportUrl = `${reportOrigin(request)}/r/${report.share_token}`;
@@ -103,6 +103,6 @@ export async function POST(request, { params }) {
       .update({ status: 'failed', last_error: String(sendError?.message || 'email_send_failed').slice(0, 500) })
       .eq('id', deliveryId)
       .eq('educator_id', context.user.id);
-    return problem(503, 'email_send_failed', '报告邮件仍无法寄出，请检查 Resend 设置。 · The report email could not be sent. Check the Resend configuration.');
+    return problem(503, 'email_send_failed', '报告邮件仍无法寄出，请检查寄送设置。');
   }
 }

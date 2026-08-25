@@ -4,7 +4,7 @@ A bilingual public card experience with an authenticated portal for the Happy
 Life Awareness Cards deck at `app.aiedu.academy`.
 
 - **Public landing page:** `/` lets anyone play a single-card reading without signing in.
-- **Signed-in user portal:** draw cards, save readings, generate fixed-content bilingual Deep Reports,
+- **Signed-in user portal:** draw cards, save readings, generate fixed-content Deep Reports,
   review/delete history, and create read-only public report links.
 - **Educator data layer:** an educator can read reports belonging only to users
   who have actively linked that educator. Links are unlimited and many-to-many.
