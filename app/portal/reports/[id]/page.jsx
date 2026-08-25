@@ -10,7 +10,10 @@ import { createServerSupabase } from '@/lib/supabase-server';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const metadata = {
-  title: '我的觉察报告 · My Awareness Report',
+  title: { absolute: '我的觉察报告' },
+  description: '一份个人觉察报告。',
+  openGraph: { title: '我的觉察报告', description: '一份个人觉察报告。' },
+  twitter: { title: '我的觉察报告', description: '一份个人觉察报告。' },
   robots: { index: false, follow: false },
 };
 
@@ -41,25 +44,25 @@ export default async function PersonalReportPage({ params }) {
 
   return (
     <main className="client-report-page">
-      <TopNav user={user} />
+      <TopNav user={user} chineseOnly />
       <div className="client-report-shell">
-        <Link className="client-report-back" href="/portal#my-reports">← 返回历史报告 · Back to report history</Link>
+        <Link className="client-report-back" href="/portal#my-reports">← 返回历史报告</Link>
 
         <header className="client-report-header">
           <div>
-            <span>PERSONAL REPORT · 我的报告</span>
-            <h1>我的觉察报告 · My awareness report</h1>
+            <span>我的报告</span>
+            <h1>我的觉察报告</h1>
             <p>{user.email}</p>
           </div>
           <div className="client-report-status is-private">
-            <strong>私人报告 · Private report</strong>
-            <small>生成于 · Created {formattedDate(report.created_at)}</small>
+            <strong>私人报告</strong>
+            <small>生成于 {formattedDate(report.created_at)}</small>
           </div>
         </header>
 
-        <section className="client-report-summary" aria-label="抽牌摘要 · Reading summary">
+        <section className="client-report-summary" aria-label="抽牌摘要">
           <div>
-            <span>牌阵 · Spread</span>
+            <span>牌阵</span>
             <strong>{readingSpreadLabel(reading?.mode, reading?.spread_key)}</strong>
           </div>
           <div className="client-report-card-list">
@@ -67,13 +70,13 @@ export default async function PersonalReportPage({ params }) {
               const card = byNum[item?.n];
               return (
                 <span key={`${item?.n}-${index}`}>
-                  {card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : `#${item?.n}`}
+                  {card ? `${String(card.n).padStart(2, '0')} ${card.cn}` : `#${item?.n}`}
                 </span>
               );
             })}
           </div>
           {report.is_public && report.share_token ? (
-            <Link className="client-report-recipient-view" href={`/r/${report.share_token}`}>开启公开页面 · Open public view ↗</Link>
+            <Link className="client-report-recipient-view" href={`/r/${report.share_token}`}>开启公开页面 ↗</Link>
           ) : null}
         </section>
 

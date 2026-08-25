@@ -183,8 +183,7 @@ export default async function HomePage() {
           <p>CONTINUE YOUR AWARENESS JOURNEY</p>
           <h2>把今天的觉察，留给未来的自己</h2>
           <span>
-            登入后可保存抽牌记录、体验完整牌阵，并生成双语深度报告。<br />
-            <i lang="en">Save readings, explore every spread, and create a bilingual reflection report.</i>
+            登入后可保存抽牌记录、体验完整牌阵，并生成深度报告。
           </span>
         </div>
         <Link href={user ? '/portal' : '/login'}>

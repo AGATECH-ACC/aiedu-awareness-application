@@ -54,11 +54,11 @@ async function loadRecipientAuthorization({ admin, verificationId, educatorId })
     .eq('educator_id', educatorId)
     .maybeSingle();
   if (error) throw error;
-  if (!data) return { error: '找不到收件验证，请重新寄送验证码。 · Recipient verification not found. Request a new code.' };
-  if (!data.verified_at) return { error: '请先完成收件邮箱验证。 · Verify the recipient email first.' };
-  if (!data.client_id) return { error: '客户资料尚未建立，请重新完成邮箱验证。 · Client record is missing. Verify the recipient email again.' };
+  if (!data) return { error: '找不到收件验证，请重新寄送验证码。' };
+  if (!data.verified_at) return { error: '请先完成收件邮箱验证。' };
+  if (!data.client_id) return { error: '客户资料尚未建立，请重新完成邮箱验证。' };
   if (!data.authorization_expires_at || new Date(data.authorization_expires_at).getTime() <= Date.now()) {
-    return { error: '收件授权已过期，请重新寄送验证码。 · Recipient authorization expired. Request a new code.' };
+    return { error: '收件授权已过期，请重新寄送验证码。' };
   }
   return { value: data };
 }
@@ -72,12 +72,12 @@ async function deliverRecipientReport({ admin, authorization, report, reading, r
   if (priorError) throw priorError;
   if (priorDelivery) {
     if (priorDelivery.report_id !== report.id) {
-      return { error: '此收件授权已用于另一份报告。 · This recipient authorization has already been used.' };
+      return { error: '此收件授权已用于另一份报告。' };
     }
     return { delivery: priorDelivery, emailSent: priorDelivery.status === 'sent', reused: true };
   }
   if (authorization.used_at) {
-    return { error: '此收件授权已用于一份报告。 · This recipient authorization has already been used.' };
+    return { error: '此收件授权已用于一份报告。' };
   }
 
   const shareToken = report.share_token || randomUUID();
@@ -155,7 +155,7 @@ export async function POST(request) {
   if (!burst.allowed) {
     return NextResponse.json({
       error: 'burst_limit_reached',
-      message: '请求过于频繁，请稍后再试。 · Too many requests. Please wait and try again.',
+      message: '请求过于频繁，请稍后再试。',
     }, {
       status: 429,
       headers: { 'Retry-After': String(burst.retryAfter) },
@@ -169,7 +169,7 @@ export async function POST(request) {
   if (!hasAwarenessAccess(user)) {
     return NextResponse.json({
       error: 'awareness_access_required',
-      message: '此账户尚未获邀使用觉察卡。 · This account has not been invited to Awareness Cards.',
+      message: '此账户尚未获邀使用觉察卡。',
     }, { status: 403 });
   }
 
@@ -179,7 +179,7 @@ export async function POST(request) {
       if (!profile || profile.plan === 'free') {
         return NextResponse.json({
           error: 'plan_required',
-          message: '深度报告需要升级方案。 · A paid plan is required for Deep Reports.',
+          message: '深度报告需要升级方案。',
         }, { status: 403 });
       }
     } catch (error) {
@@ -192,7 +192,7 @@ export async function POST(request) {
   try {
     body = await request.json();
   } catch {
-    return invalidPayload('请求不是有效的 JSON。 · The request body is not valid JSON.');
+    return invalidPayload('请求不是有效的 JSON。');
   }
 
   let admin = null;
@@ -200,7 +200,7 @@ export async function POST(request) {
   const recipientVerificationId = body?.recipientVerificationId;
   if (recipientVerificationId !== undefined) {
     if (typeof recipientVerificationId !== 'string' || !UUID_PATTERN.test(recipientVerificationId)) {
-      return invalidPayload('recipientVerificationId 格式无效。 · Recipient verification ID must be a valid UUID.');
+    return invalidPayload('收件验证编号格式无效。');
     }
     let profile;
     try {
@@ -212,7 +212,7 @@ export async function POST(request) {
     if (profile?.role !== 'educator') {
       return NextResponse.json({
         error: 'educator_required',
-        message: '只有教育者可以为他人建立报告。 · Only educators can create reports for others.',
+        message: '只有教育者可以为他人建立报告。',
       }, { status: 403 });
     }
     try {
@@ -230,7 +230,7 @@ export async function POST(request) {
       console.error('Unable to load recipient authorization', error);
       return NextResponse.json({
         error: 'recipient_verification_failed',
-        message: '暂时无法确认收件授权。 · Could not confirm recipient authorization.',
+        message: '暂时无法确认收件授权。',
       }, { status: 503 });
     }
   }
@@ -242,12 +242,12 @@ export async function POST(request) {
 
   if (retryReadingId !== undefined) {
     if (typeof retryReadingId !== 'string' || !UUID_PATTERN.test(retryReadingId)) {
-      return invalidPayload('readingId 格式无效。 · readingId must be a valid UUID.');
+      return invalidPayload('抽牌编号格式无效。');
     }
     try {
       reading = await getReading(supabase, retryReadingId);
       if (!reading) {
-        return NextResponse.json({ error: 'reading_not_found', message: '找不到这次抽牌。 · Reading not found.' }, { status: 404 });
+        return NextResponse.json({ error: 'reading_not_found', message: '找不到这次抽牌。' }, { status: 404 });
       }
       const existing = await getReportByReading(supabase, retryReadingId);
       if (existing) {
@@ -282,7 +282,7 @@ export async function POST(request) {
       if (usedToday >= limit) {
         return NextResponse.json({
           error: 'daily_limit_reached',
-          message: `今日深度报告已达上限（${limit} 份，UTC）。 · Daily Deep Report limit reached (${limit}, UTC).`,
+          message: `今日深度报告已达上限（${limit} 份，世界协调时间）。`,
         }, { status: 429 });
       }
     } catch (error) {
@@ -311,8 +311,7 @@ export async function POST(request) {
       }
     }
 
-    // Version 2 is deterministic: all copy comes from the reviewed bilingual
-    // card dataset, so report creation does not depend on an external AI model.
+    // Version 3 is deterministic and does not depend on an external model.
     const model = FIXED_REPORT_VERSION;
     const content = buildFixedReport({ mode, spreadKey, positions, cardNumbers, question });
 
@@ -343,7 +342,7 @@ export async function POST(request) {
       console.error('Unable to prepare recipient report delivery', error);
       return NextResponse.json({
         error: 'report_delivery_failed',
-        message: '报告已建立，但暂时无法准备邮件寄送。 · The report was created, but email delivery could not be prepared.',
+        message: '报告已建立，但暂时无法准备邮件寄送。',
         readingId: reading.id,
         reportId: report.id,
       }, { status: 500 });

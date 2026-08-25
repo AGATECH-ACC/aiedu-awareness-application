@@ -11,7 +11,10 @@ import DeliveryRetryButton from './DeliveryRetryButton';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const metadata = {
-  title: '客户觉察报告 · Client Awareness Report',
+  title: { absolute: '客户觉察报告' },
+  description: '一份客户觉察报告。',
+  openGraph: { title: '客户觉察报告', description: '一份客户觉察报告。' },
+  twitter: { title: '客户觉察报告', description: '一份客户觉察报告。' },
   robots: { index: false, follow: false },
 };
 
@@ -25,9 +28,9 @@ function formattedDate(value) {
 }
 
 function statusLabel(status) {
-  if (status === 'sent') return '已寄出 · Sent';
-  if (status === 'failed') return '寄送失败 · Delivery failed';
-  return '准备中 · Pending';
+  if (status === 'sent') return '已寄出';
+  if (status === 'failed') return '寄送失败';
+  return '准备中';
 }
 
 export default async function ClientReportPage({ params }) {
@@ -53,26 +56,26 @@ export default async function ClientReportPage({ params }) {
 
   return (
     <main className="client-report-page">
-      <TopNav user={user} />
+      <TopNav user={user} chineseOnly />
       <div className="client-report-shell">
-        <Link className="client-report-back" href="/portal#client-reports">← 返回客户报告 · Back to client reports</Link>
+        <Link className="client-report-back" href="/portal#client-reports">← 返回客户报告</Link>
 
         <header className="client-report-header">
           <div>
-            <span>CLIENT REPORT · 客户报告</span>
+            <span>客户报告</span>
             <h1>{delivery.recipient_name}</h1>
             <p>{delivery.recipient_email}</p>
           </div>
           <div className={`client-report-status is-${delivery.status}`}>
             <strong>{statusLabel(delivery.status)}</strong>
-            <small>建立于 · Created {formattedDate(delivery.created_at)}</small>
-            {delivery.emailed_at ? <small>寄出于 · Emailed {formattedDate(delivery.emailed_at)}</small> : null}
+            <small>建立于 {formattedDate(delivery.created_at)}</small>
+            {delivery.emailed_at ? <small>寄出于 {formattedDate(delivery.emailed_at)}</small> : null}
           </div>
         </header>
 
-        <section className="client-report-summary" aria-label="抽牌摘要 · Reading summary">
+        <section className="client-report-summary" aria-label="抽牌摘要">
           <div>
-            <span>牌阵 · Spread</span>
+            <span>牌阵</span>
             <strong>{readingSpreadLabel(reading?.mode, reading?.spread_key)}</strong>
           </div>
           <div className="client-report-card-list">
@@ -80,13 +83,13 @@ export default async function ClientReportPage({ params }) {
               const card = byNum[item?.n];
               return (
                 <span key={`${item?.n}-${index}`}>
-                  {card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : `#${item?.n}`}
+                  {card ? `${String(card.n).padStart(2, '0')} ${card.cn}` : `#${item?.n}`}
                 </span>
               );
             })}
           </div>
           {report.is_public && report.share_token ? (
-            <Link className="client-report-recipient-view" href={`/r/${report.share_token}`}>开启收件人页面 · Open recipient view ↗</Link>
+            <Link className="client-report-recipient-view" href={`/r/${report.share_token}`}>开启收件人页面 ↗</Link>
           ) : null}
         </section>
 

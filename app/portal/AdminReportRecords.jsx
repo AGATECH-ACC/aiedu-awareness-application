@@ -15,18 +15,18 @@ import {
 import { byNum, readingSpreadLabel } from '@/lib/cards';
 
 function deliveryDate(value) {
-  return new Date(value).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
+  return new Date(value).toLocaleDateString('zh-CN', {
+    day: 'numeric',
+    month: 'long',
     year: 'numeric',
     timeZone: 'Asia/Kuala_Lumpur',
   });
 }
 
 function deliveryLabel(status) {
-  if (status === 'sent') return '已寄出 · Sent';
-  if (status === 'failed') return '寄送失败 · Failed';
-  return '准备中 · Pending';
+  if (status === 'sent') return '已寄出';
+  if (status === 'failed') return '寄送失败';
+  return '准备中';
 }
 
 function deliveryReading(delivery) {
@@ -50,7 +50,7 @@ function ReportThumbnail({ card, size = 'large' }) {
     <div className={`admin-report-thumbnail is-${size}`}>
       <Image
         src={cardImage(card)}
-        alt={card ? `第 ${String(card.n).padStart(2, '0')} 张：${card.cn} · Card ${card.n}: ${card.en}` : '觉察卡背面 · Awareness card back'}
+        alt={card ? `第 ${String(card.n).padStart(2, '0')} 张：${card.cn}` : '觉察卡背面'}
         width={320}
         height={448}
         sizes={size === 'small' ? '72px' : '(max-width: 720px) 112px, 126px'}
@@ -67,8 +67,8 @@ function EmptyReports({ filtered }) {
   return (
     <div className="admin-records-empty">
       <FileText size={28} weight="duotone" aria-hidden="true" />
-      <strong>{filtered ? '没有符合条件的报告 · No matching reports' : '还没有客户报告 · No client reports yet'}</strong>
-      <p>{filtered ? '请调整搜索或筛选条件。 · Try another search or filter.' : '完成第一次客户抽牌后，报告会显示在这里。 · Complete a client reading to start your report library.'}</p>
+      <strong>{filtered ? '没有符合条件的报告' : '还没有客户报告'}</strong>
+      <p>{filtered ? '请调整搜索或筛选条件。' : '完成第一次客户抽牌后，报告会显示在这里。'}</p>
     </div>
   );
 }
@@ -82,8 +82,8 @@ function ReportCard({ delivery }) {
       <div className="admin-report-card-main">
         <ReportThumbnail card={card} />
         <div className="admin-report-card-copy">
-          <span className="admin-report-eyebrow">{reading ? readingSpreadLabel(reading.mode, reading.spread_key) : 'AWAITING CARD · 等待卡牌'}</span>
-          <h3>{card ? `${card.cn} · ${card.en}` : '觉察报告 · Awareness report'}</h3>
+          <span className="admin-report-eyebrow">{reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '等待卡牌'}</span>
+          <h3>{card ? card.cn : '觉察报告'}</h3>
           <strong>{delivery.recipient_name}</strong>
           <span>{delivery.recipient_email}</span>
           <time dateTime={delivery.created_at}>{deliveryDate(delivery.created_at)}</time>
@@ -91,7 +91,7 @@ function ReportCard({ delivery }) {
         </div>
       </div>
       <Link className="admin-report-card-link" href={`/portal/client-reports/${delivery.id}`}>
-        <span>查看报告 · View report</span>
+        <span>查看报告</span>
         <ArrowRight size={18} aria-hidden="true" />
       </Link>
     </article>
@@ -110,12 +110,12 @@ function ReportListItem({ delivery }) {
         <span>{delivery.recipient_email}</span>
       </div>
       <div className="admin-report-row-card">
-        <span>{reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '卡牌 · Card'}</span>
-        <strong>{card ? `${String(card.n).padStart(2, '0')} ${card.cn} · ${card.en}` : '等待卡牌 · Awaiting card'}</strong>
+        <span>{reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '卡牌'}</span>
+        <strong>{card ? `${String(card.n).padStart(2, '0')} ${card.cn}` : '等待卡牌'}</strong>
       </div>
       <time dateTime={delivery.created_at}>{deliveryDate(delivery.created_at)}</time>
       <ReportStatus status={delivery.status} />
-      <Link className="admin-report-row-link" href={`/portal/client-reports/${delivery.id}`} aria-label={`查看 ${delivery.recipient_name} 的报告 · View report for ${delivery.recipient_name}`}>
+      <Link className="admin-report-row-link" href={`/portal/client-reports/${delivery.id}`} aria-label={`查看 ${delivery.recipient_name} 的报告`}>
         <ArrowRight size={19} aria-hidden="true" />
       </Link>
     </article>
@@ -149,7 +149,7 @@ export default function AdminReportRecords({ deliveries }) {
         const card = deliveryCard(item);
         const reading = deliveryReading(item);
         const spread = reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '';
-        return [item.recipient_name, item.recipient_email, card?.cn, card?.en, spread]
+        return [item.recipient_name, item.recipient_email, card?.cn, spread]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(normalizedQuery));
       })
@@ -163,51 +163,51 @@ export default function AdminReportRecords({ deliveries }) {
 
   return (
     <section className="admin-records" aria-labelledby="admin-records-heading">
-      <h2 id="admin-records-heading" className="sr-only">客户报告记录 · Client report records</h2>
+      <h2 id="admin-records-heading" className="sr-only">客户报告记录</h2>
 
-      <div className="admin-metrics" aria-label="报告摘要 · Report summary">
+      <div className="admin-metrics" aria-label="报告摘要">
         <div className="admin-metric">
           <FileText size={27} weight="duotone" aria-hidden="true" />
-          <div><strong>{metrics.reports}</strong><span>总报告数 · Total reports</span></div>
+          <div><strong>{metrics.reports}</strong><span>总报告数</span></div>
         </div>
         <div className="admin-metric">
           <UsersThree size={29} weight="duotone" aria-hidden="true" />
-          <div><strong>{metrics.clients}</strong><span>服务客户 · Clients</span></div>
+          <div><strong>{metrics.clients}</strong><span>服务客户</span></div>
         </div>
         <div className="admin-metric">
           <PaperPlaneTilt size={28} weight="duotone" aria-hidden="true" />
-          <div><strong>{metrics.sentThisMonth}</strong><span>本月已发送 · Sent this month</span></div>
+          <div><strong>{metrics.sentThisMonth}</strong><span>本月已发送</span></div>
         </div>
       </div>
 
       <div className="admin-record-toolbar">
         <label className="admin-record-search">
           <MagnifyingGlass size={19} aria-hidden="true" />
-          <span className="sr-only">搜索客户或邮箱 · Search client or email</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索客户或邮箱 · Search client or email" />
+          <span className="sr-only">搜索客户或邮箱</span>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索客户或邮箱" />
         </label>
         <label className="admin-record-select">
-          <span className="sr-only">筛选状态 · Filter status</span>
+          <span className="sr-only">筛选状态</span>
           <select value={status} onChange={(event) => setStatus(event.target.value)}>
-            <option value="all">全部状态 · All statuses</option>
-            <option value="sent">已寄出 · Sent</option>
-            <option value="pending">准备中 · Pending</option>
-            <option value="failed">寄送失败 · Failed</option>
+            <option value="all">全部状态</option>
+            <option value="sent">已寄出</option>
+            <option value="pending">准备中</option>
+            <option value="failed">寄送失败</option>
           </select>
         </label>
         <label className="admin-record-select">
-          <span className="sr-only">日期排序 · Sort by date</span>
+          <span className="sr-only">日期排序</span>
           <select value={sort} onChange={(event) => setSort(event.target.value)}>
-            <option value="newest">最新优先 · Newest first</option>
-            <option value="oldest">最早优先 · Oldest first</option>
+            <option value="newest">最新优先</option>
+            <option value="oldest">最早优先</option>
           </select>
         </label>
-        <div className="admin-layout-toggle" aria-label="显示方式 · View style">
+        <div className="admin-layout-toggle" aria-label="显示方式">
           <button type="button" className={layout === 'list' ? 'is-active' : ''} aria-pressed={layout === 'list'} onClick={() => setLayout('list')}>
-            <ListBullets size={18} aria-hidden="true" /><span>列表 · List</span>
+            <ListBullets size={18} aria-hidden="true" /><span>列表</span>
           </button>
           <button type="button" className={layout === 'cards' ? 'is-active' : ''} aria-pressed={layout === 'cards'} onClick={() => setLayout('cards')}>
-            <CardsThree size={19} aria-hidden="true" /><span>卡片 · Cards</span>
+            <CardsThree size={19} aria-hidden="true" /><span>卡片</span>
           </button>
         </div>
       </div>

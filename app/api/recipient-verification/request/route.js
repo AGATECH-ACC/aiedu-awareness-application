@@ -24,15 +24,15 @@ export async function POST(request) {
     context = await getEducatorRequestContext();
   } catch (error) {
     console.error('Unable to authorize recipient verification request', error);
-    return problem(500, 'authorization_failed', '暂时无法验证教育者身份。 · Could not verify the educator account.');
+    return problem(500, 'authorization_failed', '暂时无法验证教育者身份。');
   }
   if (context.error) {
     return problem(
       context.status,
       context.error,
       context.status === 401
-        ? '请重新登入。 · Please sign in again.'
-        : '此功能只开放给教育者。 · This feature is available to educators only.'
+        ? '请重新登入。'
+        : '此功能只开放给教育者。'
     );
   }
 
@@ -40,7 +40,7 @@ export async function POST(request) {
   try {
     body = await request.json();
   } catch {
-    return problem(400, 'invalid_json', '请求内容无效。 · Invalid request body.');
+    return problem(400, 'invalid_json', '请求内容无效。');
   }
   const recipient = normalizeRecipient(body);
   if (recipient.error) return problem(400, 'invalid_recipient', recipient.error);
@@ -50,7 +50,7 @@ export async function POST(request) {
     admin = createAdminSupabase();
   } catch (error) {
     console.error('Recipient verification backend is not configured', error);
-    return problem(503, 'verification_not_configured', '收件验证尚未完成服务器设置。 · Recipient verification is not configured yet.');
+    return problem(503, 'verification_not_configured', '收件验证尚未完成服务器设置。');
   }
 
   const now = Date.now();
@@ -66,13 +66,13 @@ export async function POST(request) {
     .limit(1);
   if (recentError) {
     console.error('Unable to check recipient resend window', recentError);
-    return problem(500, 'verification_lookup_failed', '暂时无法寄送验证码。 · Could not send a verification code.');
+    return problem(500, 'verification_lookup_failed', '暂时无法寄送验证码。');
   }
   if (recent?.length) {
     const retryAfter = Math.max(1, Math.ceil(
       (new Date(recent[0].created_at).getTime() + RECIPIENT_RESEND_SECONDS * 1000 - now) / 1000
     ));
-    return problem(429, 'resend_too_soon', `请在 ${retryAfter} 秒后重新寄送。 · Try again in ${retryAfter} seconds.`, {
+    return problem(429, 'resend_too_soon', `请在 ${retryAfter} 秒后重新寄送。`, {
       'Retry-After': String(retryAfter),
     });
   }
@@ -85,10 +85,10 @@ export async function POST(request) {
     .gte('created_at', hourAgo);
   if (countError) {
     console.error('Unable to check recipient hourly limit', countError);
-    return problem(500, 'verification_lookup_failed', '暂时无法寄送验证码。 · Could not send a verification code.');
+    return problem(500, 'verification_lookup_failed', '暂时无法寄送验证码。');
   }
   if ((count || 0) >= RECIPIENT_HOURLY_LIMIT) {
-    return problem(429, 'hourly_limit_reached', '此邮箱的验证码请求过多，请一小时后再试。 · Too many codes were requested for this email. Try again later.');
+    return problem(429, 'hourly_limit_reached', '此邮箱的验证码请求过多，请一小时后再试。');
   }
 
   const verificationId = randomUUID();
@@ -99,7 +99,7 @@ export async function POST(request) {
     codeDigest = recipientCodeDigest({ verificationId, email: recipient.email, code });
   } catch (error) {
     console.error('Recipient OTP signing secret is not configured', error);
-    return problem(503, 'verification_not_configured', '收件验证尚未完成服务器设置。 · Recipient verification is not configured yet.');
+    return problem(503, 'verification_not_configured', '收件验证尚未完成服务器设置。');
   }
 
   const { error: insertError } = await admin
@@ -114,7 +114,7 @@ export async function POST(request) {
     });
   if (insertError) {
     console.error('Unable to save recipient verification', insertError);
-    return problem(500, 'verification_save_failed', '暂时无法建立验证码。 · Could not create a verification code.');
+    return problem(500, 'verification_save_failed', '暂时无法建立验证码。');
   }
 
   try {
@@ -127,7 +127,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Unable to send recipient OTP email', error);
     await admin.from('recipient_verifications').delete().eq('id', verificationId);
-    return problem(503, 'email_send_failed', '验证码邮件暂时无法寄出，请检查 Resend 设置。 · The verification email could not be sent. Check the Resend configuration.');
+    return problem(503, 'email_send_failed', '验证码邮件暂时无法寄出，请检查寄送设置。');
   }
 
   return NextResponse.json({
