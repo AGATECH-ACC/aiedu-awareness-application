@@ -10,7 +10,7 @@ const APP_LOGIN_URL = '{{ .SiteURL }}/login';
 const PASSWORD_RESET_URL = '{{ .SiteURL }}/forgot-password';
 
 function frame(options) {
-  return brandedEmailFrame({ ...options, iconUrl: TEMPLATE_ICON_URL });
+  return brandedEmailFrame({ ...options, iconUrl: TEMPLATE_ICON_URL, includeEnglishBrand: true });
 }
 
 function action(label, href = CONFIRMATION_URL) {
