@@ -10,7 +10,10 @@ import { createServerSupabase } from '@/lib/supabase-server';
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const metadata = {
-  title: '我的觉察报告',
+  title: { absolute: '我的觉察报告' },
+  description: '一份个人觉察报告。',
+  openGraph: { title: '我的觉察报告', description: '一份个人觉察报告。' },
+  twitter: { title: '我的觉察报告', description: '一份个人觉察报告。' },
   robots: { index: false, follow: false },
 };
 
@@ -41,7 +44,7 @@ export default async function PersonalReportPage({ params }) {
 
   return (
     <main className="client-report-page">
-      <TopNav user={user} />
+      <TopNav user={user} chineseOnly />
       <div className="client-report-shell">
         <Link className="client-report-back" href="/portal#my-reports">← 返回历史报告</Link>
 

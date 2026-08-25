@@ -24,7 +24,7 @@ const EMPTY_RECIPIENT = { name: '', email: '' };
 function Step({ number, active, done, children }) {
   return (
     <div className={`educator-step${active ? ' is-active' : ''}${done ? ' is-done' : ''}`}>
-      <span>{done ? <Check size={14} weight="bold" aria-label="完成 · Complete" /> : number}</span>
+      <span>{done ? <Check size={14} weight="bold" aria-label="完成" /> : number}</span>
       <div>{children}</div>
     </div>
   );
@@ -79,7 +79,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
         body: JSON.stringify(recipient),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || '验证码寄送失败。 · Could not send the verification code.');
+      if (!response.ok) throw new Error(data.message || '验证码寄送失败。');
       setVerificationId(data.verificationId);
       setMaskedEmail(data.maskedEmail);
       setConfirmedRecipient({ ...recipient, email: recipient.email.trim().toLowerCase() });
@@ -104,7 +104,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
         body: JSON.stringify({ verificationId, code: verificationCode }),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || '验证码不正确。 · The code could not be verified.');
+      if (!response.ok) throw new Error(data.message || '验证码不正确。');
       setVerified(true);
       setConfirmedRecipient(data.recipient || confirmedRecipient);
     } catch (verifyError) {
@@ -129,7 +129,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const generationError = new Error(data.message || '报告生成失败。 · Could not generate the report.');
+        const generationError = new Error(data.message || '报告生成失败。');
         generationError.readingId = data.readingId || retryReadingId || null;
         throw generationError;
       }
@@ -167,7 +167,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
     try {
       const response = await fetch(`/api/report-delivery/${deliveryId}`, { method: 'POST' });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || '重新寄送失败。 · Resend failed.');
+      if (!response.ok) throw new Error(data.message || '重新寄送失败。');
       onDeliveryChange?.({ id: deliveryId, status: 'sent', emailed_at: data.emailedAt });
       if (result?.deliveryId === deliveryId) setResult((current) => ({ ...current, emailSent: true, deliveryStatus: 'sent' }));
     } catch (resendError) {
@@ -196,78 +196,78 @@ function ClientReadingFlow({ onDeliveryChange }) {
 
   return (
     <div className="educator-client-flow">
-      <div className="educator-steps" aria-label="客户报告步骤 · Client report steps">
-        <Step number="1" active={stage === 1} done={stage > 1}>收件资料<br /><small>Recipient</small></Step>
-        <Step number="2" active={stage === 2} done={stage > 2}>邮箱验证<br /><small>Email OTP</small></Step>
-        <Step number="3" active={stage === 3} done={stage > 3}>抽牌报告<br /><small>Draw & report</small></Step>
-        <Step number="4" active={stage === 4} done={false}>邮件送达<br /><small>Delivery</small></Step>
+      <div className="educator-steps" aria-label="客户报告步骤">
+        <Step number="1" active={stage === 1} done={stage > 1}>收件资料</Step>
+        <Step number="2" active={stage === 2} done={stage > 2}>邮箱验证</Step>
+        <Step number="3" active={stage === 3} done={stage > 3}>抽牌报告</Step>
+        <Step number="4" active={stage === 4} done={false}>邮件送达</Step>
       </div>
 
       {!verificationId ? (
         <form className="educator-panel recipient-form" onSubmit={requestCode}>
           <div className="educator-panel-heading">
-            <span>01 · RECIPIENT CONSENT</span>
-            <h2>先确认收件人 · Confirm the recipient</h2>
-            <p>验证码会寄到对方邮箱。对方提供代码后，才可继续抽牌和寄送报告。<br />The recipient must provide the emailed code before you can draw and send their report.</p>
+            <span>01 · 收件确认</span>
+            <h2>先确认收件人</h2>
+            <p>验证码会寄到对方邮箱。对方提供代码后，才可继续抽牌和寄送报告。</p>
           </div>
           <div className="educator-form-grid">
             <label>
-              <span>姓名 · Name</span>
-              <input value={recipient.name} onChange={(event) => setRecipient((current) => ({ ...current, name: event.target.value }))} maxLength={120} autoComplete="name" required placeholder="收件人的姓名 · Recipient name" />
+              <span>姓名</span>
+              <input value={recipient.name} onChange={(event) => setRecipient((current) => ({ ...current, name: event.target.value }))} maxLength={120} autoComplete="name" required placeholder="收件人的姓名" />
             </label>
             <label>
-              <span>邮箱 · Email</span>
-              <input type="email" value={recipient.email} onChange={(event) => setRecipient((current) => ({ ...current, email: event.target.value }))} maxLength={320} autoComplete="email" required placeholder="name@example.com" />
+              <span>邮箱</span>
+              <input type="email" value={recipient.email} onChange={(event) => setRecipient((current) => ({ ...current, email: event.target.value }))} maxLength={320} autoComplete="email" required placeholder="请输入邮箱地址" />
             </label>
           </div>
           <button type="submit" className="educator-primary-button" disabled={requesting}>
-            {requesting ? '寄送中… · Sending…' : '寄送六位验证码 · Send 6-digit code'}
+            {requesting ? '寄送中…' : '寄送六位验证码'}
           </button>
         </form>
       ) : !verified ? (
         <form className="educator-panel otp-form" onSubmit={verifyCode}>
           <div className="educator-panel-heading">
-            <span>02 · EMAIL VERIFICATION</span>
-            <h2>输入收件人收到的代码 · Enter their code</h2>
-            <p>已寄到 {maskedEmail}。代码十分钟内有效，最多尝试五次。<br />Sent to {maskedEmail}. The code is valid for ten minutes with five attempts.</p>
+            <span>02 · 邮箱验证</span>
+            <h2>输入收件人收到的代码</h2>
+            <p>已寄到 {maskedEmail}。代码十分钟内有效，最多尝试五次。</p>
           </div>
           <label className="otp-input-label">
-            <span className="sr-only">六位验证码 · Six-digit code</span>
+            <span className="sr-only">六位验证码</span>
             <input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={verificationCode} onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="000000" autoFocus required />
           </label>
           <button type="submit" className="educator-primary-button" disabled={verifying || verificationCode.length !== 6}>
-            {verifying ? '验证中… · Verifying…' : '确认代码并继续 · Verify and continue'}
+            {verifying ? '验证中…' : '确认代码并继续'}
           </button>
           <button type="button" className="educator-text-button" onClick={requestCode} disabled={requesting || secondsToResend > 0}>
-            {secondsToResend > 0 ? `${secondsToResend} 秒后可重寄 · Resend in ${secondsToResend}s` : '重新寄送验证码 · Resend code'}
+            {secondsToResend > 0 ? `${secondsToResend} 秒后可重寄` : '重新寄送验证码'}
           </button>
           <button type="button" className="educator-text-button" onClick={() => { setVerificationId(''); setVerificationCode(''); setError(''); }}>
-            修改收件资料 · Edit recipient
+            修改收件资料
           </button>
         </form>
       ) : !result?.content ? (
         <div>
           <div className="recipient-verified" role="status">
             <span><Check size={16} weight="bold" aria-hidden="true" /></span>
-            <div><strong>{confirmedRecipient?.name}</strong><small>{confirmedRecipient?.email} · 已验证 · Verified</small></div>
+            <div><strong>{confirmedRecipient?.name}</strong><small>{confirmedRecipient?.email} · 已验证</small></div>
           </div>
           <CardDeck onReading={(reading) => { setLatest(reading); setResult(null); setError(''); }} />
           <section className="educator-panel educator-generate-panel">
             <div className="educator-panel-heading">
-              <span>03 · PERSONAL REPORT</span>
-              <h2>建立并寄送报告 · Create and send report</h2>
-              <p>{latest ? '本次抽牌已准备好。 · This reading is ready.' : '请先在上方完成抽牌。 · Complete the draw above first.'}</p>
+              <span>03 · 建立报告</span>
+              <h2>建立并寄送报告</h2>
+              <p>{latest ? '本次抽牌已准备好。' : '请先在上方完成抽牌。'}</p>
             </div>
             <label>
-              <span>觉察情境（可选）· Reflection context (optional)</span>
-              <textarea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={2000} placeholder="对方此刻想觉察的问题或情境… · A question or situation they want to reflect on…" />
+              <span>觉察情境（可选）</span>
+              <textarea value={question} onChange={(event) => setQuestion(event.target.value)} maxLength={2000} placeholder="对方此刻想觉察的问题或情境…" />
             </label>
             <button type="button" className="educator-primary-button" onClick={() => generateReport()} disabled={!latest || generating}>
-              {generating ? '报告生成中… · Generating…' : '生成报告并寄到收件邮箱 · Generate and email report'}
+              {generating ? '报告生成中…' : '生成报告并寄到收件邮箱'}
             </button>
-            {generating ? <div className="educator-elapsed" role="status">已等待 {elapsed} 秒 · {elapsed}s elapsed</div> : null}
+            {generating ? <div className="educator-elapsed" role="status">已等待 {elapsed} 秒</div> : null}
             {result?.failed && result.retryReadingId ? (
-              <button type="button" className="educator-secondary-button" onClick={() => generateReport(result.retryReadingId)} disabled={generating}>用同一次抽牌重试 · Retry this reading</button>
+              <button type="button" className="educator-secondary-button" onClick={() => generateReport(result.retryReadingId)} disabled={generating}>用同一次抽牌重试</button>
             ) : null}
           </section>
         </div>
@@ -276,17 +276,17 @@ function ClientReadingFlow({ onDeliveryChange }) {
           <div className={`delivery-result${result.emailSent ? ' is-sent' : ' is-failed'}`}>
             <span>{result.emailSent ? <Check size={18} weight="bold" aria-hidden="true" /> : <WarningCircle size={18} weight="bold" aria-hidden="true" />}</span>
             <div>
-              <h2>{result.emailSent ? '报告已寄出 · Report sent' : '报告已建立，邮件尚未寄出 · Report saved; email pending'}</h2>
+              <h2>{result.emailSent ? '报告已寄出' : '报告已建立，邮件尚未寄出'}</h2>
               <p>{confirmedRecipient?.name} · {confirmedRecipient?.email}</p>
             </div>
           </div>
           {!result.emailSent && result.deliveryId ? (
             <button type="button" className="educator-secondary-button" onClick={() => resendDelivery(result.deliveryId)} disabled={resendingId === result.deliveryId}>
-              {resendingId === result.deliveryId ? '重新寄送中… · Resending…' : '重新寄送报告 · Resend report'}
+              {resendingId === result.deliveryId ? '重新寄送中…' : '重新寄送报告'}
             </button>
           ) : null}
           <Markdownish text={result.content} />
-          <button type="button" className="educator-primary-button" onClick={startAnother}>为另一位收件人抽牌 · Start another reading</button>
+          <button type="button" className="educator-primary-button" onClick={startAnother}>为另一位收件人抽牌</button>
         </section>
       )}
 
@@ -354,50 +354,48 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
 
   const pageCopy = {
     overview: {
-      eyebrow: 'REPORT LIBRARY · 报告资料库',
-      title: '客户报告 · Client reports',
-      description: '查看并管理你为客户建立的觉察报告。 · View and manage the awareness reports you have created for clients.',
+      eyebrow: '报告资料库',
+      title: '客户报告',
+      description: '查看并管理你为客户建立的觉察报告。',
     },
     clients: {
-      eyebrow: 'VERIFIED READING · 验证式抽牌',
-      title: '建立客户报告 · New client reading',
-      description: '先取得收件人邮箱验证码，再完成抽牌与报告寄送。 · Verify the recipient by email before drawing and sending their report.',
+      eyebrow: '验证式抽牌',
+      title: '建立客户报告',
+      description: '先取得收件人邮箱验证码，再完成抽牌与报告寄送。',
     },
     mine: {
-      eyebrow: 'PERSONAL AWARENESS · 个人觉察',
-      title: '我的报告 · My reports',
-      description: '为自己抽牌、保存觉察记录，并打开完整报告。 · Draw for yourself, save your readings, and revisit full reports.',
+      eyebrow: '个人觉察',
+      title: '我的报告',
+      description: '为自己抽牌、保存觉察记录，并打开完整报告。',
     },
   }[view];
 
   const navigation = [
-    { id: 'overview', label: '总览', labelEn: 'Overview', Icon: House },
-    { id: 'clients', label: '为他人抽牌', labelEn: 'Client reading', Icon: CardsThree },
-    { id: 'mine', label: '我的报告', labelEn: 'My reports', Icon: FileText },
+    { id: 'overview', label: '总览', Icon: House },
+    { id: 'clients', label: '为他人抽牌', Icon: CardsThree },
+    { id: 'mine', label: '我的报告', Icon: FileText },
   ];
 
   const sidebar = (
-    <aside className={`admin-sidebar${drawerOpen ? ' is-open' : ''}`} aria-label="教育者门户导航 · Educator portal navigation">
+    <aside className={`admin-sidebar${drawerOpen ? ' is-open' : ''}`} aria-label="教育者门户导航">
       <div className="admin-sidebar-top">
         <Link className="admin-brand" href="/" onClick={() => setDrawerOpen(false)}>
           <strong>幸福人生觉察卡</strong>
-          <span>AWARENESS CARDS</span>
         </Link>
-        <button className="admin-drawer-close" type="button" aria-label="关闭菜单 · Close menu" onClick={() => setDrawerOpen(false)}>
+        <button className="admin-drawer-close" type="button" aria-label="关闭菜单" onClick={() => setDrawerOpen(false)}>
           <X size={23} aria-hidden="true" />
         </button>
       </div>
 
       <div className="admin-sidebar-caption">
         <span>教育者工作台</span>
-        <small>EDUCATOR WORKSPACE</small>
       </div>
 
       <nav className="admin-nav">
-        {navigation.map(({ id, label, labelEn, Icon }) => (
+        {navigation.map(({ id, label, Icon }) => (
           <button key={id} type="button" className={view === id ? 'is-active' : ''} aria-current={view === id ? 'page' : undefined} onClick={() => navigate(id)}>
             <Icon size={22} weight={view === id ? 'fill' : 'regular'} aria-hidden="true" />
-            <span><strong>{label}</strong><small>{labelEn}</small></span>
+            <span><strong>{label}</strong></span>
           </button>
         ))}
       </nav>
@@ -405,12 +403,12 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
       <div className="admin-sidebar-account">
         <div className="admin-account-avatar" aria-hidden="true">E</div>
         <div className="admin-account-copy">
-          <strong>教育者 · Educator</strong>
+          <strong>教育者</strong>
           <span>{email}</span>
         </div>
         <button type="button" onClick={signOut} disabled={signingOut}>
           <SignOut size={19} aria-hidden="true" />
-          <span>{signingOut ? '登出中… · Signing out…' : '登出 · Sign out'}</span>
+          <span>{signingOut ? '登出中…' : '登出'}</span>
         </button>
       </div>
     </aside>
@@ -419,13 +417,13 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
   return (
     <div className="educator-admin">
       {sidebar}
-      {drawerOpen ? <button type="button" className="admin-drawer-backdrop" aria-label="关闭菜单 · Close menu" onClick={() => setDrawerOpen(false)} /> : null}
+      {drawerOpen ? <button type="button" className="admin-drawer-backdrop" aria-label="关闭菜单" onClick={() => setDrawerOpen(false)} /> : null}
 
       <div className="admin-mobile-bar">
-        <button type="button" aria-label="打开菜单 · Open menu" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(true)}>
+        <button type="button" aria-label="打开菜单" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(true)}>
           <MenuIcon size={24} aria-hidden="true" />
         </button>
-        <Link href="/">幸福人生觉察卡 <span>Awareness</span></Link>
+        <Link href="/">幸福人生觉察卡</Link>
         <div className="admin-mobile-avatar" aria-hidden="true">E</div>
       </div>
 
@@ -439,12 +437,12 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
           {view !== 'clients' ? (
             <button type="button" className="admin-new-reading" onClick={() => navigate('clients')}>
               <Plus size={20} weight="bold" aria-hidden="true" />
-              <span>新增客户阅读<small>New client reading</small></span>
+              <span>新增客户报告</span>
             </button>
           ) : (
             <button type="button" className="admin-back-to-reports" onClick={() => navigate('overview')}>
               <FileText size={19} aria-hidden="true" />
-              <span>返回客户报告 · Back to reports</span>
+              <span>返回客户报告</span>
             </button>
           )}
         </header>

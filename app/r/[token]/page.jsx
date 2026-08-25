@@ -29,7 +29,7 @@ export async function generateMetadata({ params }) {
   const title = readingReportTitle(report.mode);
   const description = '一份温柔的自我觉察与反思报告。';
   return {
-    title,
+    title: { absolute: title },
     description,
     robots: { index: false, follow: false },
     openGraph: {
@@ -60,7 +60,6 @@ export default async function PublicReportPage({ params }) {
           <ReportBackButton />
           <Link href="/" className="public-report-brand">
             <div style={{ fontFamily: 'Georgia, serif', fontSize: 25, fontWeight: 700, letterSpacing: 2 }}>幸福人生觉察卡</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: 12, letterSpacing: 3.2, color: '#a9863c', marginTop: 4 }}>幸福人生觉察卡</div>
           </Link>
           <span aria-hidden="true" />
         </header>

@@ -191,7 +191,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
       {showAccountHeader ? (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '4px 16px 0', fontSize: 14, color: '#7a6f5a' }}>
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>已登入 · {email}</span>
-          <button type="button" onClick={signOut} style={{ flex: '0 0 auto', border: 'none', background: 'transparent', color: '#b5842b', fontWeight: 600, cursor: 'pointer' }}>登出 · Sign out</button>
+          <button type="button" onClick={signOut} style={{ flex: '0 0 auto', border: 'none', background: 'transparent', color: '#b5842b', fontWeight: 600, cursor: 'pointer' }}>登出</button>
         </div>
       ) : null}
 
