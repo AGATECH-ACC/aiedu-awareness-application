@@ -1,11 +1,12 @@
 'use client';
 import Image from "next/image";
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { CHAPTERS, CARDS, byNum, CURRENT_SPREADS, SINGLE_CARD_RANGE } from "@/lib/cards";
+import { CHAPTERS, CARDS, byNum, CURRENT_SPREADS, drawCardsForPositions, SINGLE_CARD_RANGE } from "@/lib/cards";
 import { insightFor } from "@/lib/card-insights";
 
 /* ── 幸福人生觉察卡 · Happy Life Awareness Cards ──────────────────────
-   Draw one card, a structured three-card spread, or four-card deep awareness.
+   Draw one card, a two-card awareness spread, a structured three-card spread,
+   or four-card deep awareness.
    Draw at random, or enter the numbers of cards you drew by hand.        */
 
 
@@ -20,26 +21,11 @@ const DECK_RUN_GAP = 18;
 const DECK_RUN_STOP_INDEX = 35;
 const cardFrontSrc = (number) => `/cards/front-${String(number).padStart(2, "0")}.png`;
 
-function drawN(n, pool) {
-  const arr = [...pool], out = [];
-  for (let i = 0; i < n && arr.length; i++) out.push(arr.splice(Math.floor(Math.random() * arr.length), 1)[0]);
-  return out;
-}
-
 function metaForMode(mode) {
   if (mode === 1) return [["当下的觉察", "This moment", "", "", SINGLE_CARD_RANGE.min, SINGLE_CARD_RANGE.max]];
   return CURRENT_SPREADS[mode].positions.map(({ cn, en, guide_cn, guide_en, min, max }) => (
     [cn, en, guide_cn, guide_en, min, max]
   ));
-}
-
-function drawForPositions(positions) {
-  return positions.map((position) => {
-    const min = position[4];
-    const max = position[5];
-    const pool = CARDS.filter((card) => card.n >= min && card.n <= max);
-    return drawN(1, pool)[0];
-  });
 }
 
 function CardArtwork({ card, side = "front", sizes, eager = false, decorative = false }) {
@@ -296,6 +282,7 @@ function ReadingRow({ card, badge, label, desc, index }) {
 
 const MODES = [
   { m: 1, cn: "单张牌" },
+  { m: 2, cn: "两张牌" },
   { m: 3, cn: "三张牌" },
   { m: 4, cn: "四卡深度觉察" },
 ];
@@ -371,7 +358,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
     if (forcedCards) {
       cards = forcedCards;
     } else if (method === "input") {
-      const nums = inputs.slice(0, forcedMode).map((s) => parseInt(s, 10));
+      const nums = inputs.slice(0, forcedMode).map((s) => Number(s));
       if (nums.some((x) => !Number.isInteger(x))) {
         setErr("请为每个位置输入有效编号。");
         return;
@@ -390,7 +377,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
       }
       cards = nums.map((x) => byNum[x]);
     } else {
-      cards = drawForPositions(nextPositions);
+      cards = drawCardsForPositions(forcedMode === 1 ? [SINGLE_CARD_RANGE] : CURRENT_SPREADS[forcedMode].positions);
     }
     setPosMeta(nextPositions);
     setReading(cards);
@@ -542,6 +529,14 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           </div>
         )}
 
+        {/* Two-card awareness explainer */}
+        {activeMode === 2 && (
+          <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 14, color: "#7a6a44", lineHeight: 1.65 }}>
+            <b>{CURRENT_SPREADS[2].name}</b><br />
+            <span>防护模式 → 人生课题</span>
+          </div>
+        )}
+
         {/* Structured three-card explainer */}
         {activeMode === 3 && (
           <div style={{ background: "#f5ecd6", border: "1px solid #e6d3a8", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 14, color: "#7a6a44", lineHeight: 1.65 }}>
@@ -688,6 +683,21 @@ export default function App({ onReading, singleOnly = false, landing = false, in
               ) : null}
             </div>
           ) : null}
+
+          {/* Two-card awareness flow */}
+          {reading && activeMode === 2 && spreadComplete && (
+            <div key={`spread-two-${dealKey}`} style={{ marginTop: 20 }}>
+              <div style={{ textAlign: "center", fontSize: 14, color: "#8a7f6c", fontWeight: 600, marginBottom: 12 }}>{CURRENT_SPREADS[2].name}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, maxWidth: 300, margin: "0 auto" }}>
+                {reading.map((card, index) => (
+                  <MiniCard key={card.n} card={card} badge={index + 1} label={posMeta[index][0]} index={index} />
+                ))}
+              </div>
+              <div style={{ marginTop: 20, background: "#fffdf8", borderRadius: 18, border: "1px solid #e6d9bd", boxShadow: "0 6px 24px rgba(80,60,30,0.07)", padding: "6px 16px 16px" }}>
+                {reading.map((card, index) => <ReadingRow key={index} card={card} badge={index + 1} label={posMeta[index][0]} desc={posMeta[index][2]} index={index} />)}
+              </div>
+            </div>
+          )}
 
           {/* Three-card row */}
           {reading && activeMode === 3 && spreadComplete && (
