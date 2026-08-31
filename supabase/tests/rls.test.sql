@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(14);
 
 insert into auth.users (id, email)
 values
@@ -43,6 +43,18 @@ select throws_ok(
   null,
   'owner cannot create another user reading'
 );
+select lives_ok(
+  $$insert into awareness.readings (user_id, mode, spread_key, cards)
+    values ('11111111-1111-4111-8111-111111111111', 2, 'protection-lesson-v1', '[{"n": 1}, {"n": 11}]')$$,
+  'owner can create a supported two-card reading'
+);
+select throws_ok(
+  $$insert into awareness.readings (user_id, mode, spread_key, cards)
+    values ('11111111-1111-4111-8111-111111111111', 5, 'unsupported', '[{"n": 1}]')$$,
+  '23514',
+  null,
+  'unsupported reading mode is rejected'
+);
 
 reset role;
 set local role authenticated;
@@ -55,7 +67,7 @@ reset role;
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"33333333-3333-4333-8333-333333333333","app_metadata":{"awareness_access":true}}';
 
-select is((select count(*)::int from awareness.readings), 1, 'educator sees the linked user reading');
+select is((select count(*)::int from awareness.readings), 2, 'educator sees the linked user readings');
 select is((select count(*)::int from awareness.deep_reports), 1, 'educator sees the linked user report');
 select is((select count(*)::int from awareness.profiles), 2, 'educator sees self and linked user profiles');
 select throws_ok(

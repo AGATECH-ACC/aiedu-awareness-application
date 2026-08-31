@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:two-card-draw": "node scripts/check-two-card-draw.mjs",
     "test:deep-report-copy": "node scripts/check-chinese-deep-report.mjs",
     "email-templates:check": "node scripts/supabase-email-templates.mjs",
     "email-templates:deploy": "node scripts/supabase-email-templates.mjs --deploy"

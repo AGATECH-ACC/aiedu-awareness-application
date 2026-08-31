@@ -6,7 +6,7 @@ create extension if not exists "pgcrypto";
 create table if not exists public.readings (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users(id) on delete cascade,
-  mode        int  not null,                 -- 1 | 3 | 4
+  mode        int  not null,                 -- 1 | 2 | 3 | 4
   spread_key  text,                           -- versioned awareness key, legacy key, or 'single'
   question    text,
   cards       jsonb not null,                 -- [{ n, position_cn, position_en }]
