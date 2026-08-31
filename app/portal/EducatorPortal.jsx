@@ -365,15 +365,15 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
     },
     mine: {
       eyebrow: '个人觉察',
-      title: '我的报告',
+      title: '为自己抽牌',
       description: '为自己抽牌、保存觉察记录，并打开完整报告。',
     },
   }[view];
 
   const navigation = [
     { id: 'overview', label: '总览', Icon: House },
+    { id: 'mine', label: '为自己抽牌', Icon: FileText },
     { id: 'clients', label: '为他人抽牌', Icon: CardsThree },
-    { id: 'mine', label: '我的报告', Icon: FileText },
   ];
 
   const sidebar = (
