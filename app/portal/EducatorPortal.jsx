@@ -16,7 +16,7 @@ import {
 import CardDeck from '@/components/CardDeck';
 import Markdownish from '@/components/Markdownish';
 import { createClient } from '@/lib/supabase-browser';
-import { getEducatorTier } from '@/lib/educator-tiering';
+import { getEducatorClientModeLimit, getEducatorTier } from '@/lib/educator-tiering';
 import AdminReportRecords from './AdminReportRecords';
 import PortalClient from './PortalClient';
 
@@ -31,7 +31,7 @@ function Step({ number, active, done, children }) {
   );
 }
 
-function ClientReadingFlow({ onDeliveryChange }) {
+function ClientReadingFlow({ onDeliveryChange, maxClientMode }) {
   const [recipient, setRecipient] = useState(EMPTY_RECIPIENT);
   const [confirmedRecipient, setConfirmedRecipient] = useState(null);
   const [verificationId, setVerificationId] = useState('');
@@ -257,7 +257,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
             <span><Check size={16} weight="bold" aria-hidden="true" /></span>
             <div><strong>{confirmedRecipient?.name}</strong><small>{confirmedRecipient?.email} · {confirmedRecipient?.phone} · 已验证</small></div>
           </div>
-          <CardDeck onReading={(reading) => { setLatest(reading); setResult(null); setError(''); }} />
+          <CardDeck maxMode={maxClientMode} onReading={(reading) => { setLatest(reading); setResult(null); setError(''); }} />
           <section className="educator-panel educator-generate-panel">
             <div className="educator-panel-heading">
               <span>03 · 建立报告</span>
@@ -357,6 +357,7 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
   }
 
   const tier = Number.isSafeInteger(qualifyingCount) ? getEducatorTier(qualifyingCount) : null;
+  const maxClientMode = getEducatorClientModeLimit(qualifyingCount);
 
   async function signOut() {
     setSigningOut(true);
@@ -464,7 +465,7 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
           {view === 'overview' ? (
             <AdminReportRecords deliveries={deliveryRecords} qualifyingReportCount={qualifyingCount} />
           ) : view === 'clients' ? (
-            <ClientReadingFlow onDeliveryChange={updateDelivery} />
+            <ClientReadingFlow maxClientMode={maxClientMode} onDeliveryChange={updateDelivery} />
           ) : (
             <PortalClient userId={userId} email={email} initialReports={ownReports} requirePlan={requirePlan} plan={plan} showAccountHeader={false} embeddedAdmin />
           )}

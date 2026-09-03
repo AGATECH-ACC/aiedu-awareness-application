@@ -8,12 +8,14 @@ import { normalizeNewReading, normalizeSavedReading } from '@/lib/reading-valida
 import { sendRecipientReportEmail } from '@/lib/report-email';
 import {
   countReportsSince,
+  getEducatorQualifyingReportCount,
   getProfile,
   getReading,
   getReportByReading,
   insertReading,
   insertReport,
 } from '@/lib/db';
+import { BASIC_EDUCATOR_MAX_CLIENT_MODE, getEducatorClientModeLimit } from '@/lib/educator-tiering';
 import { checkReportBurstLimit, reportClientIp } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
@@ -276,6 +278,24 @@ export async function POST(request) {
 
   if (normalized.error) return invalidPayload(normalized.error);
   const { mode, spreadKey, positions, cardNumbers, question } = normalized.value;
+
+  if (recipientAuthorization && mode > BASIC_EDUCATOR_MAX_CLIENT_MODE) {
+    try {
+      const qualifyingReportCount = await getEducatorQualifyingReportCount(supabase);
+      if (mode > getEducatorClientModeLimit(qualifyingReportCount)) {
+        return NextResponse.json({
+          error: 'advanced_tier_required',
+          message: '三张牌和四卡深度觉察仅开放给高阶教育者。',
+        }, { status: 403 });
+      }
+    } catch (error) {
+      console.error('Unable to check educator advanced tier', error);
+      return NextResponse.json({
+        error: 'tier_check_failed',
+        message: '暂时无法确认高阶资格，请稍后再试。',
+      }, { status: 503 });
+    }
+  }
 
   if (!report) {
     const limit = dailyLimit();

@@ -1,9 +1,17 @@
 import assert from 'node:assert/strict';
-import { getEducatorTier, EDUCATOR_TIER_TARGET } from '../lib/educator-tiering.js';
+import {
+  ADVANCED_EDUCATOR_MAX_CLIENT_MODE,
+  BASIC_EDUCATOR_MAX_CLIENT_MODE,
+  EDUCATOR_TIER_TARGET,
+  getEducatorClientModeLimit,
+  getEducatorTier,
+} from '../lib/educator-tiering.js';
 import { normalizeRecipient } from '../lib/recipient-input.js';
 
 assert.equal(getEducatorTier(EDUCATOR_TIER_TARGET - 1), 'basic');
 assert.equal(getEducatorTier(EDUCATOR_TIER_TARGET), 'advanced');
+assert.equal(getEducatorClientModeLimit(EDUCATOR_TIER_TARGET - 1), BASIC_EDUCATOR_MAX_CLIENT_MODE);
+assert.equal(getEducatorClientModeLimit(EDUCATOR_TIER_TARGET), ADVANCED_EDUCATOR_MAX_CLIENT_MODE);
 assert.deepEqual(normalizeRecipient({
   name: '  王  小明 ',
   email: ' WANG@example.com ',

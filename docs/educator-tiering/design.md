@@ -11,6 +11,8 @@ A qualifying report is one educator-owned delivery with a canonical phone number
 
 The milestone card is on the client-report dashboard above the existing summary metrics. It displays the count, progress to 30, the remaining cases below the threshold, and the agreed achieved copy: `30 个案里程碑已达成` and `已符合基础课程毕业资格`. The sidebar mirrors the derived tier. Certificate generation is not included.
 
+For `为他人抽牌`, basic educators can use only the single- and two-card modes. At 30 qualifying reports, advanced educators can use all current modes. The client UI limits the available controls, and `POST /api/report` repeats the check before it writes a reading, report, delivery, or consumes a recipient authorization. Self-draw and public report behavior are unchanged.
+
 ## Data and privacy
 
 Phone is normalized server-side to an optional `+` and 7–20 digits. It is stored as:
