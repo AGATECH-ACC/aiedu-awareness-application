@@ -1854,6 +1854,7 @@ button, input, textarea, select { font: inherit; }
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
+.recipient-form .educator-form-grid > label:last-child { grid-column: 1 / -1; }
 
 .educator-panel label > span {
   display: block;
@@ -2244,6 +2245,26 @@ button, input, textarea, select { font: inherit; }
 
 .admin-main .educator-client-flow { max-width: 980px; }
 
+.educator-milestone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 24px;
+  padding: 23px 26px;
+  border: 1px solid #d6bd8b;
+  border-radius: 14px;
+  background: linear-gradient(115deg, #fffaf0, #f7ecd6);
+}
+.educator-milestone > div { min-width: 0; flex: 1; }
+.educator-milestone span { display: block; color: var(--admin-gold); font: 800 12px/1 Georgia, serif; letter-spacing: .12em; }
+.educator-milestone h3 { margin: 8px 0; color: var(--admin-ink); font: 800 25px/1.1 Georgia, serif; }
+.educator-milestone p { margin: 0 0 13px; color: #625849; font-size: var(--type-secondary); line-height: 1.55; }
+.educator-milestone progress { width: min(100%, 480px); height: 9px; accent-color: #b8781a; }
+.educator-milestone > strong { flex: 0 0 auto; color: var(--admin-ink); font: 800 25px/1 Georgia, serif; }
+.educator-milestone.is-unavailable { border-color: var(--admin-line); background: #fffdf8; }
+.educator-milestone.is-unavailable strong { display: block; margin-top: 8px; color: #625849; font-size: var(--type-secondary); font-weight: 700; }
+
 .admin-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2519,6 +2540,7 @@ button, input, textarea, select { font: inherit; }
   .admin-new-reading,
   .admin-back-to-reports { width: 100%; }
   .admin-metrics { grid-template-columns: 1fr; }
+  .educator-milestone { align-items: flex-start; flex-direction: column; gap: 14px; }
   .admin-metric { justify-content: flex-start; min-height: 78px; padding: 16px 22px; }
   .admin-metric + .admin-metric { border-top: 1px solid #e5d8bd; border-left: 0; }
   .admin-record-toolbar { grid-template-columns: 1fr; }

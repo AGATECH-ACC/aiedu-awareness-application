@@ -49,7 +49,7 @@ function reportOrigin(request) {
 async function loadRecipientAuthorization({ admin, verificationId, educatorId }) {
   const { data, error } = await admin
     .from('recipient_verifications')
-    .select('id, educator_id, client_id, recipient_name, recipient_email, verified_at, authorization_expires_at, used_at')
+    .select('id, educator_id, client_id, recipient_name, recipient_email, recipient_phone, verified_at, authorization_expires_at, used_at')
     .eq('id', verificationId)
     .eq('educator_id', educatorId)
     .maybeSingle();
@@ -57,6 +57,7 @@ async function loadRecipientAuthorization({ admin, verificationId, educatorId })
   if (!data) return { error: '找不到收件验证，请重新寄送验证码。' };
   if (!data.verified_at) return { error: '请先完成收件邮箱验证。' };
   if (!data.client_id) return { error: '客户资料尚未建立，请重新完成邮箱验证。' };
+  if (!data.recipient_phone) return { error: '客户电话未记录，请重新寄送验证码。' };
   if (!data.authorization_expires_at || new Date(data.authorization_expires_at).getTime() <= Date.now()) {
     return { error: '收件授权已过期，请重新寄送验证码。' };
   }
@@ -66,7 +67,7 @@ async function loadRecipientAuthorization({ admin, verificationId, educatorId })
 async function deliverRecipientReport({ admin, authorization, report, reading, request }) {
   const { data: priorDelivery, error: priorError } = await admin
     .from('educator_report_deliveries')
-    .select('id, report_id, recipient_name, recipient_email, status, emailed_at, created_at')
+    .select('id, report_id, recipient_name, recipient_email, recipient_phone, status, emailed_at, created_at')
     .eq('verification_id', authorization.id)
     .maybeSingle();
   if (priorError) throw priorError;
@@ -100,9 +101,10 @@ async function deliverRecipientReport({ admin, authorization, report, reading, r
       verification_id: authorization.id,
       recipient_name: authorization.recipient_name,
       recipient_email: authorization.recipient_email,
+      recipient_phone: authorization.recipient_phone,
       status: 'pending',
     })
-    .select('id, report_id, recipient_name, recipient_email, status, emailed_at, created_at')
+    .select('id, report_id, recipient_name, recipient_email, recipient_phone, status, emailed_at, created_at')
     .single();
   if (deliveryError) throw deliveryError;
 
@@ -364,6 +366,7 @@ export async function POST(request) {
     recipient: recipientAuthorization ? {
       name: recipientAuthorization.recipient_name,
       email: recipientAuthorization.recipient_email,
+      phone: recipientAuthorization.recipient_phone,
     } : null,
     deliveryId: deliveryResult?.delivery?.id || null,
     deliveryStatus: deliveryResult?.delivery?.status || null,

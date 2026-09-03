@@ -13,6 +13,7 @@ import {
   UsersThree,
 } from '@phosphor-icons/react';
 import { byNum, readingSpreadLabel } from '@/lib/cards';
+import { EDUCATOR_TIER_TARGET, getEducatorTier } from '@/lib/educator-tiering';
 
 function deliveryDate(value) {
   return new Date(value).toLocaleDateString('zh-CN', {
@@ -86,6 +87,7 @@ function ReportCard({ delivery }) {
           <h3>{card ? card.cn : '觉察报告'}</h3>
           <strong>{delivery.recipient_name}</strong>
           <span>{delivery.recipient_email}</span>
+          <span>{delivery.recipient_phone || '未记录电话'}</span>
           <time dateTime={delivery.created_at}>{deliveryDate(delivery.created_at)}</time>
           <ReportStatus status={delivery.status} />
         </div>
@@ -108,6 +110,7 @@ function ReportListItem({ delivery }) {
       <div className="admin-report-row-recipient">
         <strong>{delivery.recipient_name}</strong>
         <span>{delivery.recipient_email}</span>
+        <span>{delivery.recipient_phone || '未记录电话'}</span>
       </div>
       <div className="admin-report-row-card">
         <span>{reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '卡牌'}</span>
@@ -122,7 +125,34 @@ function ReportListItem({ delivery }) {
   );
 }
 
-export default function AdminReportRecords({ deliveries }) {
+function MilestoneDashboard({ qualifyingReportCount }) {
+  if (!Number.isSafeInteger(qualifyingReportCount)) {
+    return (
+      <section className="educator-milestone is-unavailable" aria-label="教育者里程碑">
+        <div><span>教育者里程碑</span><strong>里程碑暂时无法读取</strong></div>
+      </section>
+    );
+  }
+
+  const tier = getEducatorTier(qualifyingReportCount);
+  const remaining = Math.max(0, EDUCATOR_TIER_TARGET - qualifyingReportCount);
+  const progress = Math.min(qualifyingReportCount, EDUCATOR_TIER_TARGET);
+  const advanced = tier === 'advanced';
+
+  return (
+    <section className="educator-milestone" aria-labelledby="educator-milestone-heading">
+      <div>
+        <span>教育者里程碑</span>
+        <h3 id="educator-milestone-heading">{advanced ? '高阶教育者' : '基础教育者'}</h3>
+        <p>{advanced ? '30 个案里程碑已达成，已符合基础课程毕业资格。' : `已完成 ${qualifyingReportCount} / ${EDUCATOR_TIER_TARGET} 个案；再完成 ${remaining} 个合格个案即可晋升高阶。`}</p>
+        <progress value={progress} max={EDUCATOR_TIER_TARGET} aria-label={`已完成 ${progress} / ${EDUCATOR_TIER_TARGET} 个案`} />
+      </div>
+      <strong>{advanced ? '已达标' : `${qualifyingReportCount}/${EDUCATOR_TIER_TARGET}`}</strong>
+    </section>
+  );
+}
+
+export default function AdminReportRecords({ deliveries, qualifyingReportCount }) {
   const records = Array.isArray(deliveries) ? deliveries : [];
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('all');
@@ -149,7 +179,7 @@ export default function AdminReportRecords({ deliveries }) {
         const card = deliveryCard(item);
         const reading = deliveryReading(item);
         const spread = reading ? readingSpreadLabel(reading.mode, reading.spread_key) : '';
-        return [item.recipient_name, item.recipient_email, card?.cn, spread]
+        return [item.recipient_name, item.recipient_email, item.recipient_phone, card?.cn, spread]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(normalizedQuery));
       })
@@ -164,6 +194,8 @@ export default function AdminReportRecords({ deliveries }) {
   return (
     <section className="admin-records" aria-labelledby="admin-records-heading">
       <h2 id="admin-records-heading" className="sr-only">客户报告记录</h2>
+
+      <MilestoneDashboard qualifyingReportCount={qualifyingReportCount} />
 
       <div className="admin-metrics" aria-label="报告摘要">
         <div className="admin-metric">
@@ -183,8 +215,8 @@ export default function AdminReportRecords({ deliveries }) {
       <div className="admin-record-toolbar">
         <label className="admin-record-search">
           <MagnifyingGlass size={19} aria-hidden="true" />
-          <span className="sr-only">搜索客户或邮箱</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索客户或邮箱" />
+          <span className="sr-only">搜索客户、邮箱或电话</span>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索客户、邮箱或电话" />
         </label>
         <label className="admin-record-select">
           <span className="sr-only">筛选状态</span>

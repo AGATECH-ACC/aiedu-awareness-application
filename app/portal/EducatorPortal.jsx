@@ -16,10 +16,11 @@ import {
 import CardDeck from '@/components/CardDeck';
 import Markdownish from '@/components/Markdownish';
 import { createClient } from '@/lib/supabase-browser';
+import { getEducatorTier } from '@/lib/educator-tiering';
 import AdminReportRecords from './AdminReportRecords';
 import PortalClient from './PortalClient';
 
-const EMPTY_RECIPIENT = { name: '', email: '' };
+const EMPTY_RECIPIENT = { name: '', email: '', phone: '' };
 
 function Step({ number, active, done, children }) {
   return (
@@ -82,7 +83,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
       if (!response.ok) throw new Error(data.message || '验证码寄送失败。');
       setVerificationId(data.verificationId);
       setMaskedEmail(data.maskedEmail);
-      setConfirmedRecipient({ ...recipient, email: recipient.email.trim().toLowerCase() });
+      setConfirmedRecipient(data.recipient || { ...recipient, email: recipient.email.trim().toLowerCase() });
       setVerificationCode('');
       setVerified(false);
       setResendAt(Date.now() + Number(data.resendAfter || 60) * 1000);
@@ -139,6 +140,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
         report_id: data.reportId,
         recipient_name: data.recipient?.name || confirmedRecipient?.name,
         recipient_email: data.recipient?.email || confirmedRecipient?.email,
+        recipient_phone: data.recipient?.phone || confirmedRecipient?.phone,
         status: data.deliveryStatus || (data.emailSent ? 'sent' : 'failed'),
         emailed_at: data.emailSent ? new Date().toISOString() : null,
         created_at: data.createdAt || new Date().toISOString(),
@@ -219,6 +221,10 @@ function ClientReadingFlow({ onDeliveryChange }) {
               <span>邮箱</span>
               <input type="email" value={recipient.email} onChange={(event) => setRecipient((current) => ({ ...current, email: event.target.value }))} maxLength={320} autoComplete="email" required placeholder="请输入邮箱地址" />
             </label>
+            <label>
+              <span>电话</span>
+              <input type="tel" value={recipient.phone} onChange={(event) => setRecipient((current) => ({ ...current, phone: event.target.value }))} maxLength={32} autoComplete="tel" inputMode="tel" required placeholder="例如 +60123456789" />
+            </label>
           </div>
           <button type="submit" className="educator-primary-button" disabled={requesting}>
             {requesting ? '寄送中…' : '寄送六位验证码'}
@@ -249,7 +255,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
         <div>
           <div className="recipient-verified" role="status">
             <span><Check size={16} weight="bold" aria-hidden="true" /></span>
-            <div><strong>{confirmedRecipient?.name}</strong><small>{confirmedRecipient?.email} · 已验证</small></div>
+            <div><strong>{confirmedRecipient?.name}</strong><small>{confirmedRecipient?.email} · {confirmedRecipient?.phone} · 已验证</small></div>
           </div>
           <CardDeck onReading={(reading) => { setLatest(reading); setResult(null); setError(''); }} />
           <section className="educator-panel educator-generate-panel">
@@ -277,7 +283,7 @@ function ClientReadingFlow({ onDeliveryChange }) {
             <span>{result.emailSent ? <Check size={18} weight="bold" aria-hidden="true" /> : <WarningCircle size={18} weight="bold" aria-hidden="true" />}</span>
             <div>
               <h2>{result.emailSent ? '报告已寄出' : '报告已建立，邮件尚未寄出'}</h2>
-              <p>{confirmedRecipient?.name} · {confirmedRecipient?.email}</p>
+              <p>{confirmedRecipient?.name} · {confirmedRecipient?.email} · {confirmedRecipient?.phone}</p>
             </div>
           </div>
           {!result.emailSent && result.deliveryId ? (
@@ -296,11 +302,12 @@ function ClientReadingFlow({ onDeliveryChange }) {
   );
 }
 
-export default function EducatorPortal({ userId, email, ownReports, deliveries, requirePlan, plan }) {
+export default function EducatorPortal({ userId, email, ownReports, deliveries, qualifyingReportCount, requirePlan, plan }) {
   const [view, setView] = useState('overview');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [deliveryRecords, setDeliveryRecords] = useState(Array.isArray(deliveries) ? deliveries : []);
+  const [qualifyingCount, setQualifyingCount] = useState(qualifyingReportCount);
 
   useEffect(() => {
     function syncFromHash() {
@@ -338,12 +345,18 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
 
   function updateDelivery(nextDelivery) {
     if (!nextDelivery?.id) return;
+    const isNew = !deliveryRecords.some((item) => item.id === nextDelivery.id);
+    if (isNew && nextDelivery.recipient_phone) {
+      setQualifyingCount((count) => Number.isSafeInteger(count) ? count + 1 : count);
+    }
     setDeliveryRecords((current) => {
       const existing = current.find((item) => item.id === nextDelivery.id);
       if (!existing) return [nextDelivery, ...current];
       return current.map((item) => item.id === nextDelivery.id ? { ...item, ...nextDelivery } : item);
     });
   }
+
+  const tier = Number.isSafeInteger(qualifyingCount) ? getEducatorTier(qualifyingCount) : null;
 
   async function signOut() {
     setSigningOut(true);
@@ -403,7 +416,7 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
       <div className="admin-sidebar-account">
         <div className="admin-account-avatar" aria-hidden="true">E</div>
         <div className="admin-account-copy">
-          <strong>教育者</strong>
+          <strong>{tier === 'advanced' ? '高阶教育者' : tier === 'basic' ? '基础教育者' : '教育者'}</strong>
           <span>{email}</span>
         </div>
         <button type="button" onClick={signOut} disabled={signingOut}>
@@ -449,7 +462,7 @@ export default function EducatorPortal({ userId, email, ownReports, deliveries, 
 
         <div className="admin-page-content">
           {view === 'overview' ? (
-            <AdminReportRecords deliveries={deliveryRecords} />
+            <AdminReportRecords deliveries={deliveryRecords} qualifyingReportCount={qualifyingCount} />
           ) : view === 'clients' ? (
             <ClientReadingFlow onDeliveryChange={updateDelivery} />
           ) : (
