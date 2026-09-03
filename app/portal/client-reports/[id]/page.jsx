@@ -65,6 +65,7 @@ export default async function ClientReportPage({ params }) {
             <span>客户报告</span>
             <h1>{delivery.recipient_name}</h1>
             <p>{delivery.recipient_email}</p>
+            <p>{delivery.recipient_phone || '未记录电话'}</p>
           </div>
           <div className={`client-report-status is-${delivery.status}`}>
             <strong>{statusLabel(delivery.status)}</strong>

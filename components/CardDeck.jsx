@@ -287,7 +287,7 @@ const MODES = [
   { m: 4, cn: "四卡深度觉察" },
 ];
 
-export default function App({ onReading, singleOnly = false, landing = false, initialMethod = "draw" } = {}) {
+export default function App({ onReading, singleOnly = false, landing = false, initialMethod = "draw", maxMode = 4 } = {}) {
   const [mode, setMode] = useState(1);
   const [method, setMethod] = useState(initialMethod === "input" ? "input" : "draw"); // draw | input
   const [inputs, setInputs] = useState(["", "", "", ""]);
@@ -300,7 +300,8 @@ export default function App({ onReading, singleOnly = false, landing = false, in
   const [dealKey, setDealKey] = useState(0);
   const resultRef = useRef(null);
   const drawTimerRefs = useRef([]);
-  const activeMode = singleOnly ? 1 : mode;
+  const availableModeLimit = Math.min(4, Math.max(1, Number(maxMode) || 4));
+  const activeMode = singleOnly ? 1 : Math.min(mode, availableModeLimit);
   const activePositions = metaForMode(activeMode);
 
   const clearRevealTimers = useCallback(() => {
@@ -498,7 +499,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
         {/* Mode */}
         {singleOnly ? null : (
           <div className="deck-mode-switch" style={{ display: "flex", gap: 6, background: "#f0e7d4", padding: 5, borderRadius: 14, marginBottom: 12 }}>
-            {MODES.map(({ m, cn }) => {
+            {MODES.filter(({ m }) => m <= availableModeLimit).map(({ m, cn }) => {
               const active = mode === m;
               return (
                 <button type="button" key={m} aria-pressed={active} onClick={() => changeMode(m)} disabled={isDrawInProgress} style={{

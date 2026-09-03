@@ -109,6 +109,7 @@ export async function POST(request) {
       educator_id: context.user.id,
       recipient_name: recipient.name,
       recipient_email: recipient.email,
+      recipient_phone: recipient.phone,
       code_digest: codeDigest,
       expires_at: expiresAt,
     });
@@ -133,6 +134,7 @@ export async function POST(request) {
   return NextResponse.json({
     verificationId,
     maskedEmail: maskedEmail(recipient.email),
+    recipient,
     expiresIn: RECIPIENT_CODE_TTL_SECONDS,
     resendAfter: RECIPIENT_RESEND_SECONDS,
   }, { status: 201 });

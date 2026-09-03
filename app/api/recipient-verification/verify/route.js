@@ -15,9 +15,9 @@ function problem(status, error, message) {
   return NextResponse.json({ error, message }, { status });
 }
 
-async function upsertEducatorClient({ admin, educatorId, name, email, verifiedAt }) {
+async function upsertEducatorClient({ admin, educatorId, name, email, phone, verifiedAt }) {
   const normalizedEmail = email.trim().toLowerCase();
-  const fields = 'id, display_name, email, email_verified_at';
+  const fields = 'id, display_name, email, phone, email_verified_at';
   const { data: existing, error: lookupError } = await admin
     .from('educator_clients')
     .select(fields)
@@ -29,7 +29,7 @@ async function upsertEducatorClient({ admin, educatorId, name, email, verifiedAt
   if (existing) {
     const { data, error } = await admin
       .from('educator_clients')
-      .update({ display_name: name, email_verified_at: verifiedAt })
+      .update({ display_name: name, phone, email_verified_at: verifiedAt })
       .eq('id', existing.id)
       .eq('educator_id', educatorId)
       .select(fields)
@@ -44,6 +44,7 @@ async function upsertEducatorClient({ admin, educatorId, name, email, verifiedAt
       educator_id: educatorId,
       display_name: name,
       email: normalizedEmail,
+      phone,
       email_verified_at: verifiedAt,
     })
     .select(fields)
@@ -59,7 +60,15 @@ async function upsertEducatorClient({ admin, educatorId, name, email, verifiedAt
       .eq('email', normalizedEmail)
       .single();
     if (concurrentError) throw concurrentError;
-    return concurrent;
+    const { data, error: updateError } = await admin
+      .from('educator_clients')
+      .update({ display_name: name, phone, email_verified_at: verifiedAt })
+      .eq('id', concurrent.id)
+      .eq('educator_id', educatorId)
+      .select(fields)
+      .single();
+    if (updateError) throw updateError;
+    return data;
   }
   throw error;
 }
@@ -100,7 +109,7 @@ export async function POST(request) {
 
   const { data: verification, error } = await admin
     .from('recipient_verifications')
-    .select('id, educator_id, client_id, recipient_name, recipient_email, code_digest, attempts, expires_at, verified_at, authorization_expires_at, used_at')
+    .select('id, educator_id, client_id, recipient_name, recipient_email, recipient_phone, code_digest, attempts, expires_at, verified_at, authorization_expires_at, used_at')
     .eq('id', verificationId)
     .eq('educator_id', context.user.id)
     .maybeSingle();
@@ -110,6 +119,7 @@ export async function POST(request) {
   }
   if (!verification) return problem(404, 'verification_not_found', '找不到这次验证，请重新寄送。');
   if (verification.used_at) return problem(409, 'verification_used', '此验证码已用于一份报告。');
+  if (!verification.recipient_phone) return problem(409, 'recipient_phone_required', '请重新寄送验证码并填写收件人电话。');
 
   const now = Date.now();
   if (verification.verified_at) {
@@ -123,6 +133,7 @@ export async function POST(request) {
         educatorId: context.user.id,
         name: verification.recipient_name,
         email: verification.recipient_email,
+        phone: verification.recipient_phone,
         verifiedAt: verification.verified_at,
       });
       if (!verification.client_id) {
@@ -140,7 +151,7 @@ export async function POST(request) {
     return NextResponse.json({
       verified: true,
       verificationId,
-      recipient: { name: verification.recipient_name, email: verification.recipient_email },
+      recipient: { name: verification.recipient_name, email: verification.recipient_email, phone: verification.recipient_phone },
       client,
     });
   }
@@ -178,6 +189,7 @@ export async function POST(request) {
       educatorId: context.user.id,
       name: verification.recipient_name,
       email: verification.recipient_email,
+      phone: verification.recipient_phone,
       verifiedAt,
     });
   } catch (clientError) {
@@ -202,7 +214,7 @@ export async function POST(request) {
   return NextResponse.json({
     verified: true,
     verificationId,
-    recipient: { name: verification.recipient_name, email: verification.recipient_email },
+    recipient: { name: verification.recipient_name, email: verification.recipient_email, phone: verification.recipient_phone },
     client,
     authorizationExpiresIn: RECIPIENT_AUTHORIZATION_TTL_SECONDS,
   });

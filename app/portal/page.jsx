@@ -4,7 +4,7 @@ import EducatorPortal from './EducatorPortal';
 import PortalClient from './PortalClient';
 import { hasAwarenessAccess } from '@/lib/awareness-access';
 import { createServerSupabase } from '@/lib/supabase-server';
-import { getProfile, listEducatorDeliveries, listReports } from '@/lib/db';
+import { getEducatorQualifyingReportCount, getProfile, listEducatorDeliveries, listReports } from '@/lib/db';
 
 export default async function PortalPage() {
   const supabase = createServerSupabase();
@@ -22,14 +22,18 @@ export default async function PortalPage() {
   if (profile?.role === 'educator') {
     let ownReports = [];
     let deliveries = [];
-    try {
-      [ownReports, deliveries] = await Promise.all([
-        listReports(supabase, { limit: 40, userId: user.id }),
-        listEducatorDeliveries(supabase, 100),
-      ]);
-    } catch (error) {
-      console.error('Unable to load educator portal data', error);
-    }
+    let qualifyingReportCount = null;
+    const [reportsResult, deliveriesResult, milestoneResult] = await Promise.allSettled([
+      listReports(supabase, { limit: 40, userId: user.id }),
+      listEducatorDeliveries(supabase, 100),
+      getEducatorQualifyingReportCount(supabase),
+    ]);
+    if (reportsResult.status === 'fulfilled') ownReports = reportsResult.value;
+    else console.error('Unable to load educator reports', reportsResult.reason);
+    if (deliveriesResult.status === 'fulfilled') deliveries = deliveriesResult.value;
+    else console.error('Unable to load educator deliveries', deliveriesResult.reason);
+    if (milestoneResult.status === 'fulfilled') qualifyingReportCount = milestoneResult.value;
+    else console.error('Unable to load educator milestone', milestoneResult.reason);
 
     return (
       <div className="educator-admin-root">
@@ -38,6 +42,7 @@ export default async function PortalPage() {
           email={user.email}
           ownReports={ownReports}
           deliveries={deliveries}
+          qualifyingReportCount={qualifyingReportCount}
           requirePlan={requirePlan}
           plan={profile?.plan || 'free'}
         />

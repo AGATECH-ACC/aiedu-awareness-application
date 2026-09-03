@@ -8,12 +8,14 @@ import { normalizeNewReading, normalizeSavedReading } from '@/lib/reading-valida
 import { sendRecipientReportEmail } from '@/lib/report-email';
 import {
   countReportsSince,
+  getEducatorQualifyingReportCount,
   getProfile,
   getReading,
   getReportByReading,
   insertReading,
   insertReport,
 } from '@/lib/db';
+import { BASIC_EDUCATOR_MAX_DRAW_MODE, getEducatorDrawModeLimit } from '@/lib/educator-tiering';
 import { checkReportBurstLimit, reportClientIp } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
@@ -49,7 +51,7 @@ function reportOrigin(request) {
 async function loadRecipientAuthorization({ admin, verificationId, educatorId }) {
   const { data, error } = await admin
     .from('recipient_verifications')
-    .select('id, educator_id, client_id, recipient_name, recipient_email, verified_at, authorization_expires_at, used_at')
+    .select('id, educator_id, client_id, recipient_name, recipient_email, recipient_phone, verified_at, authorization_expires_at, used_at')
     .eq('id', verificationId)
     .eq('educator_id', educatorId)
     .maybeSingle();
@@ -57,6 +59,7 @@ async function loadRecipientAuthorization({ admin, verificationId, educatorId })
   if (!data) return { error: '找不到收件验证，请重新寄送验证码。' };
   if (!data.verified_at) return { error: '请先完成收件邮箱验证。' };
   if (!data.client_id) return { error: '客户资料尚未建立，请重新完成邮箱验证。' };
+  if (!data.recipient_phone) return { error: '客户电话未记录，请重新寄送验证码。' };
   if (!data.authorization_expires_at || new Date(data.authorization_expires_at).getTime() <= Date.now()) {
     return { error: '收件授权已过期，请重新寄送验证码。' };
   }
@@ -66,7 +69,7 @@ async function loadRecipientAuthorization({ admin, verificationId, educatorId })
 async function deliverRecipientReport({ admin, authorization, report, reading, request }) {
   const { data: priorDelivery, error: priorError } = await admin
     .from('educator_report_deliveries')
-    .select('id, report_id, recipient_name, recipient_email, status, emailed_at, created_at')
+    .select('id, report_id, recipient_name, recipient_email, recipient_phone, status, emailed_at, created_at')
     .eq('verification_id', authorization.id)
     .maybeSingle();
   if (priorError) throw priorError;
@@ -100,9 +103,10 @@ async function deliverRecipientReport({ admin, authorization, report, reading, r
       verification_id: authorization.id,
       recipient_name: authorization.recipient_name,
       recipient_email: authorization.recipient_email,
+      recipient_phone: authorization.recipient_phone,
       status: 'pending',
     })
-    .select('id, report_id, recipient_name, recipient_email, status, emailed_at, created_at')
+    .select('id, report_id, recipient_name, recipient_email, recipient_phone, status, emailed_at, created_at')
     .single();
   if (deliveryError) throw deliveryError;
 
@@ -196,13 +200,13 @@ export async function POST(request) {
   }
 
   let admin = null;
+  let profile = null;
   let recipientAuthorization = null;
   const recipientVerificationId = body?.recipientVerificationId;
   if (recipientVerificationId !== undefined) {
     if (typeof recipientVerificationId !== 'string' || !UUID_PATTERN.test(recipientVerificationId)) {
     return invalidPayload('收件验证编号格式无效。');
     }
-    let profile;
     try {
       profile = await getProfile(supabase, user.id);
     } catch (error) {
@@ -274,6 +278,37 @@ export async function POST(request) {
 
   if (normalized.error) return invalidPayload(normalized.error);
   const { mode, spreadKey, positions, cardNumbers, question } = normalized.value;
+
+  if (mode > BASIC_EDUCATOR_MAX_DRAW_MODE) {
+    if (!profile) {
+      try {
+        profile = await getProfile(supabase, user.id);
+      } catch (error) {
+        console.error('Unable to check educator profile', error);
+        return NextResponse.json({
+          error: 'tier_check_failed',
+          message: '暂时无法确认高阶资格，请稍后再试。',
+        }, { status: 503 });
+      }
+    }
+    if (profile?.role === 'educator') {
+      try {
+        const qualifyingReportCount = await getEducatorQualifyingReportCount(supabase);
+        if (mode > getEducatorDrawModeLimit(qualifyingReportCount)) {
+          return NextResponse.json({
+            error: 'advanced_tier_required',
+            message: '三张牌和四卡深度觉察仅开放给高阶教育者。',
+          }, { status: 403 });
+        }
+      } catch (error) {
+        console.error('Unable to check educator advanced tier', error);
+        return NextResponse.json({
+          error: 'tier_check_failed',
+          message: '暂时无法确认高阶资格，请稍后再试。',
+        }, { status: 503 });
+      }
+    }
+  }
 
   if (!report) {
     const limit = dailyLimit();
@@ -364,6 +399,7 @@ export async function POST(request) {
     recipient: recipientAuthorization ? {
       name: recipientAuthorization.recipient_name,
       email: recipientAuthorization.recipient_email,
+      phone: recipientAuthorization.recipient_phone,
     } : null,
     deliveryId: deliveryResult?.delivery?.id || null,
     deliveryStatus: deliveryResult?.delivery?.status || null,
