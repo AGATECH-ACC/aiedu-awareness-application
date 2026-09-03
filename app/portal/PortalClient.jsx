@@ -48,7 +48,7 @@ function CardsSummary({ reading }) {
   );
 }
 
-export default function PortalClient({ userId, email, initialReports, requirePlan = false, plan = 'free', showAccountHeader = true, embeddedAdmin = false }) {
+export default function PortalClient({ userId, email, initialReports, requirePlan = false, plan = 'free', showAccountHeader = true, embeddedAdmin = false, maxDrawMode = 4 }) {
   const supabase = useMemo(() => createClient(), []);
   const [latest, setLatest] = useState(null);
   const [question, setQuestion] = useState('');
@@ -195,7 +195,7 @@ export default function PortalClient({ userId, email, initialReports, requirePla
         </div>
       ) : null}
 
-      <CardDeck onReading={setLatest} />
+      <CardDeck maxMode={maxDrawMode} onReading={setLatest} />
 
       <div style={{ padding: '0 16px' }}>
         <section aria-labelledby="deep-report-title" style={{ background: '#fffdf8', border: '1px solid #e6d9bd', borderRadius: 18, padding: 18, marginTop: 4 }}>
