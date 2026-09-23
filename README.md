@@ -130,9 +130,15 @@ must continue importing from `lib/cards.js`.
 | `NEXT_PUBLIC_REQUIRE_PLAN` | Browser + server | `false`; when true, `profiles.plan='free'` is gated |
 | `NEXT_PUBLIC_SITE_URL` | Browser + server | Canonical origin for metadata and links |
 
-Version 2 reports are generated locally from `lib/cards.js` and the reviewed
-bilingual deep-meaning data in `lib/card-insights.js`; no AI model or AI API key
-is used. AI-enhanced reports are intentionally reserved for a later version.
+Reports are generated locally from `lib/cards.js` and `lib/card-insights.js`;
+no AI model or AI API key is used. The Chinese descriptions for all 40 cards
+follow `幸福人生觉察卡_01-40号_用户解说手册.docx`, using the same five sections
+in card readings and newly generated reports. Section headings and life-state
+names are bold, and the four reflection questions are numbered. The approved
+duplicate wording `也可能是可能` is normalized to `也可能`.
+New reports use `fixed-card-manual-v4-cn`; saved reports keep their original
+content. Run `npm run test:deep-report-copy` to check the manual data and report
+output. Existing English companion copy is retained without translation changes.
 The report endpoint also applies a fixed best-effort IP burst limit of 10
 requests per minute. It is in memory, so it resets on deploy/cold start and is
 not shared across Vercel instances. The user-scoped database daily cap is the

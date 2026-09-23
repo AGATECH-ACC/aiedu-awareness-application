@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { CHAPTERS, CARDS, byNum, CURRENT_SPREADS, drawCardsForPositions, SINGLE_CARD_RANGE } from "@/lib/cards";
-import { insightFor } from "@/lib/card-insights";
+import { insightFor, REFLECTION_GUIDANCE } from "@/lib/card-insights";
 
 /* ── 幸福人生觉察卡 · Happy Life Awareness Cards ──────────────────────
    Draw one card, a two-card awareness spread, a structured three-card spread,
@@ -200,48 +200,45 @@ function InsightSection({ label, value, color, tint, question = false }) {
       background: question ? tint : "transparent",
       border: question ? `1px solid ${color}24` : "none",
     }}>
-      <div style={{ color, fontSize: 13, fontWeight: 800, letterSpacing: 0.6 }}>{label}</div>
+      <h3 style={{ color, fontSize: 15, fontWeight: 800, letterSpacing: 0.6, margin: 0 }}>{label}</h3>
       <div style={{ color: "#40392f", fontSize: question ? 16 : 15, fontWeight: question ? 700 : 400, lineHeight: 1.75, marginTop: 4 }}>{value}</div>
     </div>
   );
 }
 
-function RichCardInsight({ card, compact = false }) {
+function RichCardInsight({ card }) {
   const chap = CHAPTERS[card.ch];
   const insight = insightFor(card);
   if (!insight) return null;
 
-  if (compact) {
-    return (
-      <div className="card-insight card-insight--compact" style={{ marginTop: 8 }}>
-        <InsightSection label="核心主题" value={insight.core} color={chap.color} tint={chap.tint} />
-        <InsightSection label="转化方向" value={insight.shift} color={chap.color} tint={chap.tint} />
-        <InsightSection label="觉察提问" value={insight.question} color={chap.color} tint={chap.tint} question />
-      </div>
-    );
-  }
-
   return (
-    <div className="card-insight" style={{ margin: "4px 0 18px", paddingBottom: 16, borderBottom: `1px solid ${chap.color}1f` }}>
-      <InsightSection label="核心主题" value={insight.core} color={chap.color} tint={chap.tint} question />
-      <InsightSection label="牌义解读" value={insight.meaning} color={chap.color} tint={chap.tint} />
-      {insight.voices?.length ? (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ color: chap.color, fontSize: 13, fontWeight: 800, letterSpacing: 0.6 }}>可能的内在声音</div>
-          <ul style={{ margin: "6px 0 0", paddingLeft: 20, color: "#51483b", fontSize: 15, lineHeight: 1.7 }}>
-            {insight.voices.map((voice, index) => (
-              <li key={voice} style={{ marginTop: index === 0 ? 0 : 5 }}>
-                <div>“{voice}”</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      <InsightSection label="你可能会看见" value={insight.signs} color={chap.color} tint={chap.tint} />
-      <InsightSection label={insight.lensLabel.split(' · ')[0]} value={insight.lens} color={chap.color} tint={chap.tint} />
-      <InsightSection label="这套模式的代价" value={insight.cost} color={chap.color} tint={chap.tint} />
-      <InsightSection label="转化方向" value={insight.shift} color={chap.color} tint={chap.tint} />
-      <InsightSection label="觉察提问" value={insight.question} color={chap.color} tint={chap.tint} question />
+    <div className="card-insight">
+      <blockquote style={{ margin: "0 0 16px", padding: "12px 14px", borderLeft: `3px solid ${chap.color}`, background: chap.tint, color: chap.color, fontSize: 16, fontWeight: 700, lineHeight: 1.75 }}>
+        {insight.core}
+      </blockquote>
+      <InsightSection label="当你抽到这张卡" value={insight.meaning.map((paragraph) => (
+        <p key={paragraph} style={{ margin: "8px 0" }}>{paragraph}</p>
+      ))} color={chap.color} tint={chap.tint} />
+      <InsightSection label="它可能怎样出现在生活里" value={<>
+        <ul style={{ margin: "8px 0", paddingLeft: 22 }}>
+          {insight.states.map((state) => (
+            <li key={state.name} style={{ marginBottom: 12 }}>
+              <strong>{state.name}</strong><br />
+              {state.description}
+            </li>
+          ))}
+        </ul>
+        <p style={{ margin: "8px 0" }}>{REFLECTION_GUIDANCE.states}</p>
+      </>} color={chap.color} tint={chap.tint} />
+      <InsightSection label="这张卡可能在提醒你" value={insight.reminder} color={chap.color} tint={chap.tint} />
+      <InsightSection label="你可以这样理解自己" value={<>
+        <p style={{ margin: "8px 0" }}>{REFLECTION_GUIDANCE.questionsIntro}</p>
+        <ol style={{ margin: "8px 0", paddingLeft: 22 }}>
+          {insight.questions.map((question) => <li key={question} style={{ marginBottom: 6 }}>{question}</li>)}
+        </ol>
+        <p style={{ margin: "8px 0" }}>{REFLECTION_GUIDANCE.questionsOutro}</p>
+      </>} color={chap.color} tint={chap.tint} />
+      <InsightSection label="给自己的一句话" value={insight.affirmation} color={chap.color} tint={chap.tint} question />
     </div>
   );
 }
@@ -268,13 +265,7 @@ function ReadingRow({ card, badge, label, desc, index }) {
         <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 700, color: "#2a2622", marginTop: 4 }}>
           {String(card.n).padStart(2, "0")}. {card.cn}
         </div>
-        <div style={{ fontSize: 15, color: "#3a352e", lineHeight: 1.65, marginTop: 5 }}>
-          <b style={{ color: chap.color }}>影响：</b>{card.affect_cn}
-        </div>
-        <RichCardInsight card={card} compact />
-        <div style={{ fontSize: 15, color: "#3a352e", lineHeight: 1.65, marginTop: 6 }}>
-          <b style={{ color: chap.color }}>练习：</b>{card.practice_cn}
-        </div>
+        <RichCardInsight card={card} />
       </div>
     </div>
   );
@@ -621,9 +612,7 @@ export default function App({ onReading, singleOnly = false, landing = false, in
                     <div style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, marginTop: 2 }}>{reading[0].cn}</div>
                   </div>
                   <div style={{ padding: "16px 18px 18px" }}>
-                    <Block label="此刻的提醒" color={chap.color} cn={reading[0].affect_cn} />
                     <RichCardInsight card={reading[0]} />
-                    <Block label="今日练习" color={chap.color} cn={reading[0].practice_cn} last />
                   </div>
                 </div>
               ) : null}
@@ -738,18 +727,6 @@ export default function App({ onReading, singleOnly = false, landing = false, in
           用于自我觉察与反思，不是诊断或建议。
         </footer>
       </div>
-    </div>
-  );
-}
-
-function Block({ label, cn, color, last }) {
-  return (
-    <div style={{ marginBottom: last ? 0 : 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
-        <span style={{ width: 6, height: 6, borderRadius: 999, background: color }} />
-        <span style={{ fontSize: 14, fontWeight: 700, color: "#2a2622" }}>{label}</span>
-      </div>
-      <div style={{ fontSize: 16, lineHeight: 1.75, color: "#3a352e" }}>{cn}</div>
     </div>
   );
 }
